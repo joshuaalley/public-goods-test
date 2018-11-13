@@ -5,6 +5,8 @@
 
 # Load packages
 library(here)
+library(arm)
+library(reshape2)
 library(MASS)
 library(plm)
 library(texreg)
@@ -13,6 +15,7 @@ library(sampleSelection)
 library(margins)
 library(tidyverse)
 library(rstan)
+library(bayesplot)
 library(shinystan)
 
 
@@ -22,6 +25,13 @@ setwd(here::here())
 getwd()
 
 
+# Set-up STAN guidelines
+options(mc.cores = parallel::detectCores())
+rstan_options(auto_write = TRUE)
+
+
+# Set seed 
+set.seed(12)
 
 # Load state-ally-year data 
 state.ally.year <- read.csv("data/alliance-state-year.csv")
@@ -177,7 +187,7 @@ summary(m1.pg.rel)
 margins(m1.pg.rel)
 cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
       main = "Average Marginal Effect of Changes in Allied Spending")
-
+abline(h = 0)
 
 # FGLS 
 m2.pg.rel <- pggls(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
@@ -226,3 +236,129 @@ summary(heckit.rel)
 
 
 
+### Second approach: Estimate response of each state to every alliance they are in
+# Requires estimating the model in STAN
+
+
+# Load state-year matrix of alliance participation:
+atop.cow.year <- read.csv("data/atop-cow-year.csv")
+
+# Create a dataset of state-year alliance membership:
+atop.cow.year <- group_by(atop.cow.year, atopid, ccode, year)
+state.mem <- atop.cow.year %>% select(atopid, ccode, year)
+state.mem <-  mutate(state.mem, member = 1)
+state.mem <- distinct(state.mem, atopid, ccode, year, .keep_all = TRUE)
+
+# This matrix has a binary indicator of which alliances states are a member of in a given year
+state.mem <- spread(state.mem, key = atopid, value = member, fill = 0)
+
+# Remove the zero or no alliance category
+state.mem <- subset(state.mem, select = -(3))
+
+
+# Add state membership in alliances to this data
+reg.state.data <-  state.vars %>%
+                   select(ccode, year, ln.milex, lag.ln.milex,
+                          atwar, civilwar.part, rival.milex, ln.gdp, polity, 
+                          cold.war, disputes, majpower) %>%
+                  left_join(state.mem)
+
+
+# Create a matrix of state membership in alliances (Z in STAN model)
+reg.state.data <- reg.state.data[complete.cases(reg.state.data), ]
+state.mem.mat <- as.matrix(reg.state.data[, 13: ncol(reg.state.data)])
+
+# Rescale variables
+reg.state.data[, 5:11] <- lapply(reg.state.data[, 5:11], 
+                                 function(x) rescale(x, binary.inputs = "0/1"))
+
+reg.state.mat <- as.matrix(reg.state.data[, 4:12])
+
+# Set-up data for STAN
+# create a state index variable
+reg.state.data$state.id <- reg.state.data %>% group_indices(ccode)
+# Create a year index variable 
+reg.state.data$year.id <- reg.state.data %>% group_indices(year)
+
+
+
+# Define the data list 
+stan.data <- list(N = nrow(reg.state.data), y = reg.state.data[, 3],
+                  state = reg.state.data$state.id, S = length(unique(reg.state.data$state.id)),
+                  year = reg.state.data$year.id, T = length(unique(reg.state.data$year.id)),
+                  A = ncol(state.mem.mat),
+                  Z = state.mem.mat, 
+                  X = reg.state.mat, M = ncol(reg.state.mat)
+)
+
+# Compile the model code
+model.1 <- stan_model(file = "data/ml-model-stan.stan")
+
+# Variational Bayes- use to check coefficients and posterior predictions on model
+ml.model.vb <- vb(model.1, data = stan.data, seed = 12)
+launch_shinystan(ml.model.vb)
+
+# posterior predictive check from variational Bayes- did not converge
+# so treat these predictions with caution
+y = reg.state.data[, 3]
+vb.model.sum <- extract(ml.model.vb)
+ppc_dens_overlay(y, vb.model.sum$y_pred[1:100, ])
+
+
+
+# Regular STAN
+system.time(
+  ml.model <- sampling(model.1, data = stan.data, 
+                       iter = 2000, warmup = 1000, chains = 4
+  )
+)
+
+# diagnose full model
+launch_shinystan(ml.model)
+
+check_hmc_diagnostics(ml.model)
+
+
+# Extract coefficients from the model
+ml.model.sum <- extract(ml.model, permuted = TRUE)
+
+# Posterior predictive distributions relative to observed data
+yrep.full <- ml.model.sum$y_pred
+
+# plot posterior predictive denisty of first 100 simulations
+ppc_dens_overlay(y, yrep.full[1:100, ])
+
+
+# Summarize lamdba 
+lambda.summary <- summary(ml.model, pars = c("lambda"), probs = c(0.05, 0.95))$summary
+lambda.summary <- cbind.data.frame(as.numeric(colnames(state.mem.mat)), lambda.summary)
+colnames(lambda.summary)[1] <- "atopid"
+lambda.summary$positive <- ifelse((lambda.summary$`5%` > 0 & lambda.summary$`95%` > 0), 1, 0)
+lambda.summary$negative <- ifelse((lambda.summary$`5%` < 0 & lambda.summary$`95%` < 0), 1, 0)
+
+# Plot posterior means of alliance coefficients
+ggplot(lambda.summary, aes(x = mean)) +
+  geom_density() +
+  ggtitle("Posterior Means of Alliance Coefficients")
+
+ggplot(lambda.summary, aes(x = mean)) +
+  geom_histogram(bins = 60) +
+  ggtitle("Posterior Means of Alliance Coefficients")
+
+
+
+# Plot points with error bars by ATOPID
+ggplot(lambda.summary, aes(x = atopid, y = mean)) +
+  geom_errorbar(aes(ymin = `5%`, 
+                    ymax = `95%`,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1))
+
+# plot non-zero treaties
+lambda.summary %>%
+  filter(positive == 1 | negative == 1) %>% 
+  ggplot(aes(x = atopid, y = mean)) +
+  geom_errorbar(aes(ymin = `5%`, 
+                    ymax = `95%`,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1))
