@@ -33,6 +33,7 @@ rstan_options(auto_write = TRUE)
 # Set seed 
 set.seed(12)
 
+
 # Load state-ally-year data 
 state.ally.year <- read.csv("data/alliance-state-year.csv")
 state.vars <- read.csv("data/state-vars.csv")
@@ -332,33 +333,74 @@ ppc_dens_overlay(y, yrep.full[1:100, ])
 # Summarize lamdba 
 lambda.summary <- summary(ml.model, pars = c("lambda"), probs = c(0.05, 0.95))$summary
 lambda.summary <- cbind.data.frame(as.numeric(colnames(state.mem.mat)), lambda.summary)
-colnames(lambda.summary)[1] <- "atopid"
-lambda.summary$positive <- ifelse((lambda.summary$`5%` > 0 & lambda.summary$`95%` > 0), 1, 0)
-lambda.summary$negative <- ifelse((lambda.summary$`5%` < 0 & lambda.summary$`95%` < 0), 1, 0)
+colnames(lambda.summary) <- c("atopid", "lambda.mean", "lambda.se.mean",
+                              "lambda.sd", "lambda.5", "lambda.95",
+                              "lambda.neff", "lambda.rhat")
+lambda.summary$lambda.positive <- ifelse((lambda.summary$lambda.5 > 0 & lambda.summary$lambda.95 > 0), 1, 0)
+lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.summary$lambda.95 < 0), 1, 0)
 
 # Plot posterior means of alliance coefficients
-ggplot(lambda.summary, aes(x = mean)) +
+ggplot(lambda.summary, aes(x = lambda.mean)) +
   geom_density() +
   ggtitle("Posterior Means of Alliance Coefficients")
 
-ggplot(lambda.summary, aes(x = mean)) +
+ggplot(lambda.summary, aes(x = lambda.mean)) +
   geom_histogram(bins = 60) +
   ggtitle("Posterior Means of Alliance Coefficients")
 
 
 
 # Plot points with error bars by ATOPID
-ggplot(lambda.summary, aes(x = atopid, y = mean)) +
-  geom_errorbar(aes(ymin = `5%`, 
-                    ymax = `95%`,
+ggplot(lambda.summary, aes(x = atopid, y = lambda.mean)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1))
 
+
 # plot non-zero treaties
 lambda.summary %>%
-  filter(positive == 1 | negative == 1) %>% 
-  ggplot(aes(x = atopid, y = mean)) +
-  geom_errorbar(aes(ymin = `5%`, 
-                    ymax = `95%`,
+  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = lambda.mean)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1))
+
+
+# Load ATOP data for comparison
+atop <- read.csv("data/atop-additions.csv")
+
+# Join alliance coefficients with ATOP data
+alliance.coefs <- left_join(atop, lambda.summary)
+
+
+# Plot unconditional military support lambdas: lots of nulls
+alliance.coefs %>%
+  filter(uncond.milsup == 1) %>% 
+  ggplot(aes(x = atopid, y = lambda.mean)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1))
+
+# Plot positive and negative, colored by unconditional military support
+alliance.coefs %>%
+filter(lambda.positive == 1 | lambda.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = lambda.mean, color = uncond.milsup)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1))
+
+# Plot lambdas against latent strength
+ggplot(alliance.coefs, aes(y = lambda.mean, x = latent.str.mean)) + geom_point()
+
+# non-negative Coefficients with error bars, colored by latent strength 
+alliance.coefs %>%
+  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = lambda.mean, color = latent.str.mean)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1))
