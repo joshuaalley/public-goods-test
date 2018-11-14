@@ -41,13 +41,12 @@ state.vars <- read.csv("data/state-vars.csv")
 
 
 # summarize state-ally-year data with key indicators
-
 state.ally.year$treaty.pres <- ifelse(state.ally.year$atopid > 0, 1, 0)
 
 state.ally.sum <- state.ally.year %>%
   group_by(ccode, year) %>%
   summarize(
-    treary.count = n(),
+    treaty.count = n(),
     total.ally.expend = sum(ally.spend, na.rm = TRUE),
     avg.treaty.contrib = mean(alliance.contrib, na.rm = TRUE),
     avg.dem.prop = mean(avg.democ, na.rm = TRUE),
@@ -68,9 +67,6 @@ state.char.full <- left_join(state.vars, state.ally.sum)
 # Fill missing values of alliance variables with zero
 state.char.full[, 36: ncol(state.char.full)][is.na(state.char.full[, 36: ncol(state.char.full)])] <- 0
 
-
-state.char.full <- state.char.full[complete.cases(state.char.full$ccode), ]
-state.char.full <- unique(state.char.full) 
 
 
 
@@ -107,7 +103,7 @@ ggplot(state.char.inter, aes(x = ln.ally.expend)) + geom_histogram()
 
 
 ### First test: aboslute size (GDP)
-# Interact total allied spenidng and GDP
+# Interact changes in allied spending and GDP
 # Total allied spending: pooling regression
 m1.pg.abs <- lm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
                      lag.ln.milex + avg.num.mem + avg.dem.prop + 
@@ -120,6 +116,8 @@ summary(m1.pg.abs)
 margins(m1.pg.abs)
 cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
       main = "Average Marginal Effect of Changes in Allied Spending")
+abline(h = 0)
+
 
 
 # FGLS 
@@ -337,7 +335,9 @@ colnames(lambda.summary) <- c("atopid", "lambda.mean", "lambda.se.mean",
                               "lambda.sd", "lambda.5", "lambda.95",
                               "lambda.neff", "lambda.rhat")
 lambda.summary$lambda.positive <- ifelse((lambda.summary$lambda.5 > 0 & lambda.summary$lambda.95 > 0), 1, 0)
+sum(lambda.summary$lambda.positive)
 lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.summary$lambda.95 < 0), 1, 0)
+sum(lambda.summary$lambda.negative)
 
 # Plot posterior means of alliance coefficients
 ggplot(lambda.summary, aes(x = lambda.mean)) +
