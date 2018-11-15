@@ -5,3 +5,10 @@
 
 # ignore compiled rstan code
 *.rds
+
+# ignore .tex files
+*.out
+*.log
+*.aux
+*.bbl
+*.blg
