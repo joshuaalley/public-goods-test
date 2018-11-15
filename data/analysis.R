@@ -39,7 +39,6 @@ state.ally.year <- read.csv("data/alliance-state-year.csv")
 state.vars <- read.csv("data/state-vars.csv")
 
 
-
 # summarize state-ally-year data with key indicators
 state.ally.year$treaty.pres <- ifelse(state.ally.year$atopid > 0, 1, 0)
 
@@ -47,8 +46,8 @@ state.ally.sum <- state.ally.year %>%
   group_by(ccode, year) %>%
   summarize(
     treaty.count = n(),
-    total.ally.expend = sum(ally.spend, na.rm = TRUE),
-    avg.treaty.contrib = mean(alliance.contrib, na.rm = TRUE),
+    total.ally.expend = sum(ally.spend[defense == 1 | offense == 1], na.rm = TRUE),
+    avg.treaty.contrib = mean(alliance.contrib[defense == 1 | offense == 1], na.rm = TRUE),
     avg.dem.prop = mean(avg.democ, na.rm = TRUE),
     avg.num.mem = mean(num.mem, na.rm = TRUE),
     treaty.pres = max(treaty.pres)
@@ -114,8 +113,9 @@ m1.pg.abs <- lm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
 summary(m1.pg.abs)
 # Calculate marginal effects
 margins(m1.pg.abs)
-cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+mplot.abs <- cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
       main = "Average Marginal Effect of Changes in Allied Spending")
+mplot.abs
 abline(h = 0)
 
 
@@ -172,7 +172,7 @@ summary(heckit.ally.spend)
 ### Second test: relative size expressed as contribution to alliance
 # estimate interactions
 # filter out cases with no alliances
-inter.data.rel <- filter(state.char.full, avg.treaty.contrib > 0)
+inter.data.rel <- filter(state.char.full, treaty.pres == 1)
 inter.data.rel <- as.data.frame(inter.data.rel)
 
 # Total allied spending: pooling regression
@@ -184,8 +184,9 @@ m1.pg.rel <- lm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.exp
 summary(m1.pg.rel)
 # Calculate marginal effects
 margins(m1.pg.rel)
-cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
+mplot.rel <- cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
       main = "Average Marginal Effect of Changes in Allied Spending")
+mplot.rel
 abline(h = 0)
 
 # FGLS 
@@ -248,6 +249,8 @@ state.mem <- atop.cow.year %>% select(atopid, ccode, year)
 state.mem <-  mutate(state.mem, member = 1)
 state.mem <- distinct(state.mem, atopid, ccode, year, .keep_all = TRUE)
 
+#TODO(JOSH): replace 1s in this matrix with relative contribution to the alliance. 
+# At which point, lambda is effect of increasing alliance contrib. 
 # This matrix has a binary indicator of which alliances states are a member of in a given year
 state.mem <- spread(state.mem, key = atopid, value = member, fill = 0)
 
@@ -375,6 +378,15 @@ atop <- read.csv("data/atop-additions.csv")
 alliance.coefs <- left_join(atop, lambda.summary)
 
 
+# Plot by start year of alliance
+ggplot(alliance.coefs, aes(x = begyr, y = lambda.mean)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1))
+
+
+
 # Plot unconditional military support lambdas: lots of nulls
 alliance.coefs %>%
   filter(uncond.milsup == 1) %>% 
@@ -404,3 +416,4 @@ alliance.coefs %>%
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1))
+
