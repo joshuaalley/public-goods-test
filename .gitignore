@@ -4,4 +4,4 @@
 .Ruserdata
 
 # ignore compiled rstan code
-.rds
+*.rds
