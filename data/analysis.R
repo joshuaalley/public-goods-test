@@ -245,9 +245,11 @@ summary(heckit.rel)
 # Load state-year matrix of alliance participation:
 atop.cow.year <- read.csv("data/atop-cow-year.csv")
 # Merge state contributions to each alliance
+# and keep only alliances that promise military support
 atop.cow.year <- select(state.ally.year, atopid, ccode, year, alliance.contrib) %>%
                 left_join(atop.cow.year) %>%
-                group_by(atopid, ccode, year)
+                group_by(atopid, ccode, year) %>%
+                filter(defense == 1 | offense == 1)
 
 # Create a dataset of state-year alliance membership:
 state.mem <- atop.cow.year %>% select(atopid, ccode, year, alliance.contrib)
@@ -269,10 +271,10 @@ reg.state.data <-  state.vars %>%
                           cold.war, disputes, majpower) %>%
                   left_join(state.mem)
 
+# fill in missing alliance data with zeros
+reg.state.data[, 13:ncol(reg.state.data)][is.na(reg.state.data[, 13:ncol(reg.state.data)])] <- 0
 
 # Create a matrix of state membership in alliances (Z in STAN model)
-# This also removes missing alliance contributions, 
-# which are all the result of missing military expenditure data
 reg.state.data <- reg.state.data[complete.cases(reg.state.data), ]
 state.mem.mat <- as.matrix(reg.state.data[, 13: ncol(reg.state.data)])
 
@@ -304,7 +306,7 @@ model.1 <- stan_model(file = "data/ml-model-stan.stan")
 
 # Variational Bayes- use to check model will run and give reasonable predictions
 ml.model.vb <- vb(model.1, data = stan.data, seed = 12)
-# Does not converge given clustering
+# Does not converge
 
 # posterior predictive check from variational Bayes- did not converge
 # so treat these predictions with caution
@@ -346,10 +348,18 @@ lambda.summary <- cbind.data.frame(as.numeric(colnames(state.mem.mat)), lambda.s
 colnames(lambda.summary) <- c("atopid", "lambda.mean", "lambda.se.mean",
                               "lambda.sd", "lambda.5", "lambda.95",
                               "lambda.neff", "lambda.rhat")
+
+# tabulate number of positive and negative estimates
 lambda.summary$lambda.positive <- ifelse((lambda.summary$lambda.5 > 0 & lambda.summary$lambda.95 > 0), 1, 0)
-sum(lambda.summary$lambda.positive) # 26 treaties: increasing contribution to alliance leads to increased spending
+sum(lambda.summary$lambda.positive) # 20 treaties: increasing contribution to alliance leads to increased spending
 lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.summary$lambda.95 < 0), 1, 0)
-sum(lambda.summary$lambda.negative) # 27 treaties: increasing contribution to alliance leads to decreased spending
+sum(lambda.summary$lambda.negative) # 14 treaties: increasing contribution to alliance leads to decreased spending
+
+# Ignore uncertainty in estimates: are means positive or negative? 
+lambda.summary$positive.lmean <- ifelse(lambda.summary$lambda.mean > 0, 1, 0)
+sum(lambda.summary$positive.lmean) # 141 treaties
+lambda.summary$negative.lmean <- ifelse(lambda.summary$lambda.mean < 0, 1, 0)
+sum(lambda.summary$negative.lmean) # 144 treaties
 
 # Plot posterior means of alliance coefficients
 ggplot(lambda.summary, aes(x = lambda.mean)) +
@@ -423,10 +433,12 @@ filter(lambda.positive == 1 | lambda.negative == 1) %>%
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + theme_classic()
 
-# 10 / 272 defense pacts have a positive association between contribution and changes in spending
+# 18 / 272 defense pacts have a positive association between contribution and changes in spending
 table(alliance.coefs$lambda.positive, alliance.coefs$defense)
-# 12 / 272 defense pacts have a negative association beween contribution and changes in spending 
+# 13 / 272 defense pacts have a negative association beween contribution and changes in spending 
 table(alliance.coefs$lambda.negative, alliance.coefs$defense)
+
+
 
 # Plot lambdas against latent strength
 ggplot(alliance.coefs, aes(y = lambda.mean, x = latent.str.mean)) + 
