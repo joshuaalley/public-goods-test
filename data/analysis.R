@@ -104,7 +104,7 @@ ggplot(state.char.inter, aes(x = ln.ally.expend)) + geom_histogram()
 ### First test: aboslute size (GDP)
 # Interact changes in allied spending and GDP
 # Total allied spending: pooling regression
-m1.pg.abs <- lm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m1.pg.abs <- rlm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
                      lag.ln.milex + avg.num.mem + avg.dem.prop + 
                      atwar + civilwar.part + polity  + 
                      lsthreat + cold.war,
@@ -176,7 +176,7 @@ inter.data.rel <- filter(state.char.full, treaty.pres == 1)
 inter.data.rel <- as.data.frame(inter.data.rel)
 
 # Total allied spending: pooling regression
-m1.pg.rel <- lm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+m1.pg.rel <- rlm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
                      lag.ln.milex + avg.num.mem + avg.dem.prop + 
                      atwar + civilwar.part + polity  + 
                      lsthreat + cold.war,
@@ -220,6 +220,7 @@ kernel.rel <- inter.kernel(Y = "ln.milex", D = "diff.ally.expend", X = "avg.trea
 )
 kernel.rel
 
+
 # Check for non-random selection into alliances and compare allied states
 # less evidence of interaction
 heckit.rel <- heckit(selection = treaty.pres ~ lag.ln.milex + 
@@ -236,23 +237,26 @@ summary(heckit.rel)
 
 
 
-### Second approach: Estimate response of each state to every alliance they are in
+### Second approach: Multilevel model- heterogenous effects across treaties
+# Estimate a unique impact of changes in relative contribution for each alliance
 # Requires estimating the model in STAN
 
 
 # Load state-year matrix of alliance participation:
 atop.cow.year <- read.csv("data/atop-cow-year.csv")
+# Merge state contributions to each alliance
+atop.cow.year <- select(state.ally.year, atopid, ccode, year, alliance.contrib) %>%
+                left_join(atop.cow.year) %>%
+                group_by(atopid, ccode, year)
 
 # Create a dataset of state-year alliance membership:
-atop.cow.year <- group_by(atop.cow.year, atopid, ccode, year)
-state.mem <- atop.cow.year %>% select(atopid, ccode, year)
-state.mem <-  mutate(state.mem, member = 1)
+state.mem <- atop.cow.year %>% select(atopid, ccode, year, alliance.contrib)
 state.mem <- distinct(state.mem, atopid, ccode, year, .keep_all = TRUE)
 
-#TODO(JOSH): replace 1s in this matrix with relative contribution to the alliance. 
-# At which point, lambda is effect of increasing alliance contrib. 
-# This matrix has a binary indicator of which alliances states are a member of in a given year
-state.mem <- spread(state.mem, key = atopid, value = member, fill = 0)
+ 
+# This matrix has each state's contribution to every alliance in a given year
+# If a state is not a member of the alliance, corresponding matrix element = 0
+state.mem <- spread(state.mem, key = atopid, value = alliance.contrib, fill = 0)
 
 # Remove the zero or no alliance category
 state.mem <- subset(state.mem, select = -(3))
@@ -267,10 +271,12 @@ reg.state.data <-  state.vars %>%
 
 
 # Create a matrix of state membership in alliances (Z in STAN model)
+# This also removes missing alliance contributions, 
+# which are all the result of missing military expenditure data
 reg.state.data <- reg.state.data[complete.cases(reg.state.data), ]
 state.mem.mat <- as.matrix(reg.state.data[, 13: ncol(reg.state.data)])
 
-# Rescale variables
+# Rescale state regression variables
 reg.state.data[, 5:11] <- lapply(reg.state.data[, 5:11], 
                                  function(x) rescale(x, binary.inputs = "0/1"))
 
@@ -296,9 +302,9 @@ stan.data <- list(N = nrow(reg.state.data), y = reg.state.data[, 3],
 # Compile the model code
 model.1 <- stan_model(file = "data/ml-model-stan.stan")
 
-# Variational Bayes- use to check coefficients and posterior predictions on model
+# Variational Bayes- use to check model will run and give reasonable predictions
 ml.model.vb <- vb(model.1, data = stan.data, seed = 12)
-launch_shinystan(ml.model.vb)
+# Does not converge given clustering
 
 # posterior predictive check from variational Bayes- did not converge
 # so treat these predictions with caution
@@ -306,9 +312,12 @@ y = reg.state.data[, 3]
 vb.model.sum <- extract(ml.model.vb)
 ppc_dens_overlay(y, vb.model.sum$y_pred[1:100, ])
 
+# Clear variational Bayes results from environment
+rm(ml.model.vb)
+rm(vb.model.sum)
 
 
-# Regular STAN
+# Run model with full Bayes
 system.time(
   ml.model <- sampling(model.1, data = stan.data, 
                        iter = 2000, warmup = 1000, chains = 4
@@ -338,17 +347,17 @@ colnames(lambda.summary) <- c("atopid", "lambda.mean", "lambda.se.mean",
                               "lambda.sd", "lambda.5", "lambda.95",
                               "lambda.neff", "lambda.rhat")
 lambda.summary$lambda.positive <- ifelse((lambda.summary$lambda.5 > 0 & lambda.summary$lambda.95 > 0), 1, 0)
-sum(lambda.summary$lambda.positive)
+sum(lambda.summary$lambda.positive) # 26 treaties: increasing contribution to alliance leads to increased spending
 lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.summary$lambda.95 < 0), 1, 0)
-sum(lambda.summary$lambda.negative)
+sum(lambda.summary$lambda.negative) # 27 treaties: increasing contribution to alliance leads to decreased spending
 
 # Plot posterior means of alliance coefficients
 ggplot(lambda.summary, aes(x = lambda.mean)) +
-  geom_density() +
+  geom_density() + theme_classic() +
   ggtitle("Posterior Means of Alliance Coefficients")
 
 ggplot(lambda.summary, aes(x = lambda.mean)) +
-  geom_histogram(bins = 60) +
+  geom_histogram(bins = 60) + theme_classic() +
   ggtitle("Posterior Means of Alliance Coefficients")
 
 
@@ -358,7 +367,7 @@ ggplot(lambda.summary, aes(x = atopid, y = lambda.mean)) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))
+  geom_point(position = position_dodge(0.1))  + theme_classic()
 
 
 # plot non-zero treaties
@@ -368,7 +377,7 @@ lambda.summary %>%
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))
+  geom_point(position = position_dodge(0.1))  + theme_classic()
 
 
 # Load ATOP data for comparison
@@ -383,7 +392,16 @@ ggplot(alliance.coefs, aes(x = begyr, y = lambda.mean)) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))
+  geom_point(position = position_dodge(0.1)) + theme_classic()
+
+# Positive and negative only, colored by defense
+alliance.coefs %>%
+  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
+  ggplot(aes(x = begyr, y = lambda.mean, color = defense)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1)) + theme_classic()
 
 
 
@@ -394,7 +412,7 @@ alliance.coefs %>%
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))
+  geom_point(position = position_dodge(0.1))  + theme_classic()
 
 # Plot positive and negative, colored by unconditional military support
 alliance.coefs %>%
@@ -403,10 +421,16 @@ filter(lambda.positive == 1 | lambda.negative == 1) %>%
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))
+  geom_point(position = position_dodge(0.1)) + theme_classic()
+
+# 10 / 272 defense pacts have a positive association between contribution and changes in spending
+table(alliance.coefs$lambda.positive, alliance.coefs$defense)
+# 12 / 272 defense pacts have a negative association beween contribution and changes in spending 
+table(alliance.coefs$lambda.negative, alliance.coefs$defense)
 
 # Plot lambdas against latent strength
-ggplot(alliance.coefs, aes(y = lambda.mean, x = latent.str.mean)) + geom_point()
+ggplot(alliance.coefs, aes(y = lambda.mean, x = latent.str.mean)) + 
+  geom_point()  + theme_classic()
 
 # non-negative Coefficients with error bars, colored by latent strength 
 alliance.coefs %>%
@@ -415,5 +439,17 @@ alliance.coefs %>%
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))
+  geom_point(position = position_dodge(0.1)) + theme_classic()
+
+
+
+# non-negative Coefficients with error bars, colored by offense
+alliance.coefs %>%
+  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = lambda.mean, color = offense)) +
+  geom_errorbar(aes(ymin = lambda.5, 
+                    ymax = lambda.95,
+                    width=.01), position = position_dodge(0.1)) +
+  geom_point(position = position_dodge(0.1)) + theme_classic()
+
 
