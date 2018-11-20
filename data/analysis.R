@@ -113,9 +113,8 @@ m1.pg.abs <- rlm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp 
 summary(m1.pg.abs)
 # Calculate marginal effects
 margins(m1.pg.abs)
-mplot.abs <- cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
       main = "Average Marginal Effect of Changes in Allied Spending")
-mplot.abs
 abline(h = 0)
 
 
@@ -184,9 +183,8 @@ m1.pg.rel <- rlm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.ex
 summary(m1.pg.rel)
 # Calculate marginal effects
 margins(m1.pg.rel)
-mplot.rel <- cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
+cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
       main = "Average Marginal Effect of Changes in Allied Spending")
-mplot.rel
 abline(h = 0)
 
 # FGLS 
@@ -355,6 +353,7 @@ sum(lambda.summary$lambda.positive) # 20 treaties: increasing contribution to al
 lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.summary$lambda.95 < 0), 1, 0)
 sum(lambda.summary$lambda.negative) # 14 treaties: increasing contribution to alliance leads to decreased spending
 
+
 # Ignore uncertainty in estimates: are means positive or negative? 
 lambda.summary$positive.lmean <- ifelse(lambda.summary$lambda.mean > 0, 1, 0)
 sum(lambda.summary$positive.lmean) # 141 treaties
@@ -437,6 +436,18 @@ filter(lambda.positive == 1 | lambda.negative == 1) %>%
 table(alliance.coefs$lambda.positive, alliance.coefs$defense)
 # 13 / 272 defense pacts have a negative association beween contribution and changes in spending 
 table(alliance.coefs$lambda.negative, alliance.coefs$defense)
+
+
+# For non-zero alliances 
+alliance.coefs$atopid <- reorder(alliance.coefs$atopid, alliance.coefs$lambda.mean)
+alliance.coefs %>%
+  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
+  ggplot(mapping = aes(x = atopid, y = lambda.mean)) + 
+  geom_col() +
+  scale_fill_brewer(palette = "Greys") +
+  geom_text(aes(label = round(lambda.mean, digits = 3)), nudge_y = 0.075, size = 4) +
+  labs(y = "Posterior Mean of Alliance Parameter") +
+  coord_flip() + theme_classic()
 
 
 
