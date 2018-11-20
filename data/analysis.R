@@ -114,7 +114,8 @@ summary(m1.pg.abs)
 # Calculate marginal effects
 margins(m1.pg.abs)
 cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
-      main = "Average Marginal Effect of Changes in Allied Spending")
+      main = "Marginal Effect of Changes in Allied Spending on Military Spending",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
 
@@ -184,7 +185,8 @@ summary(m1.pg.rel)
 # Calculate marginal effects
 margins(m1.pg.rel)
 cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
-      main = "Average Marginal Effect of Changes in Allied Spending")
+      main = "Marginal Effect of Changes in Allied Spending on Military Spending",
+      xlab = "Average Alliance Contribution", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
 # FGLS 
