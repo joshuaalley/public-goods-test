@@ -169,74 +169,6 @@ summary(heckit.ally.spend)
 
 
 
-### Second test: relative size expressed as contribution to alliance
-# estimate interactions
-# filter out cases with no alliances
-inter.data.rel <- filter(state.char.full, treaty.pres == 1)
-inter.data.rel <- as.data.frame(inter.data.rel)
-
-# Total allied spending: pooling regression
-m1.pg.rel <- rlm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
-                     lag.ln.milex + avg.num.mem + avg.dem.prop + 
-                     atwar + civilwar.part + polity  + 
-                     lsthreat + cold.war,
-                   data = inter.data.rel)
-summary(m1.pg.rel)
-# Calculate marginal effects
-margins(m1.pg.rel)
-cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
-      main = "Marginal Effect of Changes in Allied Spending on Military Spending",
-      xlab = "Average Alliance Contribution", ylab = "Average M.E. of Changes in Allied Spending")
-abline(h = 0)
-
-# FGLS 
-m2.pg.rel <- pggls(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
-                       avg.dem.prop + lag.ln.milex +
-                       atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
-                       lsthreat + cold.war,
-                     data = inter.data.rel, subset = (majpower == 0),
-                     index = c("ccode", "year"),
-                     effect = "individual", # unrestricted error covariance
-                     model = "pooling")
-summary(m2.pg.rel)
-
-
-# binning estimator
-bin.rel <- inter.binning(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
-              Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
-                    "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
-              data = inter.data.rel,
-              na.rm = TRUE
-)
-bin.rel 
-
-# Kernel: 10+ minute run time 
-kernel.rel <- inter.kernel(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
-             Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
-                   "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
-             data = inter.data.rel, 
-             na.rm = TRUE,
-             nboots = 200, parallel = TRUE, cores = 4
-)
-kernel.rel
-
-
-# Check for non-random selection into alliances and compare allied states
-# less evidence of interaction
-heckit.rel <- heckit(selection = treaty.pres ~ lag.ln.milex + 
-                              ln.gdp + polity + atwar + lsthreat,
-                            outcome = ln.milex ~ diff.ally.expend + avg.treaty.contrib +
-                              diff.ally.expend:avg.treaty.contrib +
-                              lag.ln.milex +
-                              atwar + civilwar.part + polity + ln.gdp +
-                              lsthreat + cold.war,
-                            data = state.char.full,
-                            method = "ml")
-summary(heckit.rel)
-
-
-
-
 ### Second approach: Multilevel model- heterogenous effects across treaties
 # Estimate a unique impact of changes in relative contribution for each alliance
 # Requires estimating the model in STAN
@@ -369,7 +301,7 @@ ggplot(lambda.summary, aes(x = lambda.mean)) +
 
 ggplot(lambda.summary, aes(x = lambda.mean)) +
   geom_histogram(bins = 60) + theme_classic() +
-  ggtitle("Posterior Means of Alliance Coefficients")
+  ggtitle("Distribution of Alliance Coefficient Posterior Means")
 
 
 
@@ -378,7 +310,8 @@ ggplot(lambda.summary, aes(x = atopid, y = lambda.mean)) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))  + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
+  theme_classic()
 
 
 # plot non-zero treaties
@@ -388,7 +321,8 @@ lambda.summary %>%
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))  + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) + 
+  theme_classic()
 
 
 # Load ATOP data for comparison
@@ -402,37 +336,46 @@ alliance.coefs <- left_join(atop, lambda.summary)
 ggplot(alliance.coefs, aes(x = begyr, y = lambda.mean)) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
-                    width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + theme_classic()
+                    width=.01), position = position_dodge(0.01)) +
+  geom_point(position = position_dodge(0.01)) + geom_hline(yintercept = 0) +
+  labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
+  theme_classic() 
+ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
 
-# Positive and negative only, colored by defense
+
+# Positive and negative only
 alliance.coefs %>%
   filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = begyr, y = lambda.mean, color = defense)) +
+  ggplot(aes(x = begyr, y = lambda.mean)) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
+  labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
+  theme_classic() 
 
 
 
 # Plot unconditional military support lambdas: lots of nulls
 alliance.coefs %>%
   filter(uncond.milsup == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean)) +
+  ggplot(aes(x = begyr, y = lambda.mean)) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1))  + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
+  theme_classic()
+
 
 # Plot positive and negative, colored by unconditional military support
 alliance.coefs %>%
 filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean, color = uncond.milsup)) +
+  ggplot(aes(x = atopid, y = lambda.mean, color = factor(uncond.milsup))) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
+  theme_classic()
 
 # 18 / 272 defense pacts have a positive association between contribution and changes in spending
 table(alliance.coefs$lambda.positive, alliance.coefs$defense)
@@ -447,10 +390,10 @@ alliance.coefs %>%
   ggplot(mapping = aes(x = atopid, y = lambda.mean)) + 
   geom_col() +
   scale_fill_brewer(palette = "Greys") +
-  geom_text(aes(label = round(lambda.mean, digits = 3)), nudge_y = 0.075, size = 4) +
-  labs(y = "Posterior Mean of Alliance Parameter") +
-  coord_flip() + theme_classic()
-
+#  geom_text(aes(label = round(lambda.mean, digits = 3)), nudge_y = 0.075, size = 4) +
+  labs(x = "ATOPid", y = "Posterior Mean of Alliance Parameter") +
+  coord_flip() + theme_classic() 
+ggsave("manuscript/nonzero-alliance-coefs.pdf", height = 6, width = 8)
 
 
 # Plot lambdas against latent strength
@@ -464,17 +407,90 @@ alliance.coefs %>%
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
+  theme_classic()
 
 
 
 # non-negative Coefficients with error bars, colored by offense
 alliance.coefs %>%
   filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean, color = offense)) +
+  ggplot(aes(x = atopid, y = lambda.mean, color = factor(offense))) +
   geom_errorbar(aes(ymin = lambda.5, 
                     ymax = lambda.95,
                     width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + theme_classic()
+  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
+  theme_classic()
 
+
+
+
+
+
+
+
+### Additional single-level test: relative size expressed as contribution to alliance
+# estimate interactions
+# filter out cases with no alliances
+inter.data.rel <- filter(state.char.full, treaty.pres == 1)
+inter.data.rel <- as.data.frame(inter.data.rel)
+
+# Total allied spending: pooling regression
+m1.pg.rel <- rlm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+                   lag.ln.milex + avg.num.mem + avg.dem.prop + 
+                   atwar + civilwar.part + polity  + 
+                   lsthreat + cold.war,
+                 data = inter.data.rel)
+summary(m1.pg.rel)
+# Calculate marginal effects
+margins(m1.pg.rel)
+cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effect",
+      main = "Marginal Effect of Changes in Allied Spending on Military Spending",
+      xlab = "Average Alliance Contribution", ylab = "Average M.E. of Changes in Allied Spending")
+abline(h = 0)
+
+# FGLS 
+m2.pg.rel <- pggls(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+                     avg.dem.prop + lag.ln.milex +
+                     atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
+                     lsthreat + cold.war,
+                   data = inter.data.rel, subset = (majpower == 0),
+                   index = c("ccode", "year"),
+                   effect = "individual", # unrestricted error covariance
+                   model = "pooling")
+summary(m2.pg.rel)
+
+
+# binning estimator
+bin.rel <- inter.binning(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+                         Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
+                               "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
+                         data = inter.data.rel,
+                         na.rm = TRUE
+)
+bin.rel 
+
+# Kernel: 10+ minute run time 
+kernel.rel <- inter.kernel(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+                           Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
+                                 "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
+                           data = inter.data.rel, 
+                           na.rm = TRUE,
+                           nboots = 200, parallel = TRUE, cores = 4
+)
+kernel.rel
+
+
+# Check for non-random selection into alliances and compare allied states
+# less evidence of interaction
+heckit.rel <- heckit(selection = treaty.pres ~ lag.ln.milex + 
+                       ln.gdp + polity + atwar + lsthreat,
+                     outcome = ln.milex ~ diff.ally.expend + avg.treaty.contrib +
+                       diff.ally.expend:avg.treaty.contrib +
+                       lag.ln.milex +
+                       atwar + civilwar.part + polity + ln.gdp +
+                       lsthreat + cold.war,
+                     data = state.char.full,
+                     method = "ml")
+summary(heckit.rel)
 
