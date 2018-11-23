@@ -269,9 +269,10 @@ ml.model.sum <- extract(ml.model, permuted = TRUE)
 
 # Posterior predictive distributions relative to observed data
 yrep.full <- ml.model.sum$y_pred
+yrep.full <- yrep.full[1:100, ]
 
 # plot posterior predictive denisty of first 100 simulations
-ppc_dens_overlay(y, yrep.full[1:100, ])
+ppc_dens_overlay(y, yrep.full)
 
 
 # Summarize lamdba 
@@ -288,7 +289,7 @@ lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.s
 sum(lambda.summary$lambda.negative) # 14 treaties: increasing contribution to alliance leads to decreased spending
 
 
-# Ignore uncertainty in estimates: are means positive or negative? 
+# Ignore uncertainty in estimates: are posterior means positive or negative? 
 lambda.summary$positive.lmean <- ifelse(lambda.summary$lambda.mean > 0, 1, 0)
 sum(lambda.summary$positive.lmean) # 141 treaties
 lambda.summary$negative.lmean <- ifelse(lambda.summary$lambda.mean < 0, 1, 0)
@@ -300,9 +301,10 @@ ggplot(lambda.summary, aes(x = lambda.mean)) +
   ggtitle("Posterior Means of Alliance Coefficients")
 
 ggplot(lambda.summary, aes(x = lambda.mean)) +
-  geom_histogram(bins = 60) + theme_classic() +
+  geom_histogram(bins = 50) + theme_classic() +
+  labs(x = "Posterior Mean") +
   ggtitle("Distribution of Alliance Coefficient Posterior Means")
-
+ggsave("manuscript/alliance-coefs-hist.pdf", height = 6, width = 8)
 
 
 # Plot points with error bars by ATOPID
@@ -354,28 +356,6 @@ alliance.coefs %>%
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
   theme_classic() 
 
-
-
-# Plot unconditional military support lambdas: lots of nulls
-alliance.coefs %>%
-  filter(uncond.milsup == 1) %>% 
-  ggplot(aes(x = begyr, y = lambda.mean)) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
-                    width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
-  theme_classic()
-
-
-# Plot positive and negative, colored by unconditional military support
-alliance.coefs %>%
-filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean, color = factor(uncond.milsup))) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
-                    width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
-  theme_classic()
 
 # 18 / 272 defense pacts have a positive association between contribution and changes in spending
 table(alliance.coefs$lambda.positive, alliance.coefs$defense)

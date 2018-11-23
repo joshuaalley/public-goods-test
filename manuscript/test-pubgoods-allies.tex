@@ -34,20 +34,20 @@ Department of Political Science, Texas A\&M University.}}
 \section{Introduction}
 
 
+
 \citet{OlsonZeckhauser1966} argue that international alliances are subject to a collective action problem. 
-The aggregate capability of an alliance provides security for members. 
-But because a treaty cannot exclude members without undermining its purpose, security is a public good. 
-Individual members gain security from treaty participation, regardless of their individual contribution. 
-Olson and Zeckhauser expect that larger members of the alliance with bear a higher defense burden, because these states value defense from the alliance more. 
-Therefore, smaller alliance members free-ride on the contributions of larger partners. 
+Smaller alliance members will ``free ride'' on the contributions of larger members. 
+As of November 2018, Olson and Zeckhauser's article has been cited 1670 times.
+Furthermore, they argue that collective action dynamics within alliances apply to other international organizations. 
+Given its implications and salience, this public goods theory of alliances merits careful empirical scrutiny. 
 
 
-The prediction that larger alliance members will bear a higher defense burden has been subjected to extensive scrutiny. 
-Unfortunately, the standard test regresses military spending as a share of national income on national income. 
-This approach places GDP on both sides of the regression, making the models unidentified. 
+But even after 52 years, we have limited evidence for or against free-riding in alliances. 
+The standard test regresses military spending as a share of national income on national income. 
+This approach places GDP on both sides of the regression, so the models are unidentified. 
 
 
-\citet{PluemperNeumayer2015} attempt to rectify this problem by examining changes in spending among NATO members. 
+\citet{PluemperNeumayer2015} address the identification problem by examining changes in spending among NATO members. 
 In their framework, a lack of responsiveness to US and Soviet military spending is evidence of free riding among NATO members.
 They find no correlation between the size of a NATO member and free-riding, which they argue contradicts Olson and Zeckhauser. 
 However, they do not include the United States in their sample, which omits a crucial data point for testing the size argument.\footnote{Given the focus on responses to US spending, this decision is understandable.}
@@ -55,9 +55,8 @@ However, they do not include the United States in their sample, which omits a cr
 
 % So what is the problem here? 
 Despite the canonical status of \citet{OlsonZeckhauser1966}, their predictions have not been tested appropriately. 
-Regressions with GDP in the outcome and as the key predictor are unidentified. 
-\citet{PluemperNeumayer2015} address the identification problem in a way that does not completely test the size prediction. 
-There is enough evidence to conclude allied capability allows NATO members spend less on the military \citep{PluemperNeumayer2015, GeorgeSandler2017}.
+Most evidence suggests NATO members spend less on the military thanks to allied capability \citep{PluemperNeumayer2015, GeorgeSandler2017}.
+Although NATO is salient, it is only one case. 
 
 
 % by the way, it's mostly NATO
@@ -67,18 +66,21 @@ All six of those studies include GDP in the independent and dependent variable, 
 
 
 % So it total, there's a lot we don't know
-Due to identification problems and the overwhelming focus on NATO, we have limited empirical knowledge of the public goods theory of alliances. 
+Due to identification problems and emphasis on NATO, we have almost no evidence for the generalizability of the public goods theory of alliances. 
 Understanding of NATO is worthwhile. 
 But it is insufficient to assess the overall explanatory power of the public goods theory of alliances. 
 
 
 % I'm not the first one to address this theory: first comprehensive empirical evidence
+I am not the first scholar to question the public goods theory 
+\citep{SandlerHartley2001} summarize several extensions of the argument.  
+But such theoretical revisions are premature without knowledge that the more parsimonious public goods model is inappropriate. 
+This paper provides the first comprehensive test of the public goods theory of alliances- incorporating multiple alliances over a long time frame. 
 
 
 % Why we should care
 Failures in testing the public goods theory of alliances have two important consequences. 
 First, it hinders the accumulation of knowledge. 
-Testing predictions from a theory is essential to assessing its explanatory power. 
 Without a valid and comprehensive test, the validity of the public goods theory will remain unclear. 
 
 
@@ -94,27 +96,40 @@ Below, I outline two possible solutions to this challenge.
 Both broaden the focus away from NATO, but employ different techniques to examine the role of alliance participant size from 1816 to 2007. 
 
 
-The approach uses a standard panel data research design, using aggregate measures of alliance participation.
-Here, I find no evidence of a conditional relationship between state military spending, changes in allied spending, and state size. 
-The second design employs a multilevel model to generate separate estimates for every alliance. 
+The first approach uses a standard panel data research design, with an aggregate measure of alliance participation. 
+The second design employs a Bayesian model to generate separate estimates for every alliance. 
 In the multilevel model, I test Olson and Zeckhauser's prediction that states which contribute more to an alliance should spend more by estimating the impact of increasing alliance contribution on military spending. 
-% Summarize aggregate findings here. 
+Neither design finds strong evidence for Olson and Zeckhauser's predictions. 
 
 
 The paper proceeds as follows.
-First, I summarize the public goods theory of alliances and its key predictions in more detail.
-Then, I describe and summarize the results of panel-data tests of the public goods logic.
+First, I summarize the public goods theory of alliances and translate its predictions into both research designs.
+Then, I describe and summarize the results of a panel-data test of the public goods logic.
 The third section describes the multilevel model and associated results. 
 The final section assesses aggregate support for the public goods logic, as well as implications for scholars and policymakers. 
 
 
 \section{The Public Goods Theory of Alliances}
 
+% this needs to be succint- aim for 500 words. 
 
-\section{Panel Data Regression}
+% summarize argument
+Why are alliances subject to a public goods problem? 
+The aggregate capability of an alliance provides security for members. 
+But because a treaty cannot exclude members without undermining its purpose, security is a public good. 
+Individual members gain security from treaty participation, regardless of their individual contribution. 
+Olson and Zeckhauser expect that larger members of the alliance with bear a higher defense burden, because these states value defense from the alliance more. 
+Therefore, smaller alliance members free-ride on the contributions of larger partners. 
+
+
+% Develop implications for test: one for each section. 
+
 
 If Olson and Zeckhauser's argument is correct, smaller states should decrease military spending in response to greater allied military spending. 
 This implies a conditional relationship between allied spending, state size, and state military spending. 
+
+\section{Panel Data Regression}
+
 
 
 \subsection{Absolute Size: GDP}
@@ -127,18 +142,25 @@ This implies a conditional relationship between allied spending, state size, and
 \end{figure}
 
 
-\subsection{Relative Size: Alliance Contribution} 
+\section{Multilevel Model}
 
 
-\begin{figure}
+\begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.95\textwidth]{abs-margins-plot.pdf}
-	\label{fig:abs-margins-plot}
-	\caption{Average Marginal Effect of increasing allied military spending on a state's military spending, across the average contribution of that state to its alliances.}
+		\includegraphics[width=0.95\textwidth]{alliance-coefs-hist.pdf}
+	\caption{Posterior mean of association between alliance contribution and military spending in 285 defensive and offensive alliances from 1816 to 2007.}
+	\label{fig:alliance-coefs-hist}
 \end{figure}
 
 
-\section{Multilevel Model}
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{alliance-coefs-year.pdf}
+	\caption{Estimated association between alliance contribution and defense spending in 285 defensive and offensive alliances from 1816 to 2007. The points are the posterior mean and the error bars cover the 90\% credible interval.}
+	\label{fig:alliance-coefs-year}
+\end{figure}
+
 
 
 \section{Conclusion}
