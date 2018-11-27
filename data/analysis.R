@@ -17,7 +17,7 @@ library(tidyverse)
 library(rstan)
 library(bayesplot)
 library(shinystan)
-
+library(xtable)
 
 
 # Set working directory to current folder 
@@ -106,11 +106,13 @@ ggplot(state.char.inter, aes(x = ln.ally.expend)) + geom_histogram()
 # Total allied spending: pooling regression
 m1.pg.abs <- rlm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
                      lag.ln.milex + avg.num.mem + avg.dem.prop + 
-                     atwar + civilwar.part + polity  + 
+                     atwar + civilwar.part + polity  +
                      lsthreat + cold.war,
                    data = state.char.inter
                 )
 summary(m1.pg.abs)
+plotreg(m1.pg.abs)
+xtable(m1.pg.abs, auto = TRUE, digits = 3)
 # Calculate marginal effects
 margins(m1.pg.abs)
 cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
