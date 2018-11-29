@@ -37,7 +37,7 @@ parameters {
   real<lower = 0> sigma_year; // variance hyperparameter of the year intercepts
   vector[M] beta; // vector of state-level coefficients 
   vector[A] lambda; // alliance parameters
-  real<lower = 4> nu; // degrees of freedom in t-distribution of outcome
+  real<lower = 2> nu; // degrees of freedom in t-distribution of outcome
 
 }
 

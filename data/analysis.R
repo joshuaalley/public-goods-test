@@ -104,7 +104,7 @@ ggplot(state.char.inter, aes(x = ln.ally.expend)) + geom_histogram()
 ### First test: aboslute size (GDP)
 # Interact changes in allied spending and GDP
 # Total allied spending: pooling regression
-m1.pg.abs <- rlm(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m1.pg.abs <- rlm(change.ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
                      lag.ln.milex + avg.num.mem + avg.dem.prop + 
                      atwar + civilwar.part + polity  +
                      lsthreat + cold.war,
@@ -123,7 +123,7 @@ abline(h = 0)
 
 
 # FGLS 
-m2.pg.abs <- pggls(ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m2.pg.abs <- pggls(change.ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
                        avg.dem.prop + lag.ln.milex +
                        atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
                        lsthreat + cold.war,
@@ -135,7 +135,7 @@ summary(m2.pg.abs)
 
 
 # binning estimator
-bin.abs <- inter.binning(Y = "ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
+bin.abs <- inter.binning(Y = "change.ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
               Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                     "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
               data = state.char.inter,
@@ -144,7 +144,7 @@ bin.abs <- inter.binning(Y = "ln.milex", D = "diff.ally.expend", X = "ln.gdp",
 bin.abs
 
 # Kernel: 10+ minute run time 
-kernel.abs <- inter.kernel(Y = "ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
+kernel.abs <- inter.kernel(Y = "change.ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
              Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                    "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
              data = state.char.inter, 
@@ -158,7 +158,7 @@ kernel.abs
 # Still a statistically significant interaction
 heckit.ally.spend <- heckit(selection = treaty.pres ~ lag.ln.milex + 
                               ln.gdp + polity + atwar + lsthreat,
-                            outcome = ln.milex ~ diff.ally.expend + ln.gdp + 
+                            outcome = change.ln.milex ~ diff.ally.expend + ln.gdp + 
                               diff.ally.expend:ln.gdp +
                               lag.ln.milex +
                               atwar + civilwar.part + polity + ln.gdp +
@@ -200,7 +200,7 @@ state.mem <- subset(state.mem, select = -(3))
 
 # Add state membership in alliances to this data
 reg.state.data <-  state.vars %>%
-                   select(ccode, year, ln.milex, lag.ln.milex,
+                   select(ccode, year, change.ln.milex, lag.ln.milex,
                           atwar, civilwar.part, rival.milex, ln.gdp, polity, 
                           cold.war, disputes, majpower) %>%
                   left_join(state.mem)
@@ -270,11 +270,10 @@ check_hmc_diagnostics(ml.model)
 ml.model.sum <- extract(ml.model, permuted = TRUE)
 
 # Posterior predictive distributions relative to observed data
-yrep.full <- ml.model.sum$y_pred
-yrep.full <- yrep.full[1:100, ]
+yrep <- ml.model.sum$y_pred[1:100, ]
 
 # plot posterior predictive denisty of first 100 simulations
-ppc_dens_overlay(y, yrep.full)
+ppc_dens_overlay(y, yrep)
 
 
 # Summarize lamdba 
@@ -293,9 +292,9 @@ sum(lambda.summary$lambda.negative) # 14 treaties: increasing contribution to al
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 lambda.summary$positive.lmean <- ifelse(lambda.summary$lambda.mean > 0, 1, 0)
-sum(lambda.summary$positive.lmean) # 141 treaties
+sum(lambda.summary$positive.lmean) # 145 treaties
 lambda.summary$negative.lmean <- ifelse(lambda.summary$lambda.mean < 0, 1, 0)
-sum(lambda.summary$negative.lmean) # 144 treaties
+sum(lambda.summary$negative.lmean) # 141 treaties
 
 # Plot posterior means of alliance coefficients
 ggplot(lambda.summary, aes(x = lambda.mean)) +
@@ -359,7 +358,7 @@ alliance.coefs %>%
   theme_classic() 
 
 
-# 18 / 272 defense pacts have a positive association between contribution and changes in spending
+# 19 / 272 defense pacts have a positive association between contribution and changes in spending
 table(alliance.coefs$lambda.positive, alliance.coefs$defense)
 # 13 / 272 defense pacts have a negative association beween contribution and changes in spending 
 table(alliance.coefs$lambda.negative, alliance.coefs$defense)
@@ -418,7 +417,7 @@ inter.data.rel <- filter(state.char.full, treaty.pres == 1)
 inter.data.rel <- as.data.frame(inter.data.rel)
 
 # Total allied spending: pooling regression
-m1.pg.rel <- rlm(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+m1.pg.rel <- rlm(change.ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
                    lag.ln.milex + avg.num.mem + avg.dem.prop + 
                    atwar + civilwar.part + polity  + 
                    lsthreat + cold.war,
@@ -432,7 +431,7 @@ cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effe
 abline(h = 0)
 
 # FGLS 
-m2.pg.rel <- pggls(ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+m2.pg.rel <- pggls(change.ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
                      avg.dem.prop + lag.ln.milex +
                      atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
                      lsthreat + cold.war,
@@ -444,7 +443,7 @@ summary(m2.pg.rel)
 
 
 # binning estimator
-bin.rel <- inter.binning(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+bin.rel <- inter.binning(Y = "change.ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
                          Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                                "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
                          data = inter.data.rel,
@@ -453,7 +452,7 @@ bin.rel <- inter.binning(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty
 bin.rel 
 
 # Kernel: 10+ minute run time 
-kernel.rel <- inter.kernel(Y = "ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+kernel.rel <- inter.kernel(Y = "change.ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
                            Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                                  "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
                            data = inter.data.rel, 
@@ -467,7 +466,7 @@ kernel.rel
 # less evidence of interaction
 heckit.rel <- heckit(selection = treaty.pres ~ lag.ln.milex + 
                        ln.gdp + polity + atwar + lsthreat,
-                     outcome = ln.milex ~ diff.ally.expend + avg.treaty.contrib +
+                     outcome = change.ln.milex ~ diff.ally.expend + avg.treaty.contrib +
                        diff.ally.expend:avg.treaty.contrib +
                        lag.ln.milex +
                        atwar + civilwar.part + polity + ln.gdp +
