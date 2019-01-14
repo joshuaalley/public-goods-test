@@ -36,7 +36,7 @@ parameters {
   real<lower = 0> sigma_state; // variance hyperparameter of the state intercepts
   real<lower = 0> sigma_year; // variance hyperparameter of the year intercepts
   vector[M] beta; // vector of state-level coefficients 
-  vector[A] lambda; // alliance parameters
+  vector[A] gamma; // alliance parameters
   real<lower = 2> nu; // degrees of freedom in t-distribution of outcome
 
 }
@@ -53,19 +53,19 @@ alpha_year = 0 + sigma_year * alpha_year_std; // non-centered parameterization, 
 
 
 // Linear prediction of the state-year spending. csr_matrix_times vector will
-// produce a vector as a it multiplies the membership matrix by the vector of alliance characteristics lambda
-    y_hat = alpha + alpha_state[state] + alpha_year[year] + csr_matrix_times_vector(N, A, w, v, u, lambda) + X * beta;
+// produce a vector as a it multiplies the membership matrix by the vector of alliance characteristics gamma
+    y_hat = alpha + alpha_state[state] + alpha_year[year] + csr_matrix_times_vector(N, A, w, v, u, gamma) + X * beta;
     
 }
 
 model {
   
   
-  alpha ~ normal(0, 3);
+  alpha ~ normal(0, 1);
   sigma ~ normal(0, 1);
   alpha_year_std ~ normal(0, 1);
   alpha_state_std ~ normal(0, 1); 
-  lambda ~ normal(0, 1);
+  gamma ~ normal(0, 1);
   sigma_state ~ normal(0, 1);
   sigma_year ~ normal(0, 1); 
   beta ~  normal(0, 1);
