@@ -64,7 +64,7 @@ state.char.full <- left_join(state.vars, state.ally.sum)
 
 
 # Fill missing values of alliance variables with zero
-state.char.full[, 36: ncol(state.char.full)][is.na(state.char.full[, 36: ncol(state.char.full)])] <- 0
+state.char.full[, 42: ncol(state.char.full)][is.na(state.char.full[, 42: ncol(state.char.full)])] <- 0
 
 
 
@@ -87,8 +87,8 @@ state.char.inter <- as.data.frame(state.char.full) # interflex doesn't take tibb
 state.char.inter <- filter(state.char.inter, ln.gdp >= 18) # filter really tiny states out
 
 # summarize interaction variables
-summary(state.char.inter$ln.gdp)
-ggplot(state.char.inter, aes(x = ln.gdp)) + geom_density()
+summary(state.char.inter$change.gdp)
+ggplot(state.char.inter, aes(x = change.gdp)) + geom_density()
 
 
 summary(state.char.inter$total.ally.expend)
@@ -104,8 +104,8 @@ ggplot(state.char.inter, aes(x = ln.ally.expend)) + geom_histogram()
 ### First test: aboslute size (GDP)
 # Interact changes in allied spending and GDP
 # Total allied spending: pooling regression
-m1.pg.abs <- rlm(change.ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
-                     lag.ln.milex + avg.num.mem + avg.dem.prop + 
+m1.pg.abs <- rlm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+                     avg.num.mem + avg.dem.prop + 
                      atwar + civilwar.part + polity  +
                      lsthreat + cold.war,
                    data = state.char.inter
@@ -116,16 +116,16 @@ xtable(m1.pg.abs, auto = TRUE, digits = 3)
 # Calculate marginal effects
 margins(m1.pg.abs)
 cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
-      main = "Marginal Effect of Changes in Allied Spending on Military Spending",
+      main = "Marginal Effect of Changes in Allied Spending on Growth in Military Spending",
       xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
 
 
-# FGLS 
-m2.pg.abs <- pggls(change.ln.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
-                       avg.dem.prop + lag.ln.milex +
-                       atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
+# OLS
+m2.pg.abs <- lm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+                       avg.num.mem + avg.dem.prop + 
+                       atwar + civilwar.part + polity + ln.gdp + 
                        lsthreat + cold.war,
                      data = state.char.inter, subset = (majpower == 0),
                      index = c("ccode", "year"),
@@ -135,7 +135,7 @@ summary(m2.pg.abs)
 
 
 # binning estimator
-bin.abs <- inter.binning(Y = "change.ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
+bin.abs <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp", 
               Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                     "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
               data = state.char.inter,
@@ -158,9 +158,8 @@ kernel.abs
 # Still a statistically significant interaction
 heckit.ally.spend <- heckit(selection = treaty.pres ~ lag.ln.milex + 
                               ln.gdp + polity + atwar + lsthreat,
-                            outcome = change.ln.milex ~ diff.ally.expend + ln.gdp + 
+                            outcome = growth.milex ~ diff.ally.expend + ln.gdp + 
                               diff.ally.expend:ln.gdp +
-                              lag.ln.milex +
                               atwar + civilwar.part + polity + ln.gdp +
                               lsthreat + cold.war,
                             data = state.char.inter,
@@ -200,23 +199,23 @@ state.mem <- subset(state.mem, select = -(3))
 
 # Add state membership in alliances to this data
 reg.state.data <-  state.vars %>%
-                   select(ccode, year, change.ln.milex, lag.ln.milex,
+                   select(ccode, year, growth.milex,
                           atwar, civilwar.part, rival.milex, ln.gdp, polity, 
                           cold.war, disputes, majpower) %>%
                   left_join(state.mem)
 
 # fill in missing alliance data with zeros
-reg.state.data[, 13:ncol(reg.state.data)][is.na(reg.state.data[, 13:ncol(reg.state.data)])] <- 0
+reg.state.data[, 12:ncol(reg.state.data)][is.na(reg.state.data[, 12:ncol(reg.state.data)])] <- 0
 
 # Create a matrix of state membership in alliances (Z in STAN model)
 reg.state.data <- reg.state.data[complete.cases(reg.state.data), ]
-state.mem.mat <- as.matrix(reg.state.data[, 13: ncol(reg.state.data)])
+state.mem.mat <- as.matrix(reg.state.data[, 12: ncol(reg.state.data)])
 
 # Rescale state regression variables
 reg.state.data[, 5:11] <- lapply(reg.state.data[, 5:11], 
                                  function(x) rescale(x, binary.inputs = "0/1"))
 
-reg.state.mat <- as.matrix(reg.state.data[, 4:12])
+reg.state.mat <- as.matrix(reg.state.data[, 4:11])
 
 # Set-up data for STAN
 # create a state index variable
@@ -267,7 +266,9 @@ check_hmc_diagnostics(ml.model)
 
 
 # Extract coefficients from the model
-ml.model.sum <- extract(ml.model, permuted = TRUE)
+ml.model.sum <- extract(ml.model, pars = c("beta", "gamma", 
+                                           "sigma", "sigma_year", "sigma_state",
+                                           "y_pred"),permuted = TRUE)
 
 # Posterior predictive distributions relative to observed data
 yrep <- ml.model.sum$y_pred[1:100, ]
@@ -276,32 +277,32 @@ yrep <- ml.model.sum$y_pred[1:100, ]
 ppc_dens_overlay(y, yrep)
 
 
-# Summarize lamdba 
-lambda.summary <- summary(ml.model, pars = c("lambda"), probs = c(0.05, 0.95))$summary
-lambda.summary <- cbind.data.frame(as.numeric(colnames(state.mem.mat)), lambda.summary)
-colnames(lambda.summary) <- c("atopid", "lambda.mean", "lambda.se.mean",
-                              "lambda.sd", "lambda.5", "lambda.95",
-                              "lambda.neff", "lambda.rhat")
+# Summarize gamma
+gamma.summary <- summary(ml.model, pars = c("gamma"), probs = c(0.05, 0.95))$summary
+gamma.summary <- cbind.data.frame(as.numeric(colnames(state.mem.mat)), gamma.summary)
+colnames(gamma.summary) <- c("atopid", "gamma.mean", "gamma.se.mean",
+                              "gamma.sd", "gamma.5", "gamma.95",
+                              "gamma.neff", "gamma.rhat")
 
 # tabulate number of positive and negative estimates
-lambda.summary$lambda.positive <- ifelse((lambda.summary$lambda.5 > 0 & lambda.summary$lambda.95 > 0), 1, 0)
-sum(lambda.summary$lambda.positive) # 20 treaties: increasing contribution to alliance leads to increased spending
-lambda.summary$lambda.negative <- ifelse((lambda.summary$lambda.5 < 0 & lambda.summary$lambda.95 < 0), 1, 0)
-sum(lambda.summary$lambda.negative) # 14 treaties: increasing contribution to alliance leads to decreased spending
+gamma.summary$gamma.positive <- ifelse((gamma.summary$gamma.5 > 0 & gamma.summary$gamma.95 > 0), 1, 0)
+sum(gamma.summary$gamma.positive) # 20 treaties: increasing contribution to alliance leads to increased spending
+gamma.summary$gamma.negative <- ifelse((gamma.summary$gamma.5 < 0 & gamma.summary$gamma.95 < 0), 1, 0)
+sum(gamma.summary$gamma.negative) # 14 treaties: increasing contribution to alliance leads to decreased spending
 
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
-lambda.summary$positive.lmean <- ifelse(lambda.summary$lambda.mean > 0, 1, 0)
-sum(lambda.summary$positive.lmean) # 145 treaties
-lambda.summary$negative.lmean <- ifelse(lambda.summary$lambda.mean < 0, 1, 0)
-sum(lambda.summary$negative.lmean) # 141 treaties
+gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
+sum(gamma.summary$positive.lmean) # 145 treaties
+gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
+sum(gamma.summary$negative.lmean) # 141 treaties
 
 # Plot posterior means of alliance coefficients
-ggplot(lambda.summary, aes(x = lambda.mean)) +
+ggplot(gamma.summary, aes(x = gamma.mean)) +
   geom_density() + theme_classic() +
   ggtitle("Posterior Means of Alliance Coefficients")
 
-ggplot(lambda.summary, aes(x = lambda.mean)) +
+ggplot(gamma.summary, aes(x = gamma.mean)) +
   geom_histogram(bins = 50) + theme_classic() +
   labs(x = "Posterior Mean") +
   ggtitle("Distribution of Alliance Coefficient Posterior Means")
@@ -309,20 +310,20 @@ ggsave("manuscript/alliance-coefs-hist.pdf", height = 6, width = 8)
 
 
 # Plot points with error bars by ATOPID
-ggplot(lambda.summary, aes(x = atopid, y = lambda.mean)) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
+ggplot(gamma.summary, aes(x = atopid, y = gamma.mean)) +
+  geom_errorbar(aes(ymin = gamma.5, 
+                    ymax = gamma.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
   theme_classic()
 
 
 # plot non-zero treaties
-lambda.summary %>%
-  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean)) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
+gamma.summary %>%
+  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = gamma.mean)) +
+  geom_errorbar(aes(ymin = gamma.5, 
+                    ymax = gamma.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) + 
   theme_classic()
@@ -332,13 +333,13 @@ lambda.summary %>%
 atop <- read.csv("data/atop-additions.csv")
 
 # Join alliance coefficients with ATOP data
-alliance.coefs <- left_join(atop, lambda.summary)
+alliance.coefs <- left_join(atop, gamma.summary)
 
 
 # Plot by start year of alliance
-ggplot(alliance.coefs, aes(x = begyr, y = lambda.mean)) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
+ggplot(alliance.coefs, aes(x = begyr, y = gamma.mean)) +
+  geom_errorbar(aes(ymin = gamma.5, 
+                    ymax = gamma.95,
                     width=.01), position = position_dodge(0.01)) +
   geom_point(position = position_dodge(0.01)) + geom_hline(yintercept = 0) +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
@@ -348,45 +349,45 @@ ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
 
 # Positive and negative only
 alliance.coefs %>%
-  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = begyr, y = lambda.mean)) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
+  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
+  ggplot(aes(x = begyr, y = gamma.mean)) +
+  geom_errorbar(aes(ymin = gamma.5, 
+                    ymax = gamma.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
   theme_classic() 
 
 
-# 19 / 272 defense pacts have a positive association between contribution and changes in spending
-table(alliance.coefs$lambda.positive, alliance.coefs$defense)
-# 13 / 272 defense pacts have a negative association beween contribution and changes in spending 
-table(alliance.coefs$lambda.negative, alliance.coefs$defense)
+# 15 / 272 defense pacts have a positive association between contribution and changes in spending
+table(alliance.coefs$gamma.positive, alliance.coefs$defense)
+# 12 / 272 defense pacts have a negative association beween contribution and changes in spending 
+table(alliance.coefs$gamma.negative, alliance.coefs$defense)
 
 
 # For non-zero alliances 
-alliance.coefs$atopid <- reorder(alliance.coefs$atopid, alliance.coefs$lambda.mean)
+alliance.coefs$atopid <- reorder(alliance.coefs$atopid, alliance.coefs$gamma.mean)
 alliance.coefs %>%
-  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(mapping = aes(x = atopid, y = lambda.mean)) + 
+  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
+  ggplot(mapping = aes(x = atopid, y = gamma.mean)) + 
   geom_col() +
   scale_fill_brewer(palette = "Greys") +
-#  geom_text(aes(label = round(lambda.mean, digits = 3)), nudge_y = 0.075, size = 4) +
+#  geom_text(aes(label = round(gamma.mean, digits = 3)), nudge_y = 0.075, size = 4) +
   labs(x = "ATOPid", y = "Posterior Mean of Alliance Parameter") +
   coord_flip() + theme_classic() 
 ggsave("manuscript/nonzero-alliance-coefs.pdf", height = 6, width = 8)
 
 
-# Plot lambdas against latent strength
-ggplot(alliance.coefs, aes(y = lambda.mean, x = latent.str.mean)) + 
+# Plot gammas against latent strength
+ggplot(alliance.coefs, aes(y = gamma.mean, x = latent.str.mean)) + 
   geom_point()  + theme_classic()
 
 # non-negative Coefficients with error bars, colored by latent strength 
 alliance.coefs %>%
-  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean, color = latent.str.mean)) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
+  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = gamma.mean, color = latent.str.mean)) +
+  geom_errorbar(aes(ymin = gamma.5, 
+                    ymax = gamma.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
   theme_classic()
@@ -395,10 +396,10 @@ alliance.coefs %>%
 
 # non-negative Coefficients with error bars, colored by offense
 alliance.coefs %>%
-  filter(lambda.positive == 1 | lambda.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = lambda.mean, color = factor(offense))) +
-  geom_errorbar(aes(ymin = lambda.5, 
-                    ymax = lambda.95,
+  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
+  ggplot(aes(x = atopid, y = gamma.mean, color = factor(offense))) +
+  geom_errorbar(aes(ymin = gamma.5, 
+                    ymax = gamma.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
   theme_classic()
