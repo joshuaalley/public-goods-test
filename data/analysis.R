@@ -17,7 +17,7 @@ library(tidyverse)
 library(rstan)
 library(bayesplot)
 library(shinystan)
-library(xtable)
+library(stargazer)
 
 
 # Set working directory to current folder 
@@ -112,7 +112,8 @@ m1.pg.abs <- rlm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.
                 )
 summary(m1.pg.abs)
 plotreg(m1.pg.abs)
-xtable(m1.pg.abs, auto = TRUE, digits = 3)
+stargazer(m1.pg.abs)
+
 # Calculate marginal effects
 margins(m1.pg.abs)
 cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
@@ -127,21 +128,31 @@ m2.pg.abs <- lm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.g
                        avg.num.mem + avg.dem.prop + 
                        atwar + civilwar.part + polity + ln.gdp + 
                        lsthreat + cold.war,
-                     data = state.char.inter, subset = (majpower == 0),
-                     index = c("ccode", "year"),
-                     effect = "individual", # unrestricted error covariance
-                     model = "pooling")
+                     data = state.char.inter)
 summary(m2.pg.abs)
+stargazer(m2.pg.abs)
 
+# Plot residuals
+plot(m2.pg.abs)
+qqnorm(m2.pg.abs$residuals, main = "Normal Q-Q Plot: Regression Residuals")
+qqline(m2.pg.abs$residuals)
+# Export plot
+dev.copy(pdf,'appendix/res-qq-plot.pdf')
+dev.off()
 
 # binning estimator
 bin.abs <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp", 
               Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                     "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
               data = state.char.inter,
-              na.rm = TRUE
+              na.rm = TRUE,
+              Ylabel = "Growth in Military Spending",
+              Dlabel = "Change in Allied Spending",
+              Xlabel = "ln(GDP)", theme.bw = TRUE
 )
 bin.abs
+ggsave("appendix/inter-bin-abs.pdf", height = 6, width = 8)
+
 
 # Kernel: 10+ minute run time 
 kernel.abs <- inter.kernel(Y = "change.ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
@@ -149,9 +160,13 @@ kernel.abs <- inter.kernel(Y = "change.ln.milex", D = "diff.ally.expend", X = "l
                    "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
              data = state.char.inter, 
              na.rm = TRUE,
-             nboots = 200, parallel = TRUE, cores = 4
+             nboots = 200, parallel = TRUE, cores = 4,
+             Ylabel = "Growth in Military Spending",
+             Dlabel = "Change in Allied Spending",
+             Xlabel = "ln(GDP)", theme.bw = TRUE
 )
 kernel.abs
+ggsave("appendix/inter-kernel-abs.pdf", height = 6, width = 8)
 
 
 # Check for non-random selection into alliances and compare allied states
@@ -166,8 +181,8 @@ heckit.ally.spend <- heckit(selection = treaty.pres ~ lag.ln.milex +
                             method = "ml")
 summary(heckit.ally.spend)
 
-
-
+# Create a table for the appendix
+stargazer(heckit.ally.spend)
 
 
 ### Second approach: Multilevel model- heterogenous effects across treaties
@@ -265,6 +280,20 @@ launch_shinystan(ml.model)
 check_hmc_diagnostics(ml.model)
 
 
+# plot energy 
+post.ml <- nuts_params(ml.model) # extract posterior draws
+color_scheme_set("red")
+mcmc_nuts_energy(post.ml)
+ggsave("appendix/energy-plot.pdf", height = 6, width = 8) 
+
+
+# plot r-hats
+ml.rhat <- rhat(ml.model)
+mcmc_rhat_hist(ml.rhat)
+ggsave("appendix/rhat-plot.pdf", height = 6, width = 8) 
+
+
+
 # Extract coefficients from the model
 ml.model.sum <- extract(ml.model, pars = c("beta", "gamma", 
                                            "sigma", "sigma_year", "sigma_state",
@@ -286,16 +315,16 @@ colnames(gamma.summary) <- c("atopid", "gamma.mean", "gamma.se.mean",
 
 # tabulate number of positive and negative estimates
 gamma.summary$gamma.positive <- ifelse((gamma.summary$gamma.5 > 0 & gamma.summary$gamma.95 > 0), 1, 0)
-sum(gamma.summary$gamma.positive) # 20 treaties: increasing contribution to alliance leads to increased spending
+sum(gamma.summary$gamma.positive) # 16 treaties: increasing contribution to alliance leads to increased spending
 gamma.summary$gamma.negative <- ifelse((gamma.summary$gamma.5 < 0 & gamma.summary$gamma.95 < 0), 1, 0)
-sum(gamma.summary$gamma.negative) # 14 treaties: increasing contribution to alliance leads to decreased spending
+sum(gamma.summary$gamma.negative) # 13 treaties: increasing contribution to alliance leads to decreased spending
 
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
-sum(gamma.summary$positive.lmean) # 145 treaties
+sum(gamma.summary$positive.lmean) # 147 treaties
 gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
-sum(gamma.summary$negative.lmean) # 141 treaties
+sum(gamma.summary$negative.lmean) # 138 treaties
 
 # Plot posterior means of alliance coefficients
 ggplot(gamma.summary, aes(x = gamma.mean)) +
@@ -418,7 +447,7 @@ inter.data.rel <- filter(state.char.full, treaty.pres == 1)
 inter.data.rel <- as.data.frame(inter.data.rel)
 
 # Total allied spending: pooling regression
-m1.pg.rel <- rlm(change.ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+m1.pg.rel <- rlm(growth.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
                    lag.ln.milex + avg.num.mem + avg.dem.prop + 
                    atwar + civilwar.part + polity  + 
                    lsthreat + cold.war,
@@ -431,20 +460,18 @@ cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effe
       xlab = "Average Alliance Contribution", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
-# FGLS 
-m2.pg.rel <- pggls(change.ln.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+# OLS
+m2.pg.rel <- lm(growth.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
                      avg.dem.prop + lag.ln.milex +
                      atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
                      lsthreat + cold.war,
-                   data = inter.data.rel, subset = (majpower == 0),
-                   index = c("ccode", "year"),
-                   effect = "individual", # unrestricted error covariance
-                   model = "pooling")
+                   data = inter.data.rel
+                )
 summary(m2.pg.rel)
 
 
 # binning estimator
-bin.rel <- inter.binning(Y = "change.ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+bin.rel <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
                          Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                                "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
                          data = inter.data.rel,
@@ -453,7 +480,7 @@ bin.rel <- inter.binning(Y = "change.ln.milex", D = "diff.ally.expend", X = "avg
 bin.rel 
 
 # Kernel: 10+ minute run time 
-kernel.rel <- inter.kernel(Y = "change.ln.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+kernel.rel <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
                            Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                                  "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
                            data = inter.data.rel, 
@@ -467,7 +494,7 @@ kernel.rel
 # less evidence of interaction
 heckit.rel <- heckit(selection = treaty.pres ~ lag.ln.milex + 
                        ln.gdp + polity + atwar + lsthreat,
-                     outcome = change.ln.milex ~ diff.ally.expend + avg.treaty.contrib +
+                     outcome = growth.milex ~ diff.ally.expend + avg.treaty.contrib +
                        diff.ally.expend:avg.treaty.contrib +
                        lag.ln.milex +
                        atwar + civilwar.part + polity + ln.gdp +
