@@ -155,7 +155,7 @@ ggsave("appendix/inter-bin-abs.pdf", height = 6, width = 8)
 
 
 # Kernel: 10+ minute run time 
-kernel.abs <- inter.kernel(Y = "change.ln.milex", D = "diff.ally.expend", X = "ln.gdp", 
+kernel.abs <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp", 
              Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                    "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
              data = state.char.inter, 
@@ -173,7 +173,7 @@ ggsave("appendix/inter-kernel-abs.pdf", height = 6, width = 8)
 # Still a statistically significant interaction
 heckit.ally.spend <- heckit(selection = treaty.pres ~ lag.ln.milex + 
                               ln.gdp + polity + atwar + lsthreat,
-                            outcome = growth.milex ~ diff.ally.expend + ln.gdp + 
+                            outcome = asinh(growth.milex) ~ diff.ally.expend + ln.gdp + 
                               diff.ally.expend:ln.gdp +
                               atwar + civilwar.part + polity + ln.gdp +
                               lsthreat + cold.war,
@@ -183,6 +183,7 @@ summary(heckit.ally.spend)
 
 # Create a table for the appendix
 stargazer(heckit.ally.spend)
+
 
 
 ### Second approach: Multilevel model- heterogenous effects across treaties
@@ -411,7 +412,7 @@ ggsave("manuscript/nonzero-alliance-coefs.pdf", height = 6, width = 8)
 ggplot(alliance.coefs, aes(y = gamma.mean, x = latent.str.mean)) + 
   geom_point()  + theme_classic()
 
-# non-negative Coefficients with error bars, colored by latent strength 
+# non-negative Coefficients with error bars, colored by latent scope 
 alliance.coefs %>%
   filter(gamma.positive == 1 | gamma.negative == 1) %>% 
   ggplot(aes(x = atopid, y = gamma.mean, color = latent.str.mean)) +
@@ -423,7 +424,7 @@ alliance.coefs %>%
 
 
 
-# non-negative Coefficients with error bars, colored by offense
+# non-negative coefficients with error bars, colored by offense
 alliance.coefs %>%
   filter(gamma.positive == 1 | gamma.negative == 1) %>% 
   ggplot(aes(x = atopid, y = gamma.mean, color = factor(offense))) +
@@ -436,9 +437,95 @@ alliance.coefs %>%
 
 
 
+### 
+# Robustness check: estimate STAN model on states only in alliances
+# Filter out obs where states are not in at least one alliance
+reg.data.all <- reg.state.data %>%
+                select(-c(state.id, year.id)) %>% 
+                mutate(allied.cap = rowSums(.[12: ncol(reg.data.all)])) %>% 
+                filter(allied.cap != 0)
+
+state.mem.all <- as.matrix(reg.data.all[, 12: (ncol(reg.data.all) - 1)])
+
+# Define regression data 
+reg.mat.all <- as.matrix(reg.data.all[, 4:11])
+
+# Add state and year indicators
+reg.data.all$state.id <- group_indices(reg.data.all, ccode)
+reg.data.all$year.id <- group_indices(reg.data.all, year)
+
+# Define the data list 
+stan.data.all <- list(N = nrow(reg.data.all), y = reg.data.all[, 3],
+                  state = reg.data.all$state.id, S = length(unique(reg.data.all$state.id)),
+                  year = reg.data.all$year.id, T = length(unique(reg.data.all$year.id)),
+                  A = ncol(state.mem.mat),
+                  Z = state.mem.all, 
+                  X = reg.mat.all, M = ncol(reg.mat.all)
+)
+
+
+# Run model with full Bayes
+system.time(
+  ml.model.all <- sampling(model.1, data = stan.data.all, 
+                       iter = 2000, warmup = 1000, chains = 4
+  )
+)
+
+# diagnose full model
+check_hmc_diagnostics(ml.model.all)
 
 
 
+# Extract coefficients from the model
+sum.ml.all <- extract(ml.model.all, pars = c("gamma"), permuted = TRUE)
+
+
+# Summarize gamma
+gamma.summary.all <- summary(ml.model.all, pars = c("gamma"), probs = c(0.05, 0.95))$summary
+gamma.summary.all <- cbind.data.frame(as.numeric(colnames(state.mem.all)), gamma.summary.all)
+colnames(gamma.summary.all) <- c("atopid", "gamma.mean", "gamma.se.mean",
+                             "gamma.sd", "gamma.5", "gamma.95",
+                             "gamma.neff", "gamma.rhat")
+
+# tabulate number of positive and negative estimates
+gamma.summary.all$gamma.positive <- ifelse((gamma.summary.all$gamma.5 > 0 & gamma.summary.all$gamma.95 > 0), 1, 0)
+sum(gamma.summary.all$gamma.positive) # 18 treaties: increasing contribution to alliance leads to increased spending
+gamma.summary.all$gamma.negative <- ifelse((gamma.summary.all$gamma.5 < 0 & gamma.summary.all$gamma.95 < 0), 1, 0)
+sum(gamma.summary.all$gamma.negative) # 15 treaties: increasing contribution to alliance leads to decreased spending
+
+# Prediction success 
+18 / 285
+
+# Ignore uncertainty in estimates: are posterior means positive or negative? 
+gamma.summary.all$positive.lmean <- ifelse(gamma.summary.all$gamma.mean > 0, 1, 0)
+sum(gamma.summary.all$positive.lmean) # 138 treaties
+gamma.summary.all$negative.lmean <- ifelse(gamma.summary.all$gamma.mean < 0, 1, 0)
+sum(gamma.summary.all$negative.lmean) # 147 treaties
+
+# Plot posterior means of alliance coefficients
+ggplot(gamma.summary.all, aes(x = gamma.mean)) +
+  geom_density() + theme_classic() +
+  ggtitle("Posterior Means of Alliance Coefficients")
+
+ggplot(gamma.summary.all, aes(x = gamma.mean)) +
+  geom_histogram(bins = 50) + theme_classic() +
+  labs(x = "Posterior Mean") +
+  ggtitle("Distribution of Alliance Coefficient Posterior Means")
+ggsave("appendix/all-sample-gamma")
+
+
+# Create a data frame with gamma pars from both samples 
+gamma.comp <- cbind.data.frame(gamma.summary$gamma.mean, gamma.summary.all$gamma.mean)
+colnames(gamma.comp) <- c("full", "allies")
+gamma.comp <- melt(gamma.comp)
+
+# plot 
+ggplot(gamma.comp, aes(x = value, fill = variable)) + 
+  geom_density(alpha = 0.25) +
+  scale_fill_manual(name = "Sample", values=c("#999999", "#000000")) +
+  ggtitle("Posterior Distributions of Treaty Scope: Major and Non-Major Powers") +
+  theme_classic()
+ggsave("appendix/sample-comp-gamma.pdf")
 
 ### Additional single-level test: relative size expressed as contribution to alliance
 # estimate interactions

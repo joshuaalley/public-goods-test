@@ -211,6 +211,42 @@ Relaxing the linearity assumptions of the robust regression does little to chang
 
 
 
+\section{Alternative Sample for Multilevel Model}
+
+
+It is possible that estimating a model on the full sample of states makes misleading comparisons by including states with no alliances.
+Without protection from an alliance, these states might have to spend more on the military \citep{Morrow1993}. 
+Increasing contribution would have less of an impact compared to these countries than to other states in alliances. 
+
+
+To check whether this was the case, I re-fit the multilevel model on a sample of only states with at least one alliance. 
+This reduced the sample size from 9,961 observations to 6,148. 
+The results are relatively unchanged, however. 
+
+
+138 treaties have a positive mean $\gamma$ parameter, and 18 of those treaties have a 90\% credible interval that excludes zero. 
+147 treaties have a negative mean $\gamma$ estimate, and 15 of those treaties have a 90\% credible interval that excludes zero.
+Thus the prediction success rate for a public goods model increases marginally from 5.6\% in the full sample to 6.3\%  in a sample with only alliance participants. 
+This is not a large enough change to suggest the results are qualitatively different. 
+
+
+Furthermore, as \autoref{fig:sample-comp-gamma} shows, the distribution of the association between treaty contribution and spending across alliances is very similar across the two samples. 
+This figure overlays the distribution of the mean $\gamma$ parameters in each sample. 
+The is little discernible difference between the two. 
+
+
+\begin{figure}
+	\centering
+		\includegraphics[width=0.95\textwidth]{sample-comp-gamma.pdf}
+	\caption{Comparison of the distribution of $\gamma$ parameters in full sample and a sample of only alliance participants. There is minimal different in the distribution of these parameters across the two samples.}
+	\label{fig:sample-comp-gamma}
+\end{figure}
+
+
+
+
+
+
 \section{Convergence of Multilevel Model} 
 
 
