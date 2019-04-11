@@ -38,12 +38,11 @@ Department of Political Science, Texas A\&M University.}}
 
 Robust regression is appropriate for residuals from the growth variable. 
 Several observations of states during war see gigantic increases in spending--- the largest value is 140, relative to a median of .063. 
-This generates extremely skewed residuals, so OLS is inefficient. 
+This generates extremely heavy-tailed residuals, so OLS is inefficient. 
 
 
-The skewness of the residuals is readily apparent in \autoref{fig:res-qq-plot}. 
-Many positive residuals deviate from the normality assumption. 
-
+Even after applying the inverse hyperbolic sine transformation, the residuals in \autoref{fig:res-qq-plot} deviate strongly from normality. 
+\autoref{fig:res-qq-plot} shows the residuals from models 2 and 3 of \autoref{tab:ols-est}, which reports some robustness checks.
 
 \begin{figure}[htbp]
 	\centering
@@ -55,65 +54,84 @@ Many positive residuals deviate from the normality assumption.
 
 
 Although OLS is not the best estimator for the spending growth data, it produces similar results.
-\autoref{tab:ols-est} summarizes the OLS estimates. 
-The coefficient on changes in allied spending is negative but statistically insignificant. 
-The negative coefficient on GDP indicates the limited validity of these results, but there is still no evidence size modifies the association between changes in allied spending and growth in military expenditures. 
+\autoref{tab:ols-est} summarizes estimates from OLS models with and without a transformed growth and spending and robust regression with transformed spending. 
 
 \begin{table}[!htbp] \centering 
-\begin{tabular}{@{\extracolsep{5pt}}lc} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
- & Growth Military Spending \\ 
+ & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-4} 
+\\[-1.8ex] & Growth Spending & \multicolumn{2}{c}{IHS(Growth Spending)} \\ 
+\\[-1.8ex] & \textit{OLS} & \textit{OLS} & \textit{Robust Reg.} \\ 
+\\[-1.8ex] & (1) & (2) & (3)\\ 
 \hline \\[-1.8ex] 
- Change Allied Spending & $-$0.235 \\ 
-  & (0.648) \\ 
-  & \\ 
- ln(GDP) & $-$0.038$^{**}$ \\ 
-  & (0.017) \\ 
-  & \\ 
- Change Allied Spending $\times$ ln(GDP) & 0.011 \\ 
-  & (0.027) \\ 
-  & \\ 
- Average Alliance Size & $-$0.003 \\ 
-  & (0.002) \\ 
-  & \\ 
- Average Alliance Democracy & $-$0.001 \\ 
-  & (0.008) \\ 
-  & \\ 
- International War & 0.476$^{***}$ \\ 
-  & (0.141) \\ 
-  & \\ 
- Civil War Participant & 0.206$^{**}$ \\ 
-  & (0.104) \\ 
-  & \\ 
- POLITY & 0.001 \\ 
-  & (0.005) \\ 
-  & \\ 
- External Threat & 0.107 \\ 
-  & (0.152) \\ 
-  & \\ 
- Cold War & 0.032 \\ 
-  & (0.058) \\ 
-  & \\ 
- Constant & 1.074$^{***}$ \\ 
-  & (0.413) \\ 
+ Change Allied Spending & $-$0.235 & $-$0.099 & $-$0.026 \\ 
+  & (0.648) & (0.087) & (0.047) \\ 
+  & & & \\ 
+ ln(GDP) & $-$0.038$^{**}$ & $-$0.008$^{***}$ & 0.0003 \\ 
+  & (0.017) & (0.002) & (0.001) \\ 
+  & & & \\ 
+ Change Allied Spending $\times$ ln(GDP) & 0.011 & 0.005 & 0.002 \\ 
+  & (0.027) & (0.004) & (0.002) \\ 
+  & & & \\ 	
+ Average Alliance Size & $-$0.003 & $-$0.0001 & 0.0003$^{*}$ \\ 
+  & (0.002) & (0.0003) & (0.0002) \\ 
+  & & & \\ 
+ Average Alliance Democracy & $-$0.001 & $-$0.001 & $-$0.0003 \\ 
+  & (0.008) & (0.001) & (0.001) \\ 
+  & & & \\ 
+ International War & 0.476$^{***}$ & 0.228$^{***}$ & 0.096$^{***}$ \\ 
+  & (0.141) & (0.019) & (0.010) \\ 
+  & & & \\ 
+ Civil War Participant & 0.206$^{**}$ & 0.025$^{*}$ & 0.001 \\ 
+  & (0.104) & (0.014) & (0.008) \\ 
+  & & & \\ 
+ Polity & 0.001 & 0.0001 & $-$0.0001 \\ 
+  & (0.005) & (0.001) & (0.0004) \\ 
+  & & & \\ 
+ External Threat & 0.107 & 0.080$^{***}$ & 0.042$^{***}$ \\ 
+  & (0.152) & (0.021) & (0.011) \\ 
+  & & & \\ 
+ Cold War & 0.032 & 0.034$^{***}$ & 0.047$^{***}$ \\ 
+  & (0.058) & (0.008) & (0.004) \\ 
+  & & & \\ 
+ Constant & 1.074$^{***}$ & 0.259$^{***}$ & 0.026 \\ 
+  & (0.413) & (0.056) & (0.030) \\ 
+  & & & \\ 
 \hline \\[-1.8ex] 
-Observations & 9,139 \\ 
-R$^{2}$ & 0.003 \\ 
-Residual Std. Error & 2.649 (df = 9128) \\ 
-F Statistic & 2.506$^{***}$ (df = 10; 9128) \\ 
+Observations & 9,139 & 9,139 & 9,139 \\ 
+R$^{2}$ & 0.003 & 0.025 &  \\ 
+Residual Std. Error (df = 9128) & 2.649 & 0.358 & 0.157 \\ 
 \hline 
 \hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
 \end{tabular} 
-\caption{OLS estimates of conditional relationship between allied spending, GDP and growth in military spending. }
+\caption{Robustness checks of conditional relationship between allied spending, GDP and growth in military spending. }
 \label{tab:ols-est}
 \end{table} 
 
 
 The OLS model is a poor fit for the dependent variable. 
 The R$^2$ is miniscule, and the standard error of the residual is much larger than the robust regression. 
+Transforming the DV improves the performance of OLS, but leads to similar inferences. 
 Despite the lackluster fit, I present these results to show that the conventional estimator generates similar inferences. 
+
+
+Rather than interpret the coefficients, I plot the marginal effect of allied spending across the range of GDP for these three models.
+\autoref{fig:me-plots} compares these results with the marginal effects plot from the robust regression in the paper. 
+Three of the four estimation strategies produce a positive marginal effect, along with broad enough confidence intervals to suggest a conditional relationship with GDP is unlikely.\footnote{The robust regression results are so similar because even after transforming spending growth, the robust estimator down-weights those extreme observations a great deal.} 
+OLS without a transformed DV finds no positive impact of changing allied capability on growth in spending, but this result should be taken with great caution due to poor model fit. 
+Regardless, none of the results matches the expectation of a negative effect which increases in state size. 
+
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{me-plots.pdf}
+	\caption{Comparison of marginal effect of changing allied spending on growth in military spending across the range of GDP. Each plot corresponds to an estimation strategy.}
+	\label{fig:me-plots}
+\end{figure}
+
 
 
 I also checked whether inferences were sensitive to non-random selection into alliances. 

@@ -100,6 +100,23 @@ ggplot(state.char.inter, aes(x = ln.ally.expend)) + geom_histogram()
 
 
 
+# tests for panel unit roots
+y.panel <- state.char.inter %>% select(ccode, ln.milex, year) %>%
+           mutate(ln.milex = approx(year, ln.milex, year)$y) %>% # interpolate missing data points
+            spread(ccode, ln.milex) %>% select(-(year))
+y.panel <- as.matrix(y.panel)
+# formal test is not working at the moment- reasons are unclear but some points surrounded by missing values after interpolation
+# choi.test <- pCADFtest(y.panel, max.lag.y = 4, crosscorr = .05, type = "trend")
+
+# plot on ln shows clear evidence of non-stationarity
+ggplot(state.char.inter, aes(x = year, y = ln.milex, colour = as.factor(ccode))) + 
+  geom_line()
+
+# Growth is more mean-reverting
+ggplot(state.char.inter, aes(x = year, y = asinh(growth.milex), colour = as.factor(ccode))) + 
+  geom_line()
+
+
 
 ### First test: aboslute size (GDP)
 # Interact changes in allied spending and GDP
@@ -121,6 +138,12 @@ cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
       xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
+# Switch the directions 
+cplot(m1.pg.abs, x = "diff.ally.expend", dx = "ln.gdp", what = "effect",
+      main = "Marginal Effect GDP on Growth in Military Spending",
+      xlab = "Change in Allied Capability", ylab = "Average M.E. of ln(GDP)")
+abline(h = 0)
+
 
 
 # OLS
@@ -130,15 +153,8 @@ m2.pg.abs <- lm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.g
                        lsthreat + cold.war,
                      data = state.char.inter)
 summary(m2.pg.abs)
-stargazer(m2.pg.abs)
 
-# Plot residuals
-plot(m2.pg.abs)
-qqnorm(m2.pg.abs$residuals, main = "Normal Q-Q Plot: Regression Residuals")
-qqline(m2.pg.abs$residuals)
-# Export plot
-dev.copy(pdf,'appendix/res-qq-plot.pdf')
-dev.off()
+
 
 # binning estimator
 bin.abs <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp", 
@@ -147,7 +163,7 @@ bin.abs <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp
               data = state.char.inter,
               na.rm = TRUE,
               Ylabel = "Growth in Military Spending",
-              Dlabel = "Change in Allied Spending",
+              Dlabel = "Allied Spending",
               Xlabel = "ln(GDP)", theme.bw = TRUE
 )
 bin.abs
@@ -162,7 +178,7 @@ kernel.abs <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "ln.g
              na.rm = TRUE,
              nboots = 200, parallel = TRUE, cores = 4,
              Ylabel = "Growth in Military Spending",
-             Dlabel = "Change in Allied Spending",
+             Dlabel = "Allied Spending",
              Xlabel = "ln(GDP)", theme.bw = TRUE
 )
 kernel.abs
@@ -173,7 +189,7 @@ ggsave("appendix/inter-kernel-abs.pdf", height = 6, width = 8)
 # Still a statistically significant interaction
 heckit.ally.spend <- heckit(selection = treaty.pres ~ lag.ln.milex + 
                               ln.gdp + polity + atwar + lsthreat,
-                            outcome = asinh(growth.milex) ~ diff.ally.expend + ln.gdp + 
+                            outcome = growth.milex ~ diff.ally.expend + ln.gdp + 
                               diff.ally.expend:ln.gdp +
                               atwar + civilwar.part + polity + ln.gdp +
                               lsthreat + cold.war,
@@ -526,6 +542,97 @@ ggplot(gamma.comp, aes(x = value, fill = variable)) +
   ggtitle("Posterior Distributions of Treaty Scope: Major and Non-Major Powers") +
   theme_classic()
 ggsave("appendix/sample-comp-gamma.pdf")
+
+
+
+
+
+
+### Transform outcome with Inverse hyperbolic sine to reduce the extremely heavy tails 
+# Total allied spending: pooling regression
+m1.abs.ihs <- rlm(asinh(growth.milex) ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+                   avg.num.mem + avg.dem.prop + 
+                   atwar + civilwar.part + polity  +
+                   lsthreat + cold.war,
+                 data = state.char.inter
+)
+summary(m1.abs.ihs)
+plotreg(m1.abs.ihs)
+stargazer(m1.abs.ihs)
+
+# Calculate marginal effects
+margins(m1.abs.ihs)
+cplot(m1.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+      main = "Marginal Effect of Changes in Allied Spending on Growth in Military Spending",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
+abline(h = 0)
+
+# Switch the directions 
+cplot(m1.abs.ihs, x = "diff.ally.expend", dx = "ln.gdp", what = "effect",
+      main = "Marginal Effect GDP on Growth in Military Spending",
+      xlab = "Change in Allied Capability", ylab = "Average M.E. of ln(GDP)")
+abline(h = 0)
+
+
+# Results are very similar- check distribution of weights across observations
+plot(m1.pg.abs$residuals, m1.pg.abs$w) # original model
+abline(h = 0)
+plot(m1.abs.ihs$residuals, m1.abs.ihs$w) # transformed DV
+
+
+# OLS estiamtion 
+m2.abs.ihs <- lm(asinh(growth.milex) ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+                    avg.num.mem + avg.dem.prop + 
+                    atwar + civilwar.part + polity  +
+                    lsthreat + cold.war,
+                  data = state.char.inter
+)
+summary(m2.abs.ihs)
+
+cplot(m2.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+      main = "Marginal Effect of Changes in Allied Spending on Growth in Military Spending",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
+abline(h = 0)
+
+
+# Take this and ols estiamtes in one appendix table
+stargazer(m2.pg.abs, m2.abs.ihs, m1.abs.ihs)
+
+# plot residuals from transformed regression 
+qqnorm(m2.abs.ihs$residuals, main = "Normal Q-Q Plot: Regression Residuals")
+qqline(m2.abs.ihs$residuals)
+# Export plot
+dev.copy(pdf,'appendix/res-qq-plot.pdf')
+dev.off()
+
+
+# Marginal effects plots all in one place
+par(mfrow = c(2, 2))
+
+# Main model in paper: robust regression 
+cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+      main = "Robust Reg",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+
+# rreg- transformed DV
+cplot(m1.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+      main = "Robust Reg: Transformed DV",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+
+# OLS 
+cplot(m2.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+      main = "Linear Regression",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+
+# OLS with transformed DV 
+cplot(m2.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+      main = "Linear Regression: Transformed DV",
+      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+# Export plot
+dev.copy(pdf,'appendix/me-plots.pdf')
+dev.off()
+dev.off()
+
 
 ### Additional single-level test: relative size expressed as contribution to alliance
 # estimate interactions
