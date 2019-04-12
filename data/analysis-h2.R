@@ -150,6 +150,8 @@ colnames(gamma.summary) <- c("atopid", "gamma.mean", "gamma.se.mean",
                              "gamma.sd", "gamma.5", "gamma.95",
                              "gamma.neff", "gamma.rhat")
 
+
+
 # tabulate number of positive and negative estimates
 gamma.summary$gamma.positive <- ifelse((gamma.summary$gamma.5 > 0 & gamma.summary$gamma.95 > 0), 1, 0)
 sum(gamma.summary$gamma.positive) # 16 treaties: increasing contribution to alliance leads to increased spending
@@ -181,7 +183,7 @@ ggplot(gamma.summary, aes(x = atopid, y = gamma.mean)) +
                     ymax = gamma.95,
                     width=.01), position = position_dodge(0.1)) +
   geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
-  theme_classic()
+  theme_classic() + coord_flip()
 
 
 # plot non-zero treaties
@@ -209,7 +211,7 @@ ggplot(alliance.coefs, aes(x = begyr, y = gamma.mean)) +
                     width=.01), position = position_dodge(0.01)) +
   geom_point(position = position_dodge(0.01)) + geom_hline(yintercept = 0) +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
-  theme_classic() 
+  theme_classic()
 ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
 
 
@@ -244,7 +246,7 @@ alliance.coefs %>%
 ggsave("manuscript/nonzero-alliance-coefs.pdf", height = 6, width = 8)
 
 
-# Plot gammas against latent strength
+# Plot gammas against latent scope
 ggplot(alliance.coefs, aes(y = gamma.mean, x = latent.str.mean)) + 
   geom_point()  + theme_classic()
 
@@ -259,7 +261,6 @@ alliance.coefs %>%
   theme_classic()
 
 
-
 # non-negative coefficients with error bars, colored by offense
 alliance.coefs %>%
   filter(gamma.positive == 1 | gamma.negative == 1) %>% 
@@ -272,9 +273,50 @@ alliance.coefs %>%
 
 
 
+# Calculate positive and negative posterior probability
+positive.check <- function(x){
+  mean(x > 0)
+}
+gamma.probs <- apply(ml.model.sum$gamma, 2, positive.check)
+gamma.probs <- cbind.data.frame(gamma.probs, gamma.summary$atopid,
+                                gamma.summary$gamma.mean)
+colnames(gamma.probs) <- c("pos.post.prob", "atopid", "gamma.mean")
+
+
+# Plot posterior probabilities
+gamma.probs$atopid <- reorder(gamma.probs$atopid, gamma.probs$pos.post.prob)
+gamma.probs$over.50 <- gamma.probs$pos.post.prob - .50
+
+# For all alliances
+ggplot(gamma.probs, aes(x = atopid, y = over.50)) + 
+  geom_col() +
+  scale_y_continuous(breaks = seq(from = -.5, to = .5, .25),
+                     labels = c("100% Negative", "75% negative", "Even", 
+                                "75% Positive", "100% Positive")) +
+  labs(x = "Alliance", y = "Posterior Probability") +
+  theme_classic() +
+  theme(axis.text.x = element_blank(), # remove atopid labels
+        axis.ticks.x = element_blank()) +
+  ggtitle("Posterior Probability of Alliance Coefficients")
+ggsave("manuscript/full-post-prob.pdf")
+
+
+# non-zero given 90% cutoff
+gamma.probs$non.zero <- ifelse(gamma.probs$pos.post.prob >= .90 | 
+                                gamma.probs$pos.post.prob <= .10, 1, 0)
+sum(gamma.probs$non.zero)
+# positive and negative
+gamma.probs$nz.pos <- ifelse(gamma.probs$pos.post.prob >= .90 & 
+                               gamma.probs$non.zero == 1, 1, 0)
+sum(gamma.probs$nz.pos)
+30/285
+gamma.probs$nz.neg <- ifelse(gamma.probs$pos.post.prob <= .10 & 
+                               gamma.probs$non.zero == 1, 1, 0)
+sum(gamma.probs$nz.neg)
+22/285
 
 ### 
-# Robustness check: estimate STAN model on states only in alliances
+# Robustness check: estimate model on states only in alliances
 # Filter out obs where states are not in at least one alliance
 reg.data.all <- reg.state.data %>%
   select(-c(state.id, year.id)) %>% 

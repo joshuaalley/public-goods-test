@@ -440,12 +440,29 @@ There are large positive values, but also many large negative values.
 147 of 285 alliances have a positive posterior mean. 
 138 of 285 alliances have a negative posterior mean. 
 The large number of negative values provides some evidence against Hypothesis 2. 
-However, the posterior means do not convey whether the impact of increasing alliance contribution can be distinguished from zero. 
 
 
+However, the posterior means do not convey when the impact of increasing alliance contribution can be distinguished from zero. 
+More positive mass in the posterior of the $\gamma$ parameter for each alliance, adds evidence for Hypothesis 2. 
+\autoref{fig:full-post-prob} plots the relative positive and negative posterior probability of each $\gamma$ parameter. 
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{full-post-prob.pdf}
+	\caption{Positive and negative posterior probability of $\gamma$ parameters, sorted by posterior mean. Each column is the relative posterior probability of the effect of increasing contribution for each alliance. Even posterior probability implies 50\% positive and negative posterior mass--- a $\gamma$ parameter with mean 0 and perfectly symmetric uncertainty. Deviations from this add either positive or negative posterior mass.}
+	\label{fig:full-post-prob}
+\end{figure}
+
+
+The distribution of positive and negative posterior mass is roughly symmetric, which matches the distribution of posterior means. 
+About half of treaties have more positive posterior probability, while the other half have greater negative probability. 
+There is little evidence that greater treaty contribution increases military spending in more treaties. 
+
+
+The credible interval of each $\gamma$ parameter is another source of information about the likely effect of treaty contribution.\footnote{The 90\% credible interval falls between the 5\% and 95\% quantiles of the posterior.} 
 \autoref{fig:alliance-coefs-year} plots the $\gamma$ parameter for each alliance against the start year of the treaty.
 Points mark the posterior mean. 
-The error bars encapsulate the 90\% credible interval.\footnote{The credible interval falls between the 5\% and 95\% quantiles of the posterior.}  
+The error bars encapsulate the 90\% credible interval.
 
 
 \begin{figure}[htbp]
@@ -458,15 +475,22 @@ The error bars encapsulate the 90\% credible interval.\footnote{The credible int
 
 Most posterior means are close to zero, so 251 credible intervals include zero. 
 There are 16 alliances where the credible interval includes only positive values, as the public goods model predicts. 
-That leaves 13 treaties where the credible interval covers only negative values. 
-
-
+That leaves 13 treaties where the credible interval covers only negative values.
 16 of 285, or 6\%, is a dismal prediction success rate for Hypothesis 2. 
+
+
+If we instead calculate the positive and negative posterior probability, as in \autoref{fig:full-post-prob}, we can use 90\% as a threshold. 
+In that case, 30 alliances have a $\gamma$ parameter with more than 90\% positive posterior mass. 
+Conversely, 22 treaties have a $\gamma$ parameter with more than 90\% negative posterior mass. 
+This approach increases the prediction success rate of Hypothesis 2 to 10.5\%. 
+ 
+
+No approach to examining the association between treaty contribution and military expenditure shows a preponderance of positive coefficients. 
 There is no association between treaty contribution and growth in military spending in most alliances.
 The 13 negative $\gamma$ parameters imply larger members of those alliances \emph{lower growth in military spending}, which the public goods theory cannot explain. 
 
 
-Alliances with a non-zero $\gamma$ provide additional information. 
+These alliances with a high probability of a non-zero $\gamma$ parameter provide additional information. 
 I examine these cases in more detail to assess whether collective action is the main issue. 
 In \autoref{fig:nonzero-alliance-coefs}, I plot the posterior means of $\gamma$ for all 29 alliances.  
 Several of these alliances have a large expected impact on military spending. 
@@ -479,8 +503,7 @@ Several of these alliances have a large expected impact on military spending.
 	\label{fig:nonzero-alliance-coefs}
 \end{figure}
 
-
-% Update this para. 
+ 
 The largest positive association between treaty contribution and defense spending growth is the 1961 Defense Pact of the African and Malagasy Union (ATOPID 3455). 
 The second largest is an 1866 offensive pact between Italy and Prussia (ATOPID 1265). 
 Third largest is an Inter-American Hemispheric defense pact during World War II (ATOPID 3010). 
