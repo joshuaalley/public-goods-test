@@ -15,6 +15,7 @@ library(interflex)
 library(sampleSelection)
 library(margins)
 library(stargazer)
+library(robustlmm)
 
 
 # Set working directory to current folder 
@@ -279,6 +280,33 @@ cplot(m2.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
 dev.copy(pdf,'appendix/me-plots.pdf')
 dev.off()
 dev.off()
+
+
+
+
+# Robust regression with random effects
+# Long run time here. 
+rreg.re.abs <- rlmer(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+  avg.num.mem + avg.dem.prop + 
+  atwar + civilwar.part + polity  +
+  lsthreat + cold.war + (1|ccode) + (1|year),
+data = state.char.inter
+)
+summary(rreg.re.abs)
+
+
+
+### Given possible disagreements about which covariates to include-
+# Bayesian Model Averaging
+# Generate probabilities over covariates and models
+
+# Create the interaction term
+state.char.inter$inter.expend.gdp <- state.char.inter$diff.ally.expend*state.char.inter$ln.gdp
+
+
+
+
+
 
 
 ### Additional single-level test: relative size expressed as contribution to alliance
