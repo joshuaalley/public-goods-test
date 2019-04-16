@@ -133,11 +133,14 @@ ggsave("appendix/rhat-plot.pdf", height = 6, width = 8)
 
 # Extract coefficients from the model
 ml.model.sum <- extract(ml.model, pars = c("beta", "gamma", 
-                                           "sigma", "sigma_year", "sigma_state",
-                                           "y_pred"),permuted = TRUE)
+                                           "sigma", "sigma_year", "sigma_state"),permuted = TRUE)
+
+# Remove model from workspace- 1.3 Gb
+saveRDS(ml.model, "ml.model.rds")
+rm(ml.model)
 
 # Posterior predictive distributions relative to observed data
-yrep <- ml.model.sum$y_pred[1:100, ]
+yrep <- extract(ml.model, pars = c("y_pred"))[1:100, ]
 
 # plot posterior predictive denisty of first 100 simulations
 ppc_dens_overlay(y, yrep)
