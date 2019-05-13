@@ -35,8 +35,10 @@ parameters {
   vector[T] alpha_year_std; // better behaved distribution of year intercepts
   real<lower = 0> sigma_state; // variance hyperparameter of the state intercepts
   real<lower = 0> sigma_year; // variance hyperparameter of the year intercepts
+  real<lower = 0> sigma_all; // variance hyperparameter of the alliance pars
   vector[M] beta; // vector of state-level coefficients 
-  vector[A] gamma; // alliance parameters
+  vector[A] gamma_std; // mean in non-centered parameterization of gamma
+  real theta; // population mean of alliance pars
   real<lower = 2> nu; // degrees of freedom in t-distribution of outcome
 
 }
@@ -44,12 +46,15 @@ parameters {
 transformed parameters {
   vector[S] alpha_state; // state intercepts
   vector[T] alpha_year; // year intercepts
+  vector[A] gamma; // alliance parameters
   vector[N] y_hat; // linear prediction of the outcome mean
 
 
  alpha_state = 0 + sigma_state * alpha_state_std; // non-centered parameterization, where alpha_state ~ N(0, sigma_state)
 
 alpha_year = 0 + sigma_year * alpha_year_std; // non-centered parameterization, where alpha_state ~ N(0, sigma_state)
+
+gamma = theta + sigma_all * gamma_std; // non-centered parameterization of gamma
 
 
 // Linear prediction of the state-year spending. csr_matrix_times vector will
@@ -65,10 +70,12 @@ model {
   sigma ~ normal(0, 1);
   alpha_year_std ~ normal(0, 1);
   alpha_state_std ~ normal(0, 1); 
-  gamma ~ normal(0, 1);
+  gamma_std ~ normal(0, 1);
   sigma_state ~ normal(0, 1);
   sigma_year ~ normal(0, 1); 
+  sigma_all ~ normal(0, 1);
   beta ~  normal(0, 1);
+  theta ~ normal(0, .5);
   nu ~ gamma(2, 0.1); // Prior for degrees of freedom in t-dist
   
   y ~ student_t(nu, y_hat, sigma);
