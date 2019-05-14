@@ -31,19 +31,19 @@ set.seed(12)
 atop.cow.year <- read.csv("data/atop-cow-year.csv")
 # Merge state contributions to each alliance
 # and keep only alliances that promise military support
-atop.cow.year <- select(state.ally.year, atopid, ccode, year, alliance.contrib) %>%
+atop.cow.year <- select(state.ally.year, atopid, ccode, year, contrib.gdp) %>%
   left_join(atop.cow.year) %>%
   group_by(atopid, ccode, year) %>%
   filter(defense == 1 | offense == 1)
 
 # Create a dataset of state-year alliance membership:
-state.mem <- atop.cow.year %>% select(atopid, ccode, year, alliance.contrib)
+state.mem <- atop.cow.year %>% select(atopid, ccode, year, contrib.gdp)
 state.mem <- distinct(state.mem, atopid, ccode, year, .keep_all = TRUE)
 
 
 # This matrix has each state's contribution to every alliance in a given year
 # If a state is not a member of the alliance, corresponding matrix element = 0
-state.mem <- spread(state.mem, key = atopid, value = alliance.contrib, fill = 0)
+state.mem <- spread(state.mem, key = atopid, value = contrib.gdp, fill = 0)
 
 # Remove the zero or no alliance category
 state.mem <- subset(state.mem, select = -(3))
@@ -163,9 +163,9 @@ sum(gamma.summary$gamma.negative) # 0 treaties: increasing contribution to allia
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
-sum(gamma.summary$positive.lmean) # 147 treaties
+sum(gamma.summary$positive.lmean) # 0 treaties
 gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
-sum(gamma.summary$negative.lmean) # 138 treaties
+sum(gamma.summary$negative.lmean) # 285 treaties
 
 
 # Plot posterior means of alliance coefficients
@@ -202,17 +202,12 @@ ggplot(alliance.coefs, aes(x = begyr, y = gamma.mean)) +
   geom_errorbar(aes(ymin = gamma.5, 
                     ymax = gamma.95,
                     width=.01), position = position_dodge(0.01)) +
-  geom_point(position = position_dodge(0.01)) + geom_hline(yintercept = 0) +
+  geom_point(position = position_dodge(0.01)) + 
+  geom_hline(yintercept = 0) + geom_hline(yintercept = -0.006, linetype = "dashed") +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
   theme_classic()
 ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
 
-
-
-# 15 / 272 defense pacts have a positive association between contribution and changes in spending
-table(alliance.coefs$gamma.positive, alliance.coefs$defense)
-# 12 / 272 defense pacts have a negative association beween contribution and changes in spending 
-table(alliance.coefs$gamma.negative, alliance.coefs$defense)
 
 
 
@@ -264,42 +259,13 @@ gamma.probs$nz.neg <- ifelse(gamma.probs$pos.post.prob <= .10 &
 sum(gamma.probs$nz.neg) # 1
 
 
-## Plots focused on treaties with non-zero association
-# plot non-zero treaties
-gamma.summary %>%
-  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
-  ggplot(aes(x = atopid, y = gamma.mean)) +
-  geom_errorbar(aes(ymin = gamma.5, 
-                    ymax = gamma.95,
-                    width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) + 
-  theme_classic()
-
-# Positive and negative only: gamma against start year
-alliance.coefs %>%
-  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
-  ggplot(aes(x = begyr, y = gamma.mean)) +
-  geom_errorbar(aes(ymin = gamma.5, 
-                    ymax = gamma.95,
-                    width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
-  labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
-  theme_classic() 
-
-
-# For non-zero alliances bar plot of gamma mean 
-alliance.coefs$atopid <- reorder(alliance.coefs$atopid, alliance.coefs$gamma.mean)
-alliance.coefs %>%
-  filter(gamma.positive == 1 | gamma.negative == 1) %>% 
-  ggplot(mapping = aes(x = atopid, y = gamma.mean)) + 
-  geom_col() +
-  scale_fill_brewer(palette = "Greys") +
-  #  geom_text(aes(label = round(gamma.mean, digits = 3)), nudge_y = 0.075, size = 4) +
-  labs(x = "ATOPid", y = "Posterior Mean of Alliance Parameter") +
-  coord_flip() + theme_classic() 
-ggsave("manuscript/nonzero-alliance-coefs.pdf", height = 6, width = 8)
-
-
+# Look at distribution of hyperparameters
+# Variance hyperparameter
+plot(density(ml.model.sum$sigma_all))
+summary(ml.model.sum$sigma_all)
+# mean hyperparameter
+plot(density(ml.model.sum$theta))
+summary(ml.model.sum$theta)
 
 
 ### 
