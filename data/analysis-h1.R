@@ -16,6 +16,8 @@ library(sampleSelection)
 library(margins)
 library(stargazer)
 library(robustlmm)
+library(tidyverse)
+
 
 
 # Set working directory to current folder 
@@ -127,9 +129,12 @@ stargazer(m1.pg.abs)
 # Calculate marginal effects
 margins(m1.pg.abs)
 cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
-      main = "Marginal Effect of Changes in Allied Spending on Growth in Military Spending",
+      main = "Allied Spending and Growth in Military Spending",
       xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
+# Export plot
+dev.copy(pdf,'manuscript/abs-margins-plot.pdf')
+dev.off()
 
 # Switch the directions 
 cplot(m1.pg.abs, x = "diff.ally.expend", dx = "ln.gdp", what = "effect",
@@ -176,23 +181,6 @@ kernel.abs <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "ln.g
 )
 kernel.abs
 ggsave("appendix/inter-kernel-abs.pdf", height = 6, width = 8)
-
-
-# Check for non-random selection into alliances and compare allied states
-# Still a statistically significant interaction
-heckit.ally.spend <- heckit(selection = treaty.pres ~ lag.ln.milex + 
-                              ln.gdp + polity + atwar + lsthreat,
-                            outcome = growth.milex ~ diff.ally.expend + ln.gdp + 
-                              diff.ally.expend:ln.gdp +
-                              atwar + civilwar.part + polity + ln.gdp +
-                              lsthreat + cold.war,
-                            data = state.char.inter,
-                            method = "ml")
-summary(heckit.ally.spend)
-
-# Create a table for the appendix
-stargazer(heckit.ally.spend)
-
 
 
 
@@ -296,19 +284,6 @@ summary(rreg.re.abs)
 
 
 
-### Given possible disagreements about which covariates to include-
-# Bayesian Model Averaging
-# Generate probabilities over covariates and models
-
-# Create the interaction term
-state.char.inter$inter.expend.gdp <- state.char.inter$diff.ally.expend*state.char.inter$ln.gdp
-
-
-
-
-
-
-
 ### Additional single-level test: relative size expressed as contribution to alliance
 # estimate interactions
 # filter out cases with no alliances
@@ -358,17 +333,4 @@ kernel.rel <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "avg.
 )
 kernel.rel
 
-
-# Check for non-random selection into alliances and compare allied states
-# less evidence of interaction
-heckit.rel <- heckit(selection = treaty.pres ~ lag.ln.milex + 
-                       ln.gdp + polity + atwar + lsthreat,
-                     outcome = growth.milex ~ diff.ally.expend + avg.treaty.contrib +
-                       diff.ally.expend:avg.treaty.contrib +
-                       lag.ln.milex +
-                       atwar + civilwar.part + polity + ln.gdp +
-                       lsthreat + cold.war,
-                     data = state.char.full,
-                     method = "ml")
-summary(heckit.rel)
 

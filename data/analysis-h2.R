@@ -268,6 +268,8 @@ plot(density(ml.model.sum$theta))
 summary(ml.model.sum$theta)
 
 
+
+
 ### 
 # Robustness check: estimate model on states only in alliances
 # Filter out obs where states are not in at least one alliance
@@ -308,7 +310,7 @@ check_hmc_diagnostics(ml.model.all)
 
 
 # Extract coefficients from the model
-sum.ml.all <- extract(ml.model.all, pars = c("gamma"), permuted = TRUE)
+sum.ml.all <- extract(ml.model.all, pars = c("gamma", "theta", "sigma_all"), permuted = TRUE)
 
 
 # Summarize gamma
@@ -324,8 +326,6 @@ sum(gamma.summary.all$gamma.positive) # 0 treaties: increasing contribution to a
 gamma.summary.all$gamma.negative <- ifelse((gamma.summary.all$gamma.5 < 0 & gamma.summary.all$gamma.95 < 0), 1, 0)
 sum(gamma.summary.all$gamma.negative) # 0 treaties: increasing contribution to alliance leads to decreased spending
 
-# Prediction success 
-18 / 285
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary.all$positive.lmean <- ifelse(gamma.summary.all$gamma.mean > 0, 1, 0)
@@ -352,9 +352,9 @@ gamma.comp <- melt(gamma.comp)
 
 # plot 
 ggplot(gamma.comp, aes(x = value, fill = variable)) + 
-  geom_density(alpha = 0.25) +
+  geom_density(alpha=0.25) +
   scale_fill_manual(name = "Sample", values=c("#999999", "#000000")) +
-  ggtitle("Posterior Distributions of Treaty Scope: Major and Non-Major Powers") +
+  ggtitle("Posterior Means: Full Sample and Alliance Members Only") +
   theme_classic()
 ggsave("appendix/sample-comp-gamma.pdf")
 
