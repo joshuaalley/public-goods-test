@@ -252,6 +252,51 @@ No parameters generate concern, even at a more conservative threshold of 1.05.
 	\caption{Histogram of split $\hat{R}$ statistic for all parameters in the multilevel model.}
 	\label{fig:rhat-plot}
 \end{figure}
+
+
+\subsubsection{Inferences from Simulated Data}
+
+
+To assess if the model is giving reasonable answers, I simulated data and associated parameters, then re-estimated the model on the simulated data.
+The model is a good fit if the credible intervals contain the known parameter values for the simulated data. 
+This process checks whether the model can recover parameters from a known data-generating process that matches the model. 
+
+
+I simulate a hypothetical dataset with 5000 observations, of 50 states observed over 200 years. 
+There are 200 alliances in this data, and 2 state-level control variables. 
+The hypothetical outcome is drawn from a Cauchy distribution with mean 0 and a scale of .25. 
+
+
+I then simulate 2,000 draws of the outcome using the generated quantities block in STAN. 
+The next step is selecting one of those draws of the outcome--- which includes the value of the outcome for each observation and the associated parameter values. 
+I select the 12th draw from the posterior and check whether after estimating the model on these data, the credible intervals include zero. 
+
+
+I focus on inferences about the $\gamma$, $\theta$ and $\sigma_{all}$ parameters, because these are essential to testing the public goods argument. 
+As \autoref{fig:theta-sim-res} and \autoref{fig:sall-sim-res} show, the posteriors accurately capture the known values of the hyper-parameters $\theta$ and $\sigma_{all}$. 
+In these figures, the true parameter value is marked with a thick black line, while the light gray shaded area shows the 90\% credible interval. 
+
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{theta-sim-res.pdf}
+	\caption{Posterior estimates and known parameter values for alliance hyperparameter $\theta$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\theta$ value, which falls within the 90\% interval.}
+	\label{fig:theta-sim-res}
+\end{figure}
+
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{sall-sim-res.pdf}
+	\caption{Posterior estimates and known parameter values for alliance hyperparameter $\sigma_{all}$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\sigma_{all}$ value, which falls within the 90\% interval.}
+	\label{fig:sall-sim-res}
+\end{figure}
+
+
+Because graphical presentation of the 200 $\gamma$ parameters is more difficult, I calculated whether the credible interval contained the known parameter. 
+184 of the 200 intervals include the ``true'' $\gamma$ value, which is a 92\% success rate. 
+Given the number of parameters and potential simulation variance, such accuracy is tolerable. 
+Simulating data and recovering known parameters shows that the model estimates are reasonable approximations of the data-generating process. 
  
 
 
