@@ -28,7 +28,7 @@ Department of Political Science, Texas A\&M University.}}
 
 \doublespace
 
-This document contains supporting materials for the tests of Hypothesis 1 and 2. 
+This appendix contains supporting materials for the tests of Hypothesis 1 and 2. 
 The first section includes material for the test of Hypothesis 1. 
 The second section describes the priors, convergence diagnostics and results from an alternative sample for the multilevel model I used to test Hypothesis 2. 
 
@@ -42,10 +42,11 @@ The second section describes the priors, convergence diagnostics and results fro
 Robust regression is appropriate for residuals from the growth variable. 
 Several observations of states during war see gigantic increases in spending--- the largest value is 140, relative to a median of .063. 
 This generates extremely heavy-tailed residuals, so OLS is inefficient. 
+I do not transform spending growth for either test in the paper, but do so here as part of the robustness checks. 
 
 
-Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals in \autoref{fig:res-qq-plot} deviate strongly from normality. 
-I use the IHS transformation because it accomodates positive, negative and zero values. 
+Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals deviate strongly from normality as \autoref{fig:res-qq-plot} shows. 
+I use the IHS transformation because it accommodates positive, negative and zero values. 
 \autoref{fig:res-qq-plot} shows the residuals from models 2 and 3 of \autoref{tab:ols-est}, which reports some robustness checks.
 
 \begin{figure}[htbp]
@@ -117,16 +118,16 @@ Residual Std. Error (df = 9128) & 2.649 & 0.358 & 0.157 \\
 
 
 The OLS model is a poor fit for the dependent variable. 
-The R$^2$ is miniscule, and the standard error of the residual is much larger than the robust regression. 
-Transforming the DV improves the performance of OLS, but leads to similar inferences. 
+The R$^2$ is miniscule, and the standard error of the residual is much larger than in the robust regression. 
+Transforming the outcome improves the performance of OLS, but leads to similar inferences. 
 Despite the lackluster fit, I present these results to show that OLS generates similar inferences. 
 
 
-Rather than interpret the coefficients, I plot the marginal effect of allied spending across the range of GDP for these three models.
+Rather than interpret the coefficients, I plot the marginal effect of allied spending across the range of GDP for all three models.
 \autoref{fig:me-plots} compares these results with the marginal effects plot from the robust regression in the paper. 
 Three of the four estimation strategies produce a positive marginal effect, along with broad enough confidence intervals to suggest a conditional relationship with GDP is unlikely.\footnote{The robust regression results are so similar because even after transforming spending growth, the robust estimator heavily down-weights the most unusual observations.} 
 OLS without a transformed DV finds no positive impact of changing allied capability on growth in spending, but this result should be taken with great caution due to poor model fit. 
-Regardless, none of the results matches the expectation of a negative effect which increases in state size as articulated by Hypothesis 1. 
+Regardless, none of the results matches the expectation of Hypothesis 1--- a negative effect which increases in state size. 
 
 
 \begin{figure}[htbp]
@@ -142,7 +143,7 @@ Regardless, none of the results matches the expectation of a negative effect whi
 
 
 \citet{Hainmuelleretal2019} show linearity assumptions and a lack of support in the range of the modifying variable can generate misleading inferences in interactive models. 
-They suggest estimating associations with binning and kernel estimators to check for non-linearity and adequate support. 
+They suggest estimating interactions with binning and kernel estimators to check for non-linearity and adequate support. 
 \autoref{fig:inter-bin-abs} plots the results of the binning estimator. 
 
 
@@ -154,7 +155,7 @@ They suggest estimating associations with binning and kernel estimators to check
 \end{figure}
 
 
-The binning estimator suggests that the linearity assumptions of the robust regression are acceptable. 
+The binning estimator indicates that the linearity assumptions of the robust regression are acceptable. 
 There is still no evidence state size modifies the impact of allied spending on growth in military spending, however. 
 The marginal effect of allied spending cannot be distinguished from zero across the range of GDP. 
 
@@ -168,9 +169,9 @@ The marginal effect of allied spending cannot be distinguished from zero across 
 
 
 The kernel estimator also generates little evidence of a conditional relationship. 
-As \autoref{fig:inter-kernel-abs} demonstrates, the marginal effect of spending is mostly positive. 
-Negative point estimates of the marginal effect are indistinguishable from zero. 
-Allowing non-linear changes in the marginal effect of allied capability does little to change substantive inferences about the presence of a conditional relationship. 
+As \autoref{fig:inter-kernel-abs} demonstrates, the marginal effect of spending is null. 
+Both positive and negative point estimates of the marginal effect are indistinguishable from zero. 
+Allowing non-linear changes in the marginal effect of allied capability removes the positive marginal effect, it still shows little evidence of a conditional relationship, let alone the expectations of Hypothesis 1. 
 
 
 
@@ -210,14 +211,14 @@ $ p(\nu) \sim gamma(2, 0.1)$
 
 
 To facilitate estimation, I use a non-centered parameterization for the state and year varying intercepts, as well as the $\gamma$ parameters \citep{BetancourtGirolani2015}. 
-The prior is equivalent, but a non-centered parameterization decouples the mean and variance, which makes sampling easier. 
+A non-centered parameterization decouples the mean and variance to express an equivalent prior, which makes sampling easier. 
 I also employ a sparse matrix representation of the alliance membership matrix $\textbf{Z}$ to speed up estimation. 
 
 
 \subsection{Convergence} 
 
 
-There were no divergent iterations in sampling, which would have invalidated the results. 
+There were no divergent iterations in sampling. 
 However, there are other threats to inference from the posterior samples. 
 Given heavy tails in military spending growth, STAN might have struggled to explore the posterior distribution. 
 
@@ -262,9 +263,9 @@ The model is a good fit if the credible intervals contain the known parameter va
 This process checks whether the model can recover parameters from a known data-generating process that matches the model. 
 
 
-I simulate a hypothetical dataset with 5000 observations, of 50 states observed over 200 years. 
+I simulate a hypothetical dataset with 5000 observations of 50 states observed over 200 years. 
 There are 200 alliances in this data, and 2 state-level control variables. 
-The hypothetical outcome is drawn from a Cauchy distribution with mean 0 and a scale of .25. 
+The hypothetical outcome is drawn from a Cauchy distribution with mean 0 and a scale of .25, which is more heavy-tailed than even my observed growth data. 
 
 
 I then simulate 2,000 draws of the outcome using the generated quantities block in STAN. 
@@ -280,7 +281,7 @@ In these figures, the true parameter value is marked with a thick black line, wh
 \begin{figure}[htbp]
 	\centering
 		\includegraphics[width=0.95\textwidth]{theta-sim-res.pdf}
-	\caption{Posterior estimates and known parameter values for alliance hyperparameter $\theta$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\theta$ value, which falls within the 90\% interval.}
+	\caption{Posterior estimates and known parameter value for the alliance hyperparameter $\theta$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\theta$ value, which falls within the 90\% interval.}
 	\label{fig:theta-sim-res}
 \end{figure}
 
@@ -288,7 +289,7 @@ In these figures, the true parameter value is marked with a thick black line, wh
 \begin{figure}[htbp]
 	\centering
 		\includegraphics[width=0.95\textwidth]{sall-sim-res.pdf}
-	\caption{Posterior estimates and known parameter values for alliance hyperparameter $\sigma_{all}$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\sigma_{all}$ value, which falls within the 90\% interval.}
+	\caption{Posterior estimates and known parameter value for the alliance hyperparameter $\sigma_{all}$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\sigma_{all}$ value, which falls within the 90\% interval.}
 	\label{fig:sall-sim-res}
 \end{figure}
 
