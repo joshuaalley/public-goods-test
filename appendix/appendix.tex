@@ -175,11 +175,47 @@ Allowing non-linear changes in the marginal effect of allied capability removes 
 
 
 
+\subsection{Robust Regression with Random Effects} 
+
+
+In the test of Hypothesis 1, the robust regression estimator ignores clustering of observations within groups of states and years. 
+\citet{Koller2016} develops a robust regression estimator with random effects, which I fit as a robustness check. 
+\autoref{tab:rreg-re-res} summarizes the results. 
+
+
+\begin{table}[!htbp] \centering 
+\begin{tabular}{@{\extracolsep{5pt}} cccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & Estimate & Std. Error & t value \\ 
+\hline \\[-1.8ex] 
+Change Allied Spending & $$-$0.015$ & $0.048$ & $$-$0.310$ \\ 
+ln(GDP) & $$-$0.002$ & $0.001$ & $$-$1.414$ \\ 
+Change Allied Spending $\times$ ln(GDP) & $0.001$ & $0.002$ & $0.661$ \\ 
+Avg. Alliance Size & $$-$0.0001$ & $0.0002$ & $$-$0.401$ \\ 
+Avg Alliance Democracy & $$-$0.001$ & $0.001$ & $$-$1.354$ \\ 
+International War & $0.096$ & $0.011$ & $8.889$ \\ 
+Civil War Participant & $0.010$ & $0.008$ & $1.299$ \\ 
+Polity & $0.0002$ & $0.0004$ & $0.657$ \\ 
+External Threat & $0.016$ & $0.013$ & $1.217$ \\ 
+Cold War & $0.060$ & $0.011$ & $5.242$ \\ 
+Constant & $0.075$ & $0.031$ & $2.436$ \\ 
+\hline \\[-1.8ex] 
+\end{tabular} 
+\caption{Results from Robust Regression with State and Year random effects.} 
+\label{tab:rreg-re-res} 
+\end{table} 
+
+
+Robust regression with random effects produces similar inferences about the presence of a conditional relationship between GDP and changing allied capability. 
+The sign, magnitude and statistical significance of all the coefficients are similar to results from other estimators. 
+Therefore, while it is difficult to use \textsf{R} output from Koller's robust regression estimator to plot the interaction, results from this estimator should mirror the above plots. 
+Accounting for clustering of observations does little to change my inferences about Hypothesis 1. 
 
 
 \section{Multilevel Model}
 
-This section describes the priors on the multilevel model, convergence diagnositics for the Hamiltonian Monte Carlo, and results from running the same model on a sample of only states with at least one alliance. 
+This section describes the priors on the multilevel model, convergence diagnostics for the Hamiltonian Monte Carlo, and results from running the same model on a sample of only states with at least one alliance. 
 
 \subsection{Priors} 
 

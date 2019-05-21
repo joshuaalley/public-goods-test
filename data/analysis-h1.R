@@ -282,6 +282,9 @@ data = state.char.inter
 )
 summary(rreg.re.abs)
 
+# No cplot or stargazer to report these results
+rreg.re.sum <- summary(rreg.re.abs)
+stargazer(rreg.re.sum$coefficients)
 
 
 ### Additional single-level test: relative size expressed as contribution to alliance
@@ -312,7 +315,7 @@ m2.pg.rel <- lm(growth.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally
                    data = inter.data.rel
                 )
 summary(m2.pg.rel)
-
+plot(rreg.re.abs)
 
 # binning estimator
 bin.rel <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
