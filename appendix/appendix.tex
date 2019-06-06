@@ -16,9 +16,8 @@
 \title{
 \textbf{Appendix: Reassessing the Public Goods Theory of Alliances}
 	}
-\author{Joshua Alley\footnote{Graduate Student,
-Department of Political Science, Texas A\&M University.}}
-\date{{\normalsize \today}}
+%\author{Joshua Alley\footnote{Graduate Student,
+%Department of Political Science, Texas A\&M University.}}
 
 \bibliographystyle{apsr}
 
@@ -30,7 +29,7 @@ Department of Political Science, Texas A\&M University.}}
 
 This appendix contains supporting materials for the tests of Hypothesis 1 and 2. 
 The first section includes material for the test of Hypothesis 1. 
-The second section describes the priors, convergence diagnostics and results from an alternative sample for the multilevel model I used to test Hypothesis 2. 
+The second section describes priors, convergence diagnostics and results from simulated data for the multilevel model I used to test Hypothesis 2. 
 
 %----------------------------------
 \section{Other Estimates of Panel Data Interaction}
@@ -39,90 +38,91 @@ The second section describes the priors, convergence diagnostics and results fro
 \subsection{Alternative Estimators}
 
 
-Robust regression is appropriate for residuals from the growth variable. 
-Several observations of states during war see gigantic increases in spending--- the largest value is 140, relative to a median of .063. 
-This generates extremely heavy-tailed residuals, so OLS is inefficient. 
-I do not transform spending growth for either test in the paper, but do so here as part of the robustness checks. 
+%Robust regression is appropriate for residuals from the growth variable. 
+%Several observations of states during war see gigantic increases in spending--- the largest value is 140, relative to a median of .063. 
+%This generates extremely heavy-tailed residuals, so OLS is inefficient. 
+%I do not transform spending growth for either test in the paper, but do so here as part of the robustness checks. 
+%
+%
+%Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals deviate strongly from normality as \autoref{fig:res-qq-plot} shows. 
+%I use the IHS transformation because it accommodates positive, negative and zero values. 
+%\autoref{fig:res-qq-plot} shows the residuals from models 2 and 3 of \autoref{tab:ols-est}, which reports some robustness checks.
+%
+%\begin{figure}[htbp]
+	%\centering
+		%\includegraphics[width=0.95\textwidth]{res-qq-plot.pdf}
+	%\caption{Plot of residuals against normal quantiles. Deviations from the straight line are deviations from the normal distribution.}
+	%\label{fig:res-qq-plot}
+%\end{figure}
+%
+%
+%
+%Although OLS is not the best estimator for the spending growth data, it produces similar inferences.
+%\autoref{tab:ols-est} summarizes estimates from OLS models with and without transforming growth in spending as well as robust regression with transformed spending. 
+%
+%\begin{table}[!htbp] \centering 
+%\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+%\\[-1.8ex]\hline 
+%\hline \\[-1.8ex] 
+ %& \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
+%\cline{2-4} 
+%\\[-1.8ex] & Spending Growth & \multicolumn{2}{c}{IHS(Spending Growth)} \\ 
+%\\[-1.8ex] & \textit{OLS} & \textit{OLS} & \textit{Robust Reg.} \\ 
+%\\[-1.8ex] & (1) & (2) & (3)\\ 
+%\hline \\[-1.8ex] 
+ %Change Allied Spending & $-$0.235 & $-$0.099 & $-$0.026 \\ 
+  %& (0.648) & (0.087) & (0.047) \\ 
+  %& & & \\ 
+ %ln(GDP) & $-$0.038$^{**}$ & $-$0.008$^{***}$ & 0.0003 \\ 
+  %& (0.017) & (0.002) & (0.001) \\ 
+  %& & & \\ 
+ %Change Allied Spending $\times$ ln(GDP) & 0.011 & 0.005 & 0.002 \\ 
+  %& (0.027) & (0.004) & (0.002) \\ 
+  %& & & \\ 	
+ %Average Alliance Size & $-$0.003 & $-$0.0001 & 0.0003$^{*}$ \\ 
+  %& (0.002) & (0.0003) & (0.0002) \\ 
+  %& & & \\ 
+ %Average Alliance Democracy & $-$0.001 & $-$0.001 & $-$0.0003 \\ 
+  %& (0.008) & (0.001) & (0.001) \\ 
+  %& & & \\ 
+ %International War & 0.476$^{***}$ & 0.228$^{***}$ & 0.096$^{***}$ \\ 
+  %& (0.141) & (0.019) & (0.010) \\ 
+  %& & & \\ 
+ %Civil War Participant & 0.206$^{**}$ & 0.025$^{*}$ & 0.001 \\ 
+  %& (0.104) & (0.014) & (0.008) \\ 
+  %& & & \\ 
+ %Polity & 0.001 & 0.0001 & $-$0.0001 \\ 
+  %& (0.005) & (0.001) & (0.0004) \\ 
+  %& & & \\ 
+ %External Threat & 0.107 & 0.080$^{***}$ & 0.042$^{***}$ \\ 
+  %& (0.152) & (0.021) & (0.011) \\ 
+  %& & & \\ 
+ %Cold War & 0.032 & 0.034$^{***}$ & 0.047$^{***}$ \\ 
+  %& (0.058) & (0.008) & (0.004) \\ 
+  %& & & \\ 
+ %Constant & 1.074$^{***}$ & 0.259$^{***}$ & 0.026 \\ 
+  %& (0.413) & (0.056) & (0.030) \\ 
+  %& & & \\ 
+%\hline \\[-1.8ex] 
+%Observations & 9,139 & 9,139 & 9,139 \\ 
+%R$^{2}$ & 0.003 & 0.025 &  \\ 
+%Residual Std. Error (df = 9128) & 2.649 & 0.358 & 0.157 \\ 
+%\hline 
+%\hline \\[-1.8ex] 
+%\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+%\end{tabular} 
+%\caption{Robustness checks of conditional relationship between allied spending, GDP and growth in military spending.}
+%\label{tab:ols-est}
+%\end{table} 
+%
+%
+%The OLS model is a poor fit for the dependent variable. 
+%The R$^2$ is miniscule, and the standard error of the residual is much larger than in the robust regression. 
+%Transforming the outcome improves the performance of OLS, but leads to similar inferences. 
+%Despite the lackluster fit, I present these results to show that OLS generates similar inferences. 
 
 
-Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals deviate strongly from normality as \autoref{fig:res-qq-plot} shows. 
-I use the IHS transformation because it accommodates positive, negative and zero values. 
-\autoref{fig:res-qq-plot} shows the residuals from models 2 and 3 of \autoref{tab:ols-est}, which reports some robustness checks.
-
-\begin{figure}[htbp]
-	\centering
-		\includegraphics[width=0.95\textwidth]{res-qq-plot.pdf}
-	\caption{Plot of residuals against normal quantiles. Deviations from the straight line are deviations from the normal distribution.}
-	\label{fig:res-qq-plot}
-\end{figure}
-
-
-
-Although OLS is not the best estimator for the spending growth data, it produces similar inferences.
-\autoref{tab:ols-est} summarizes estimates from OLS models with and without transforming growth in spending as well as robust regression with transformed spending. 
-
-\begin{table}[!htbp] \centering 
-\begin{tabular}{@{\extracolsep{5pt}}lccc} 
-\\[-1.8ex]\hline 
-\hline \\[-1.8ex] 
- & \multicolumn{3}{c}{\textit{Dependent variable:}} \\ 
-\cline{2-4} 
-\\[-1.8ex] & Spending Growth & \multicolumn{2}{c}{IHS(Spending Growth)} \\ 
-\\[-1.8ex] & \textit{OLS} & \textit{OLS} & \textit{Robust Reg.} \\ 
-\\[-1.8ex] & (1) & (2) & (3)\\ 
-\hline \\[-1.8ex] 
- Change Allied Spending & $-$0.235 & $-$0.099 & $-$0.026 \\ 
-  & (0.648) & (0.087) & (0.047) \\ 
-  & & & \\ 
- ln(GDP) & $-$0.038$^{**}$ & $-$0.008$^{***}$ & 0.0003 \\ 
-  & (0.017) & (0.002) & (0.001) \\ 
-  & & & \\ 
- Change Allied Spending $\times$ ln(GDP) & 0.011 & 0.005 & 0.002 \\ 
-  & (0.027) & (0.004) & (0.002) \\ 
-  & & & \\ 	
- Average Alliance Size & $-$0.003 & $-$0.0001 & 0.0003$^{*}$ \\ 
-  & (0.002) & (0.0003) & (0.0002) \\ 
-  & & & \\ 
- Average Alliance Democracy & $-$0.001 & $-$0.001 & $-$0.0003 \\ 
-  & (0.008) & (0.001) & (0.001) \\ 
-  & & & \\ 
- International War & 0.476$^{***}$ & 0.228$^{***}$ & 0.096$^{***}$ \\ 
-  & (0.141) & (0.019) & (0.010) \\ 
-  & & & \\ 
- Civil War Participant & 0.206$^{**}$ & 0.025$^{*}$ & 0.001 \\ 
-  & (0.104) & (0.014) & (0.008) \\ 
-  & & & \\ 
- Polity & 0.001 & 0.0001 & $-$0.0001 \\ 
-  & (0.005) & (0.001) & (0.0004) \\ 
-  & & & \\ 
- External Threat & 0.107 & 0.080$^{***}$ & 0.042$^{***}$ \\ 
-  & (0.152) & (0.021) & (0.011) \\ 
-  & & & \\ 
- Cold War & 0.032 & 0.034$^{***}$ & 0.047$^{***}$ \\ 
-  & (0.058) & (0.008) & (0.004) \\ 
-  & & & \\ 
- Constant & 1.074$^{***}$ & 0.259$^{***}$ & 0.026 \\ 
-  & (0.413) & (0.056) & (0.030) \\ 
-  & & & \\ 
-\hline \\[-1.8ex] 
-Observations & 9,139 & 9,139 & 9,139 \\ 
-R$^{2}$ & 0.003 & 0.025 &  \\ 
-Residual Std. Error (df = 9128) & 2.649 & 0.358 & 0.157 \\ 
-\hline 
-\hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{3}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
-\end{tabular} 
-\caption{Robustness checks of conditional relationship between allied spending, GDP and growth in military spending.}
-\label{tab:ols-est}
-\end{table} 
-
-
-The OLS model is a poor fit for the dependent variable. 
-The R$^2$ is miniscule, and the standard error of the residual is much larger than in the robust regression. 
-Transforming the outcome improves the performance of OLS, but leads to similar inferences. 
-Despite the lackluster fit, I present these results to show that OLS generates similar inferences. 
-
-
+I estimate three different models for the robustness check: OLS models with and without the inverse hyperbolic sine transformation of growth in spending as well as robust regression with transformed spending. 
 Rather than interpret the coefficients, I plot the marginal effect of allied spending across the range of GDP for all three models.
 \autoref{fig:me-plots} compares these results with the marginal effects plot from the robust regression in the paper. 
 Three of the four estimation strategies produce a positive marginal effect, along with broad enough confidence intervals to suggest a conditional relationship with GDP is unlikely.\footnote{The robust regression results are so similar because even after transforming spending growth, the robust estimator heavily down-weights the most unusual observations.} 
@@ -149,7 +149,7 @@ They suggest estimating interactions with binning and kernel estimators to check
 
 \begin{figure}
 	\centering
-		\includegraphics[width=0.95\textwidth]{inter-bin-abs.pdf}
+		\includegraphics[width=0.65\textwidth]{inter-bin-abs.pdf}
 		\caption{Binning estimates of interaction between changes in allied spending and GDP.}
 	\label{fig:inter-bin-abs}
 \end{figure}
@@ -162,7 +162,7 @@ The marginal effect of allied spending cannot be distinguished from zero across 
 
 \begin{figure}
 	\centering
-		\includegraphics[width=0.95\textwidth]{inter-kernel-abs.pdf}
+		\includegraphics[width=0.65\textwidth]{inter-kernel-abs.pdf}
 	\caption{Kernel estimate of interaction between changes in allied spending and GDP.}
 	\label{fig:inter-kernel-abs}
 \end{figure}
@@ -267,7 +267,7 @@ The substantial overlap in the distributions for all four chains in \autoref{fig
 
 \begin{figure}
 	\centering
-		\includegraphics[width=0.95\textwidth]{energy-plot.pdf}
+		\includegraphics[width=0.55\textwidth]{energy-plot.pdf}
 	\caption{Energy plot of multilevel model results. Greater overlap in the two histograms indicates adequate exploration of the posterior distribution. }
 	\label{fig:energy-plot}
 \end{figure}
@@ -285,7 +285,7 @@ No parameters generate concern, even at a more conservative threshold of 1.05.
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.95\textwidth]{rhat-plot.pdf}
+		\includegraphics[width=0.55\textwidth]{rhat-plot.pdf}
 	\caption{Histogram of split $\hat{R}$ statistic for all parameters in the multilevel model.}
 	\label{fig:rhat-plot}
 \end{figure}
@@ -294,7 +294,7 @@ No parameters generate concern, even at a more conservative threshold of 1.05.
 \subsubsection{Inferences from Simulated Data}
 
 
-To assess if the model is giving reasonable answers, I simulated data and associated parameters, then re-estimated the model on the simulated data.
+To assess if the model gives reasonable answers, I simulated data and associated parameters, then re-estimated the model on the simulated data.
 The model is a good fit if the credible intervals contain the known parameter values for the simulated data. 
 This process checks whether the model can recover parameters from a known data-generating process that matches the model. 
 
@@ -316,7 +316,7 @@ In these figures, the true parameter value is marked with a thick black line, wh
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.95\textwidth]{theta-sim-res.pdf}
+		\includegraphics[width=0.65\textwidth]{theta-sim-res.pdf}
 	\caption{Posterior estimates and known parameter value for the alliance hyperparameter $\theta$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\theta$ value, which falls within the 90\% interval.}
 	\label{fig:theta-sim-res}
 \end{figure}
@@ -324,7 +324,7 @@ In these figures, the true parameter value is marked with a thick black line, wh
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.95\textwidth]{sall-sim-res.pdf}
+		\includegraphics[width=0.65\textwidth]{sall-sim-res.pdf}
 	\caption{Posterior estimates and known parameter value for the alliance hyperparameter $\sigma_{all}$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\sigma_{all}$ value, which falls within the 90\% interval.}
 	\label{fig:sall-sim-res}
 \end{figure}
@@ -338,32 +338,32 @@ Simulating data and recovering known parameters shows that the model estimates a
 
 
 
-\subsection{Alternative Sample} 
-
-
-It is possible that estimating a model on the full sample of states makes misleading comparisons by including states with no alliances.
-This adds many zeros to the membership matrix. 
-To check whether inferences are sensitive to including states with no alliance participation, I re-fit the multilevel model on a sample of only states with at least one alliance. 
-This reduced the sample size from 9,961 observations to 5,222, but the results are relatively unchanged. 
-
-
-All 285 treaties have a negative mean $\gamma$ estimate, and none have a 90\% credible interval that excludes zero.
-The overall mean $\theta$ is more negative in this sample and the $\gamma$ estimates remain tightly clustered around that mean. 
-Thus as \autoref{fig:sample-comp-gamma} shows, the distribution of the association between treaty contribution and spending across alliances is more negative in the alliance members sample. 
-This figure overlays the distribution of the mean $\gamma$ parameters in each sample. 
-
-
-\begin{figure}
-	\centering
-		\includegraphics[width=0.95\textwidth]{sample-comp-gamma.pdf}
-	\caption{Comparison of the distribution of posterior mean $\gamma$ parameters in full sample and a sample of only alliance participants. The darker gray distribution is the mean of the $\gamma$ parameters in the sample of alliance members. The impact of treaty contribution on growth in military spending is more negative in the alliance-members only sample.}
-	\label{fig:sample-comp-gamma}
-\end{figure}
-
-
-Therefore, inferences about the impact of treaty contribution on growth in military spending are unchanged if the sample is restricted only to alliance members. 
-Increasing a state's share of total allied GDP leads to a more negative effect on treaty spending in expectation. 
-I am still unable to identify any reliably positive $\gamma$ parameters, which contradicts Olson and Zeckhauser's exploitation hypothesis. 
+%\subsection{Alternative Sample} 
+%
+%
+%It is possible that estimating a model on the full sample of states makes misleading comparisons by including states with no alliances.
+%This adds many zeros to the membership matrix. 
+%To check whether inferences are sensitive to including states with no alliance participation, I re-fit the multilevel model on a sample of only states with at least one alliance. 
+%This reduced the sample size from 9,961 observations to 5,222, but the results are relatively unchanged. 
+%
+%
+%All 285 treaties have a negative mean $\gamma$ estimate, and none have a 90\% credible interval that excludes zero.
+%The overall mean $\theta$ is more negative in this sample and the $\gamma$ estimates remain tightly clustered around that mean. 
+%Thus as \autoref{fig:sample-comp-gamma} shows, the distribution of the association between treaty contribution and spending across alliances is more negative in the alliance members sample. 
+%This figure overlays the distribution of the mean $\gamma$ parameters in each sample. 
+%
+%
+%\begin{figure}
+	%\centering
+		%\includegraphics[width=0.95\textwidth]{sample-comp-gamma.pdf}
+	%\caption{Comparison of the distribution of posterior mean $\gamma$ parameters in full sample and a sample of only alliance participants. The darker gray distribution is the mean of the $\gamma$ parameters in the sample of alliance members. The impact of treaty contribution on growth in military spending is more negative in the alliance-members only sample.}
+	%\label{fig:sample-comp-gamma}
+%\end{figure}
+%
+%
+%Therefore, inferences about the impact of treaty contribution on growth in military spending are unchanged if the sample is restricted only to alliance members. 
+%Increasing a state's share of total allied GDP leads to a more negative effect on treaty spending in expectation. 
+%I am still unable to identify any reliably positive $\gamma$ parameters, which contradicts Olson and Zeckhauser's exploitation hypothesis. 
 
 
 
