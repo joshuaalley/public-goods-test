@@ -545,7 +545,28 @@ As a result, the data indicates that the effects of increasing economic weight $
 Under these circumstances, it is difficult to distinguish any estimates from zero, even as partial pooling shares strength across coefficients and reduces uncertainty. 
 
 
-The $\gamma$ estimates allow for inferences about individual alliances, so I now highlight a few noteworthy cases. 
+The small scale of the $\gamma$ parameters is reflected in predictions about military spending. 
+To assess whether increasing a state's share of allied GDP leads to higher defense spending, I simulated the effect of changing GDP shares on percentage changes in military spending. 
+In the simulated data, I used the full posteriors of the, intercept $\alpha$, all the $\beta$ coefficients, and one $\gamma$ value. 
+I selected the $\gamma$ parameter with the most positive posterior mass, so this test is the \emph{best case} for the public goods model. 
+I set the state-level regressors at their median value and varied economic weight between minimum, median and near maximum values. 
+
+
+In \autoref{fig:pred-change-share}, I summarize predicted changes in military spending at different levels of alliance contribution. 
+In this figure, the point marks the mean and the error bars summarize the 90\% credible interval. 
+Though moving from the minimum share of allied GDP to the high value of .70 slightly decreases the median value, the three predictions are impossible to distinguish from one another. 
+Changing a state's relative economic contribution to an alliance leads to no perceptible differences in defense spending. 
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{pred-change-share.pdf}
+	\caption{Predicted percentage changes in military spending for a simulated state with minimal, median and high shares of total allied GDP. Points mark the median value, and the error bars summarize the 90\% credible interval.}
+	\label{fig:pred-change-share}
+\end{figure}
+
+The hypothetical scenario in \autoref{fig:pred-change-share} is the best case for the public goods models predictions. 
+There is no evidence that increasing a state's share of total allied GDP leads to free-riding. 
+As a final step, the $\gamma$ estimates allow for inferences about individual alliances, so I now highlight a few noteworthy cases. 
 One alliance has greater than 90\% negative posterior probability: a 1972 pact between Hungary and Romania (ATOPID 3680). 
 Several other bilateral alliances among Warsaw Pact members have large negative posterior means (ATOPID 3605 and ATOPID 3610). 
 

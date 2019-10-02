@@ -12,7 +12,6 @@ library(MASS)
 library(plm)
 library(texreg)
 library(interflex)
-library(sampleSelection)
 library(margins)
 library(stargazer)
 library(robustlmm)
@@ -104,12 +103,12 @@ y.panel <- as.matrix(y.panel)
 # choi.test <- pCADFtest(y.panel, max.lag.y = 4, crosscorr = .05, type = "trend")
 
 # plot on ln shows clear evidence of non-stationarity
-ggplot(state.char.inter, aes(x = year, y = ln.milex, colour = as.factor(ccode))) + 
-  geom_line()
+ggplot(state.char.inter, aes(x = year, y = ln.milex, group = as.factor(ccode))) + 
+  geom_line(alpha = .5)
 
 # Growth is more mean-reverting
-ggplot(state.char.inter, aes(x = year, y = asinh(growth.milex), colour = as.factor(ccode))) + 
-  geom_line()
+ggplot(state.char.inter, aes(x = year, y = asinh(growth.milex), group = as.factor(ccode))) + 
+  geom_line(alpha = .5)
 
 
 

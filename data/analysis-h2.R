@@ -133,16 +133,17 @@ ggsave("appendix/rhat-plot.pdf", height = 6, width = 8)
 
 # Extract coefficients from the model
 ml.model.sum <- extract(ml.model, pars = c("beta", "gamma", "theta",
+                                           "alpha",
                                            "sigma", "sigma_year", 
                                            "sigma_state", "sigma_all"),
                         permuted = TRUE)
 
 
 # Posterior predictive distributions relative to observed data
-yrep <- extract(ml.model, pars = c("y_pred"))[1:100, ]
+yrep <- extract(ml.model, pars = c("y_pred"))
 
 # plot posterior predictive denisty of first 100 simulations
-ppc_dens_overlay(y, yrep)
+ppc_dens_overlay(y, yrep$y_pred[1:100, ])
 
 
 # Summarize gamma
@@ -210,14 +211,6 @@ ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
 
 
 
-
-# Plot gammas against latent scope
-ggplot(alliance.coefs, aes(y = gamma.mean, x = latent.scope.mean)) + 
-  geom_point()  + theme_classic()
-
-
-
-
 # Calculate positive and negative posterior probability
 positive.check <- function(x){
   mean(x > 0)
@@ -268,6 +261,60 @@ plot(density(ml.model.sum$theta))
 summary(ml.model.sum$theta)
 
 
+ 
+### simulate impact of increasing share of allied GDP, given typical gamma
+# create relevant dataframe of coefficients
+coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 284])
+
+# Create hypothetical dataset 
+all.data.lshare <- numeric(ncol(reg.state.mat) + 2)
+names(all.data.lshare) <- c("cons", colnames(reg.state.mat), "econ.share")
+
+# summarize contrib/share of allied GDP
+summary(atop.cow.year$contrib.gdp)
+
+# Set values of variables for simulation 
+all.data.lshare["cons"] <- 1 
+all.data.lshare["atwar"] <- 1
+all.data.lshare["civilwar.part"] <- 0 
+all.data.lshare["rival.milex"] <- median(reg.state.data$rival.milex)
+all.data.lshare["ln.gdp"] <- median(reg.state.data$ln.gdp)
+all.data.lshare["polity"] <-median(reg.state.data$polity)
+all.data.lshare["cold.war"] <- 0
+all.data.lshare["disputes"] <- 0
+all.data.lshare["majpower"] <- 0
+all.data.lshare["econ.share"] <- .02 # set share to minimum
+
+# Matrix multiplication for prediction: low 
+pred.lshare <- coef.sim%*%all.data.lshare
+
+
+# move share to median
+all.data.mshare <- all.data.lshare
+all.data.mshare["econ.share"] <- .2 # key IV: median
+
+# Matrix multiplication for prediction: median
+pred.mshare <- coef.sim%*%all.data.mshare
+
+
+# move share to highest value != 1 
+all.data.hshare <- all.data.lshare
+all.data.hshare["econ.share"] <- .7 # key IV: high
+
+# Matrix multiplication for prediction: high 
+pred.hshare <- coef.sim%*%all.data.hshare
+
+
+# Compare predictions"
+pred.data <- cbind.data.frame(pred.lshare, pred.mshare, pred.hshare)
+colnames(pred.data) <- c("Low Share", "Median Share", "High Share")
+
+# plot 90% credible intervals 
+color_scheme_set("gray")
+mcmc_intervals(pred.data, prob = .9) +
+  labs(x = "Predicted Percentage Change in Military Spending", y = "Share of Allied GDP") +
+  theme_classic()
+ggsave("manuscript/pred-change-share.pdf", height = 6, width = 8)
 
 
 ### 
@@ -361,6 +408,7 @@ ggsave("appendix/sample-comp-gamma.pdf")
 
 
 # Remove model from workspace- 1.3 Gb
-saveRDS(ml.model, "ml.model.rds")
+saveRDS(ml.model, "data/ml-model.rds")
 rm(ml.model)
+saveRDS(ml.model.all, "data/ml-model-all.rds")
 rm(ml.model.all)
