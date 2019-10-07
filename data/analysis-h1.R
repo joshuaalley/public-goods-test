@@ -66,6 +66,8 @@ state.char.full[, 42: ncol(state.char.full)][is.na(state.char.full[, 42: ncol(st
 # Log-transform allied expenditures variable
 state.char.full$ln.ally.expend <- log(state.char.full$total.ally.expend + 1)
 
+# IHS transforamtion of growth variable
+state.char.full$ihs.growth.milex <- asinh(state.char.full$growth.milex)
 
 # Difference allied spending: consistent with approach of Plumper and Neumayer
 state.char.full <- state.char.full %>%
@@ -76,13 +78,31 @@ state.char.full <- state.char.full %>%
                  ) 
 
 
+# Normalized GDP by year
+state.char.full <- state.char.full %>% 
+  group_by(year) %>%
+  mutate(
+    ln.gdp.norm = ln.gdp / max(ln.gdp, na.rm = TRUE)
+  ) %>%
+  group_by()
+
+# Compare the two variables 
+ggplot(state.char.full, aes(x = ln.gdp)) + geom_histogram()
+ggplot(state.char.full, aes(x = ln.gdp.norm)) + geom_histogram()
+
+
+
 # Set up interaction with a separate dataset
 state.char.inter <- as.data.frame(state.char.full) # interflex doesn't take tibble input
 state.char.inter <- filter(state.char.inter, ln.gdp >= 18) # filter really tiny states out
 
 # summarize interaction variables
-summary(state.char.inter$change.gdp)
-ggplot(state.char.inter, aes(x = change.gdp)) + geom_density()
+summary(state.char.inter$ln.gdp)
+ggplot(state.char.inter, aes(x = ln.gdp)) + geom_histogram()
+
+# normalize GDP
+summary(state.char.inter$ln.gdp.norm)
+ggplot(state.char.inter, aes(x = ln.gdp.norm)) + geom_histogram()
 
 
 summary(state.char.inter$total.ally.expend)
@@ -115,7 +135,7 @@ ggplot(state.char.inter, aes(x = year, y = asinh(growth.milex), group = as.facto
 ### First test: aboslute size (GDP)
 # Interact changes in allied spending and GDP
 # Total allied spending: pooling regression
-m1.pg.abs <- rlm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m1.pg.abs <- rlm(growth.milex ~ diff.ally.expend + ln.gdp.norm + diff.ally.expend:ln.gdp.norm +
                      avg.num.mem + avg.dem.prop + 
                      atwar + civilwar.part + polity  +
                      lsthreat + cold.war,
@@ -127,16 +147,16 @@ stargazer(m1.pg.abs)
 
 # Calculate marginal effects
 margins(m1.pg.abs)
-cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+cplot(m1.pg.abs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
       main = "Allied Spending and Growth in Military Spending",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 # Export plot
 dev.copy(pdf,'manuscript/abs-margins-plot.pdf')
 dev.off()
 
 # Switch the directions 
-cplot(m1.pg.abs, x = "diff.ally.expend", dx = "ln.gdp", what = "effect",
+cplot(m1.pg.abs, x = "diff.ally.expend", dx = "ln.gdp.norm", what = "effect",
       main = "Marginal Effect GDP on Growth in Military Spending",
       xlab = "Change in Allied Capability", ylab = "Average M.E. of ln(GDP)")
 abline(h = 0)
@@ -144,9 +164,9 @@ abline(h = 0)
 
 
 # OLS
-m2.pg.abs <- lm(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m2.pg.abs <- lm(growth.milex ~ diff.ally.expend + ln.gdp.norm + diff.ally.expend:ln.gdp.norm +
                        avg.num.mem + avg.dem.prop + 
-                       atwar + civilwar.part + polity + ln.gdp + 
+                       atwar + civilwar.part + polity + 
                        lsthreat + cold.war,
                      data = state.char.inter)
 summary(m2.pg.abs)
@@ -154,29 +174,30 @@ summary(m2.pg.abs)
 
 
 # binning estimator
-bin.abs <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp", 
+bin.abs <- inter.binning(Y = "ihs.growth.milex", D = "diff.ally.expend", X = "ln.gdp.norm", 
               Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                     "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
               data = state.char.inter,
               na.rm = TRUE,
               Ylabel = "Growth in Military Spending",
               Dlabel = "Allied Spending",
-              Xlabel = "ln(GDP)", theme.bw = TRUE
+              Xlabel = "ln(GDP): Normalized", theme.bw = TRUE
 )
 bin.abs
 ggsave("appendix/inter-bin-abs.pdf", height = 6, width = 8)
 
 
 # Kernel: 10+ minute run time 
-kernel.abs <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp", 
+# Subset to values above .7: insane uncertainty otherwise
+kernel.abs <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "ln.gdp.norm", 
              Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                    "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
-             data = state.char.inter, 
+             data = subset(state.char.inter, state.char.inter$ln.gdp.norm > .7), 
              na.rm = TRUE,
              nboots = 200, parallel = TRUE, cores = 4,
              Ylabel = "Growth in Military Spending",
              Dlabel = "Allied Spending",
-             Xlabel = "ln(GDP)", theme.bw = TRUE
+             Xlabel = "ln(GDP): Normalized", theme.bw = TRUE
 )
 kernel.abs
 ggsave("appendix/inter-kernel-abs.pdf", height = 6, width = 8)
@@ -185,7 +206,7 @@ ggsave("appendix/inter-kernel-abs.pdf", height = 6, width = 8)
 
 ### Transform outcome with Inverse hyperbolic sine to reduce the extremely heavy tails 
 # Total allied spending: pooling regression
-m1.abs.ihs <- rlm(asinh(growth.milex) ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m1.abs.ihs <- rlm(ihs.growth.milex ~ diff.ally.expend + ln.gdp.norm + diff.ally.expend:ln.gdp.norm +
                    avg.num.mem + avg.dem.prop + 
                    atwar + civilwar.part + polity  +
                    lsthreat + cold.war,
@@ -197,13 +218,13 @@ stargazer(m1.abs.ihs)
 
 # Calculate marginal effects
 margins(m1.abs.ihs)
-cplot(m1.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+cplot(m1.abs.ihs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
       main = "Marginal Effect of Changes in Allied Spending on Growth in Military Spending",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
 # Switch the directions 
-cplot(m1.abs.ihs, x = "diff.ally.expend", dx = "ln.gdp", what = "effect",
+cplot(m1.abs.ihs, x = "diff.ally.expend", dx = "ln.gdp.norm", what = "effect",
       main = "Marginal Effect GDP on Growth in Military Spending",
       xlab = "Change in Allied Capability", ylab = "Average M.E. of ln(GDP)")
 abline(h = 0)
@@ -216,7 +237,7 @@ plot(m1.abs.ihs$residuals, m1.abs.ihs$w) # transformed DV
 
 
 # OLS estiamtion 
-m2.abs.ihs <- lm(asinh(growth.milex) ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
+m2.abs.ihs <- lm(asinh(growth.milex) ~ diff.ally.expend + ln.gdp.norm + diff.ally.expend:ln.gdp.norm +
                     avg.num.mem + avg.dem.prop + 
                     atwar + civilwar.part + polity  +
                     lsthreat + cold.war,
@@ -224,9 +245,9 @@ m2.abs.ihs <- lm(asinh(growth.milex) ~ diff.ally.expend + ln.gdp + diff.ally.exp
 )
 summary(m2.abs.ihs)
 
-cplot(m2.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+cplot(m2.abs.ihs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
       main = "Marginal Effect of Changes in Allied Spending on Growth in Military Spending",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Changes in Allied Spending")
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Changes in Allied Spending")
 abline(h = 0)
 
 
@@ -245,24 +266,24 @@ dev.off()
 par(mfrow = c(2, 2))
 
 # Main model in paper: robust regression 
-cplot(m1.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+cplot(m1.pg.abs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
       main = "Robust Reg",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Allied Cap")
 
 # rreg- transformed DV
-cplot(m1.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
-      main = "Robust Reg: Transformed DV",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+cplot(m1.abs.ihs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
+      main = "Robust Reg: IHS",
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Allied Cap")
 
 # OLS 
-cplot(m2.pg.abs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
+cplot(m2.pg.abs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
       main = "Linear Regression",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Allied Cap")
 
 # OLS with transformed DV 
-cplot(m2.abs.ihs, x = "ln.gdp", dx = "diff.ally.expend", what = "effect",
-      main = "Linear Regression: Transformed DV",
-      xlab = "ln(GDP)", ylab = "Average M.E. of Allied Cap")
+cplot(m2.abs.ihs, x = "ln.gdp.norm", dx = "diff.ally.expend", what = "effect",
+      main = "Linear Regression: IHS",
+      xlab = "ln(GDP): Normalized", ylab = "Average M.E. of Allied Cap")
 # Export plot
 dev.copy(pdf,'appendix/me-plots.pdf')
 dev.off()
@@ -271,19 +292,19 @@ dev.off()
 
 
 
-# Robust regression with random effects
-# Long run time here. 
-rreg.re.abs <- rlmer(growth.milex ~ diff.ally.expend + ln.gdp + diff.ally.expend:ln.gdp +
-  avg.num.mem + avg.dem.prop + 
-  atwar + civilwar.part + polity  +
-  lsthreat + cold.war + (1|ccode) + (1|year),
-data = state.char.inter
-)
-summary(rreg.re.abs)
+# Robust regression with random effects: I may need to RSTAN or brms this thing.
+# This is freezing both machines at the moment: comment out. 
+#rreg.re.abs <- rlmer(growth.milex ~ diff.ally.expend + ln.gdp.norm + diff.ally.expend:ln.gdp.norm +
+#  avg.num.mem + avg.dem.prop + 
+#  atwar + civilwar.part + polity  +
+#  lsthreat + cold.war + (1|ccode) + (1|year),
+#data = state.char.inter
+#)
+#summary(rreg.re.abs)
 
 # No cplot or stargazer to report these results
-rreg.re.sum <- summary(rreg.re.abs)
-stargazer(rreg.re.sum$coefficients)
+#rreg.re.sum <- summary(rreg.re.abs)
+#stargazer(rreg.re.sum$coefficients)
 
 
 ### Additional single-level test: relative size expressed as contribution to alliance
@@ -291,6 +312,14 @@ stargazer(rreg.re.sum$coefficients)
 # filter out cases with no alliances
 inter.data.rel <- filter(state.char.full, treaty.pres == 1)
 inter.data.rel <- as.data.frame(inter.data.rel)
+
+# Look at robust regression among alliance members
+m1.pg.all <- rlm(growth.milex ~ diff.ally.expend + ln.gdp.norm + diff.ally.expend:ln.gdp.norm +
+                   lag.ln.milex + avg.num.mem + avg.dem.prop + 
+                   atwar + civilwar.part + polity  + 
+                   lsthreat + cold.war,
+                 data = inter.data.rel)
+summary(m1.pg.all)
 
 # Total allied spending: pooling regression
 m1.pg.rel <- rlm(growth.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
@@ -307,9 +336,9 @@ cplot(m1.pg.rel, x = "avg.treaty.contrib", dx = "diff.ally.expend", what = "effe
 abline(h = 0)
 
 # OLS
-m2.pg.rel <- lm(growth.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
+m2.pg.rel <- lm(ihs.growth.milex ~ diff.ally.expend + avg.treaty.contrib + diff.ally.expend:avg.treaty.contrib +
                      avg.dem.prop + lag.ln.milex +
-                     atwar + civilwar.part + polity + ln.gdp + avg.num.mem +
+                     atwar + civilwar.part + polity + ln.gdp.norm + avg.num.mem +
                      lsthreat + cold.war,
                    data = inter.data.rel
                 )
@@ -317,7 +346,7 @@ summary(m2.pg.rel)
 plot(rreg.re.abs)
 
 # binning estimator
-bin.rel <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+bin.rel <- inter.binning(Y = "ihs.growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
                          Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                                "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
                          data = inter.data.rel,
@@ -326,7 +355,7 @@ bin.rel <- inter.binning(Y = "growth.milex", D = "diff.ally.expend", X = "avg.tr
 bin.rel 
 
 # Kernel: 10+ minute run time 
-kernel.rel <- inter.kernel(Y = "growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
+kernel.rel <- inter.kernel(Y = "ihs.growth.milex", D = "diff.ally.expend", X = "avg.treaty.contrib", 
                            Z = c("lag.ln.milex", "atwar", "civilwar.part", "polity", 
                                  "lsthreat", "cold.war", "avg.num.mem", "avg.dem.prop"), 
                            data = inter.data.rel, 
