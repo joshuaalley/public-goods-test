@@ -225,9 +225,9 @@ colnames(gamma.probs) <- c("pos.post.prob", "atopid", "gamma.mean")
 gamma.probs$atopid <- reorder(gamma.probs$atopid, gamma.probs$pos.post.prob)
 gamma.probs$over.50 <- gamma.probs$pos.post.prob - .50
 
-# For all alliances
+# For all alliances: plot relative posterior probability 
 ggplot(gamma.probs, aes(x = atopid, y = over.50)) + 
-  geom_col() +
+  geom_col(color = "grey", fill = "black") +
   scale_y_continuous(breaks = seq(from = -.5, to = .5, .25),
                      labels = c("100% Negative", "75% negative", "Even", 
                                 "75% Positive", "100% Positive")) +

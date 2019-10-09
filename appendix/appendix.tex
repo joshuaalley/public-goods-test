@@ -44,7 +44,7 @@ This generates extremely heavy-tailed residuals, so OLS is inefficient.
 I do not transform the outcome for either test in the paper, but do so here as part of the robustness checks. 
 
 
-Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals deviate strongly from normality as \autoref{fig:res-qq-plot} shows. 
+Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals deviate strongly from normality, as \autoref{fig:res-qq-plot} shows. 
 I use the IHS transformation because it accommodates positive, negative and zero values. 
 \autoref{fig:res-qq-plot} shows the residuals from an OLS model with a transformation outcome, which is part of the robustness checks.
 
@@ -55,7 +55,7 @@ I use the IHS transformation because it accommodates positive, negative and zero
 	\label{fig:res-qq-plot}
 \end{figure}
 
-I estimate three different models for the robustness check: OLS models with and without the inverse hyperbolic sine transformation of percentage changes in spending as well as robust regression with transformed spending. 
+I estimate three different models for the robustness check: OLS models with and without the inverse hyperbolic sine transformation, followed by robust regression with transformed spending. 
 Rather than tabulate the coefficients, I plot the marginal effect of allied spending across the range of GDP for all three models.
 \autoref{fig:me-plots} compares these results with the marginal effects plot from the robust regression in the paper. 
 Transforming percentage changes in military spending has little effect on the robust regression results because even after transforming the dependent variable, the robust estimator heavily down-weights the most unusual observations. 
@@ -97,7 +97,7 @@ Like the OLS margins plots above, these results may be sensitive to unusual obse
 
 
 The binning estimator indicates potential deviations from linearity. 
-This pattern matches the OLS estimates, which runs contrary to Hypothesis 1. 
+This pattern matches the OLS estimates, which are contrary to Hypothesis 1. 
 Given the possible non-linearity, the kernel regression is a useful check. 
 
 
@@ -283,7 +283,7 @@ Simulating data and recovering known parameters shows that the model estimates a
 
 
 It is possible that estimating a model on the full sample of states makes misleading comparisons by including states with no alliances.
-This adds many zeros to the membership matrix. 
+This adds many zeros to the membership matrix \textbf{Z}. 
 To check whether inferences are sensitive to including states with no alliance participation, I re-fit the multilevel model on a sample of only states with at least one alliance. 
 This reduced the sample size from 9,961 observations to 5,222, but the results are relatively unchanged. 
 
