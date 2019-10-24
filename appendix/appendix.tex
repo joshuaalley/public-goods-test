@@ -27,136 +27,54 @@
 
 \doublespace
 
-This appendix contains supporting materials for the tests of Hypothesis 1 and 2. 
-The first section includes material for the test of Hypothesis 1. 
-The second section describes priors, convergence diagnostics and results from simulated data for the multilevel model I used to test Hypothesis 2. 
-
-%----------------------------------
-\section{Other Estimates of Panel Data Interaction}
+This appendix contains supporting materials for the test of Hypothesis 1 in ``Reassessing the Public Goods Theory of Alliances.'' 
+Section 1 provides more detail about the variables in the model and Section 2 shows that results from the hierarchical model are accurate. 
 
 
-\subsection{Alternative Estimators}
+\section{Variables} 
 
 
-Robust regression is appropriate for residuals from the percentage changes in spending variable. 
-Several observations of states during war see gigantic increases in spending--- the largest value is 140, relative to a median of .063. 
-This generates extremely heavy-tailed residuals, so OLS is inefficient. 
-I do not transform the outcome for either test in the paper, but do so here as part of the robustness checks. 
+Olson and Zeckhauser use GDP to measure state size, so I constructed a measure of GDP using data from the Maddison Project, which provides longer historical coverage \citep{Boltetal2018}. 
+I then take the natural log of GDP to address the variable's skewed distribution. 
+I use military spending data from the Correlates of War Project \citep{SingerCINC1988}.  
+All alliance membership data comes from Version 4 of the Alliance Treaty Obligations and Provisions (ATOP) data \citep{Leedsetal2002}.  
 
 
-Even after applying the inverse hyperbolic sine (IHS) transformation, the residuals deviate strongly from normality, as \autoref{fig:res-qq-plot} shows. 
-I use the IHS transformation because it accommodates positive, negative and zero values. 
-\autoref{fig:res-qq-plot} shows the residuals from an OLS model with a transformation outcome, which is part of the robustness checks.
-
-\begin{figure}[htbp]
-	\centering
-		\includegraphics[width=0.95\textwidth]{res-qq-plot.pdf}
-	\caption{Plot of residuals against normal quantiles. Deviations from the straight line are deviations from the normal distribution.}
-	\label{fig:res-qq-plot}
-\end{figure}
-
-I estimate three different models for the robustness check: OLS models with and without the inverse hyperbolic sine transformation, followed by robust regression with transformed spending. 
-Rather than tabulate the coefficients, I plot the marginal effect of allied spending across the range of GDP for all three models.
-\autoref{fig:me-plots} compares these results with the marginal effects plot from the robust regression in the paper. 
-Transforming percentage changes in military spending has little effect on the robust regression results because even after transforming the dependent variable, the robust estimator heavily down-weights the most unusual observations. 
+My dependent variable is percentage changes in military spending. 
+Olson and Zeckhauser use defense spending as a share of GDP as their dependent variable, which is the source of previously described identification problems \citep{Kronmal1993, PluemperNeumayer2015}. 
+I use percentage changes instead of the defense burden because this measure gives a sense of burdens from changing defense budgets with a lower risk of spurious inferences. 
+Annual percentage changes in spending is the change in military spending as a share of the previous year's budget:
 
 
-The OLS estimates reverse the patterns in the robust regression, and the scale of the estimates is sensitive to whether the variable is transformed. 
-The marginal effect for smaller states is statistically significant in the OLS estimates, but it is decreasing in GDP. 
-For small states, expanding allied capability \emph{increases} percentage changes in military spending, and the effect of allied capability is lower in small states. 
-This is the opposite of Hypothesis 1, but it should be treated with extreme caution. 
-Without the inverse hyperbolic sine transformation, the predicted marginal effect of changes in allied spending is implausibly large relative to the scale of the outcome. 
-OLS may be too sensitive to the unusual observations in military spending data. 
-In any case, the robust regression estimates in the manuscript are the best case for Hypothesis 1. 
+\begin{equation}
+\mbox{\% Change Military Spending} = \frac{\mbox{Mil. Ex.}_t - \mbox{Mil. Ex.}_{t-1} }{ \mbox{Mil. Ex.}_{t-1} } = \frac{\Delta \mbox{Mil. Ex.} }{ \mbox{Mil. Ex.}_{t-1} }
+\end{equation} 
 
 
-\begin{figure}[htbp]
-	\centering
-		\includegraphics[width=0.95\textwidth]{me-plots.pdf}
-	\caption{Comparison of marginal effect of changing allied spending on percentage changes in military spending across the range of GDP. Each plot corresponds to an estimation strategy. The top left plot is the marginal effects plot from the manuscript.}
-	\label{fig:me-plots}
-\end{figure}
+Measuring percentage changes in spending matches Olson and Zeckhauser's emphasis on how alliance participants allocate resources to the military.
+Positive percentage changes in spending imply an expanding defense budget and higher defense burden, all else equal.
+Moreover, using percentage changes in spending mitigates the risk of spurious inferences due to non-stationarity in panel data. 
+The log-level of military spending is not mean-reverting in long panels.
+A differenced military spending variable has increasing variance over time, as budgets expand and generate larger changes. 
+Modeling the DV in levels or changes might lead to spurious inferences \citep{GrangerNewbold1974}. 
 
 
-
-\subsection{Continuous Modifying Variable}
-
-
-\citet{Hainmuelleretal2019} show linearity assumptions and a lack of support in the range of the modifying variable can generate misleading inferences in interactive models. 
-They suggest estimating interactions with binning and kernel estimators to check for non-linearity and adequate support. 
-\autoref{fig:inter-bin-abs} plots the results of the binning estimator. 
-Like the OLS margins plots above, these results may be sensitive to unusual observations. 
+Using percentage changes in military spending as the dependent variable benchmarks changes to budget size. 
+This facilitates comparisons across states and years. 
+A 2\% change is an equally burdensome increase in the defense budget for large and small states, all else equal. 
 
 
-\begin{figure}
-	\centering
-		\includegraphics[width=0.65\textwidth]{inter-bin-abs.pdf}
-		\caption{Binning estimates of interaction between changes in allied spending and GDP.}
-	\label{fig:inter-bin-abs}
-\end{figure}
+Besides the economic weight values in \textbf{Z}, I controlled for other variables that are correlated with alliance participation and military spending. 
+I adjusted for international war \citep{Reiteretal2016}, civil war participation \citep{SarkeesWayman2010}, and a count of annual MIDs \citep{Gibleretal2016}. 
+I also included measures of regime type, external threat \citep{LeedsSavun2007}, GDP, and the Cold War era. 
 
-
-The binning estimator indicates potential deviations from linearity. 
-This pattern matches the OLS estimates, which are contrary to Hypothesis 1. 
-Given the possible non-linearity, the kernel regression is a useful check. 
-
-
-\begin{figure}
-	\centering
-		\includegraphics[width=0.65\textwidth]{inter-kernel-abs.pdf}
-	\caption{Kernel estimate of interaction between changes in allied spending and GDP.}
-	\label{fig:inter-kernel-abs}
-\end{figure}
-
-
-The kernel estimator generates less evidence of a conditional relationship. 
-As \autoref{fig:inter-kernel-abs} demonstrates, the marginal effect of spending is highly uncertain for small states, and close to zero otherwise. 
-Though it is difficult to see from the plot, both positive and negative point estimates of the marginal effect are indistinguishable from zero. 
-Allowing non-linear changes in the marginal effect of allied capability still shows little evidence of a conditional relationship, let alone the expectations of Hypothesis 1. 
-
-
-
-%\subsection{Robust Regression with Random Effects} 
-%
-%
-%In the test of Hypothesis 1, the robust regression estimator ignores clustering of observations within groups of states and years. 
-%\citet{Koller2016} develops a robust regression estimator with random effects, which I fit as a robustness check. 
-%\autoref{tab:rreg-re-res} summarizes the results. 
-%
-%
-%\begin{table}[!htbp] \centering 
-%\begin{tabular}{@{\extracolsep{5pt}} cccc} 
-%\\[-1.8ex]\hline 
-%\hline \\[-1.8ex] 
-% & Estimate & Std. Error & t value \\ 
-%\hline \\[-1.8ex] 
-%Change Allied Spending & $$-$0.015$ & $0.048$ & $$-$0.310$ \\ 
-%ln(GDP) & $$-$0.002$ & $0.001$ & $$-$1.414$ \\ 
-%Change Allied Spending $\times$ ln(GDP) & $0.001$ & $0.002$ & $0.661$ \\ 
-%Avg. Alliance Size & $$-$0.0001$ & $0.0002$ & $$-$0.401$ \\ 
-%Avg Alliance Democracy & $$-$0.001$ & $0.001$ & $$-$1.354$ \\ 
-%International War & $0.096$ & $0.011$ & $8.889$ \\ 
-%Civil War Participant & $0.010$ & $0.008$ & $1.299$ \\ 
-%Polity & $0.0002$ & $0.0004$ & $0.657$ \\ 
-%External Threat & $0.016$ & $0.013$ & $1.217$ \\ 
-%Cold War & $0.060$ & $0.011$ & $5.242$ \\ 
-%Constant & $0.075$ & $0.031$ & $2.436$ \\ 
-%\hline \\[-1.8ex] 
-%\end{tabular} 
-%\caption{Results from Robust Regression with State and Year random effects.} 
-%\label{tab:rreg-re-res} 
-%\end{table} 
-%
-%
-%Robust regression with random effects produces similar inferences about the presence of a conditional relationship between GDP and changing allied capability. 
-%The sign, magnitude and statistical significance of all the coefficients are similar to results from other estimators. 
-%Therefore, while it is difficult to use \textsf{R} output from Koller's robust regression estimator to plot the interaction, results from this estimator should mirror the above plots. 
-%Accounting for clustering of observations does little to change my inferences about Hypothesis 1. 
+ 
 
 
 \section{Multilevel Model}
 
-This section describes the priors on the multilevel model, convergence diagnostics for the Hamiltonian Monte Carlo, and results from running the same model on a sample of only states with at least one alliance. 
+This section describes the priors on the multilevel model, convergence diagnostics for the Hamiltonian Monte Carlo, and results from running the same model on a sample of states with at least one alliance. 
+
 
 \subsection{Priors} 
 
@@ -312,7 +230,7 @@ I am still unable to identify any reliably positive $\gamma$ parameters, which c
 
 
 
-
+\newpage
 \singlespace
 
 
