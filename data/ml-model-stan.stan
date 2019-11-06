@@ -52,9 +52,9 @@ transformed parameters {
 
  alpha_state = 0 + sigma_state * alpha_state_std; // non-centered parameterization, where alpha_state ~ N(0, sigma_state)
 
-alpha_year = 0 + sigma_year * alpha_year_std; // non-centered parameterization, where alpha_state ~ N(0, sigma_state)
+ alpha_year = 0 + sigma_year * alpha_year_std; // non-centered parameterization, where alpha_state ~ N(0, sigma_state)
 
-gamma = theta + sigma_all * gamma_std; // non-centered parameterization of gamma
+ gamma = theta + sigma_all * gamma_std; // non-centered parameterization of gamma
 
 
 // Linear prediction of the state-year spending. csr_matrix_times vector will
@@ -78,7 +78,8 @@ model {
   theta ~ normal(0, .5);
   nu ~ gamma(2, 0.1); // Prior for degrees of freedom in t-dist
   
-  y ~ student_t(nu, y_hat, sigma);
+  asinh(y) ~ student_t(nu, y_hat, sigma);
+  target += -asinh(y);
 }
 
 generated quantities {

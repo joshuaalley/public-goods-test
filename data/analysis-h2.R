@@ -6,6 +6,7 @@
 
 
 # Load packages
+library(arm)
 library(tidyverse)
 library(rstan)
 library(bayesplot)
@@ -28,7 +29,10 @@ set.seed(12)
 
 
 # Load state-year matrix of alliance participation:
+state.ally.year <- read.csv("data/alliance-state-year.csv")
+state.vars <- read.csv("data/state-vars.csv")
 atop.cow.year <- read.csv("data/atop-cow-year.csv")
+
 # Merge state contributions to each alliance
 # and keep only alliances that promise military support
 atop.cow.year <- select(state.ally.year, atopid, ccode, year, contrib.gdp) %>%
@@ -61,7 +65,15 @@ reg.state.data[, 12:ncol(reg.state.data)][is.na(reg.state.data[, 12:ncol(reg.sta
 
 # Create a matrix of state membership in alliances (Z in STAN model)
 reg.state.data <- reg.state.data[complete.cases(reg.state.data), ]
+
+# filter only for states with at least one alliance
+reg.state.data <- reg.state.data %>%
+  mutate(allied.cap = rowSums(.[12: ncol(reg.state.data)])) %>% 
+  filter(allied.cap != 0) %>%
+  select(-(allied.cap))
+
 state.mem.mat <- as.matrix(reg.state.data[, 12: ncol(reg.state.data)])
+
 
 # Rescale state regression variables
 reg.state.data[, 5:11] <- lapply(reg.state.data[, 5:11], 
@@ -82,26 +94,19 @@ stan.data <- list(N = nrow(reg.state.data), y = reg.state.data[, 3],
                   state = reg.state.data$state.id, S = length(unique(reg.state.data$state.id)),
                   year = reg.state.data$year.id, T = length(unique(reg.state.data$year.id)),
                   A = ncol(state.mem.mat),
-                  Z = state.mem.mat, 
-                  X = reg.state.mat, M = ncol(reg.state.mat)
+                  X = reg.state.mat, M = ncol(reg.state.mat),
+                  Z = state.mem.mat
 )
 
 # Compile the model code
 model.1 <- stan_model(file = "data/ml-model-stan.stan")
 
-# Variational Bayes- use to check model will run and give reasonable predictions
+# Variational Bayes- use to check model will run before going full STAN 
 ml.model.vb <- vb(model.1, data = stan.data, seed = 12)
 # Does not converge
 
-# posterior predictive check from variational Bayes- did not converge
-# so treat these predictions with caution
-y = reg.state.data[, 3]
-vb.model.sum <- extract(ml.model.vb)
-ppc_dens_overlay(y, vb.model.sum$y_pred[1:100, ])
-
 # Clear variational Bayes results from environment
 rm(ml.model.vb)
-rm(vb.model.sum)
 
 
 # Run model with full Bayes
@@ -112,14 +117,13 @@ system.time(
 )
 
 # diagnose full model
-# launch_shinystan(ml.model) # use occasionally
-
+# launch_shinystan(ml.model) 
 check_hmc_diagnostics(ml.model)
 
 
 # plot energy 
 post.ml <- nuts_params(ml.model) # extract posterior draws
-color_scheme_set("red")
+color_scheme_set("gray")
 mcmc_nuts_energy(post.ml)
 ggsave("appendix/energy-plot.pdf", height = 6, width = 8) 
 
@@ -164,21 +168,16 @@ sum(gamma.summary$gamma.negative) # 0 treaties: increasing contribution to allia
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
-sum(gamma.summary$positive.lmean) # 0 treaties
+sum(gamma.summary$positive.lmean) # 14 treaties
 gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
-sum(gamma.summary$negative.lmean) # 285 treaties
+sum(gamma.summary$negative.lmean) # 272 treaties
 
 
 # Plot posterior means of alliance coefficients
 ggplot(gamma.summary, aes(x = gamma.mean)) +
-  geom_density() + theme_classic() +
-  ggtitle("Posterior Means of Alliance Coefficients")
-
-ggplot(gamma.summary, aes(x = gamma.mean)) +
   geom_histogram(bins = 50) + theme_classic() +
   labs(x = "Posterior Mean", y = "Number of Alliances") +
   ggtitle("Distribution of Alliance Coefficient Posterior Means")
-ggsave("manuscript/alliance-coefs-hist.pdf", height = 6, width = 8)
 
 
 # Plot points with error bars by ATOPID
@@ -199,12 +198,14 @@ alliance.coefs <- left_join(atop, gamma.summary)
 
 
 # Plot by start year of alliance
+mean(ml.model.sum$theta)
 ggplot(alliance.coefs, aes(x = begyr, y = gamma.mean)) +
   geom_errorbar(aes(ymin = gamma.5, 
                     ymax = gamma.95,
                     width=.01), position = position_dodge(0.01)) +
   geom_point(position = position_dodge(0.01)) + 
-  geom_hline(yintercept = 0) + geom_hline(yintercept = -0.006, linetype = "dashed") +
+  geom_hline(yintercept = 0) + 
+  geom_hline(yintercept = mean(ml.model.sum$theta), linetype = "dashed") +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
   theme_classic()
 ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
@@ -236,7 +237,6 @@ ggplot(gamma.probs, aes(x = atopid, y = over.50)) +
   theme(axis.text.x = element_blank(), # remove atopid labels
         axis.ticks.x = element_blank()) +
   ggtitle("Posterior Probability of Alliance Coefficients")
-ggsave("manuscript/full-post-prob.pdf")
 
 
 # non-zero given 90% cutoff
@@ -249,7 +249,7 @@ gamma.probs$nz.pos <- ifelse(gamma.probs$pos.post.prob >= .90 &
 sum(gamma.probs$nz.pos) # 0 
 gamma.probs$nz.neg <- ifelse(gamma.probs$pos.post.prob <= .10 & 
                                gamma.probs$non.zero == 1, 1, 0)
-sum(gamma.probs$nz.neg) # 1
+sum(gamma.probs$nz.neg) # 2
 
 
 # Look at distribution of hyperparameters
@@ -264,7 +264,7 @@ summary(ml.model.sum$theta)
  
 ### simulate impact of increasing share of allied GDP, given typical gamma
 # create relevant dataframe of coefficients
-coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 284])
+coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 144])
 
 # Create hypothetical dataset 
 all.data.lshare <- numeric(ncol(reg.state.mat) + 2)
@@ -275,7 +275,7 @@ summary(atop.cow.year$contrib.gdp)
 
 # Set values of variables for simulation 
 all.data.lshare["cons"] <- 1 
-all.data.lshare["atwar"] <- 1
+all.data.lshare["atwar"] <- 0
 all.data.lshare["civilwar.part"] <- 0 
 all.data.lshare["rival.milex"] <- median(reg.state.data$rival.milex)
 all.data.lshare["ln.gdp"] <- median(reg.state.data$ln.gdp)
@@ -317,98 +317,7 @@ mcmc_intervals(pred.data, prob = .9) +
 ggsave("manuscript/pred-change-share.pdf", height = 6, width = 8)
 
 
-### 
-# Robustness check: estimate model on states only in alliances
-# Filter out obs where states are not in at least one alliance
-reg.data.all <- reg.state.data %>%
-  select(-c(state.id, year.id)) %>% 
-  mutate(allied.cap = rowSums(.[12: ncol(reg.data.all)])) %>% 
-  filter(allied.cap != 0)
 
-state.mem.all <- as.matrix(reg.data.all[, 12: (ncol(reg.data.all) - 1)])
-
-# Define regression data 
-reg.mat.all <- as.matrix(reg.data.all[, 4:11])
-
-# Add state and year indicators
-reg.data.all$state.id <- group_indices(reg.data.all, ccode)
-reg.data.all$year.id <- group_indices(reg.data.all, year)
-
-# Define the data list 
-stan.data.all <- list(N = nrow(reg.data.all), y = reg.data.all[, 3],
-                      state = reg.data.all$state.id, S = length(unique(reg.data.all$state.id)),
-                      year = reg.data.all$year.id, T = length(unique(reg.data.all$year.id)),
-                      A = ncol(state.mem.mat),
-                      Z = state.mem.all, 
-                      X = reg.mat.all, M = ncol(reg.mat.all)
-)
-
-
-# Run model with full Bayes
-system.time(
-  ml.model.all <- sampling(model.1, data = stan.data.all, 
-                           iter = 2000, warmup = 1000, chains = 4
-  )
-)
-
-# diagnose full model
-check_hmc_diagnostics(ml.model.all)
-
-
-
-# Extract coefficients from the model
-sum.ml.all <- extract(ml.model.all, pars = c("gamma", "theta", "sigma_all"), permuted = TRUE)
-
-
-# Summarize gamma
-gamma.summary.all <- summary(ml.model.all, pars = c("gamma"), probs = c(0.05, 0.95))$summary
-gamma.summary.all <- cbind.data.frame(as.numeric(colnames(state.mem.all)), gamma.summary.all)
-colnames(gamma.summary.all) <- c("atopid", "gamma.mean", "gamma.se.mean",
-                                 "gamma.sd", "gamma.5", "gamma.95",
-                                 "gamma.neff", "gamma.rhat")
-
-# tabulate number of positive and negative estimates
-gamma.summary.all$gamma.positive <- ifelse((gamma.summary.all$gamma.5 > 0 & gamma.summary.all$gamma.95 > 0), 1, 0)
-sum(gamma.summary.all$gamma.positive) # 0 treaties: increasing contribution to alliance leads to increased spending
-gamma.summary.all$gamma.negative <- ifelse((gamma.summary.all$gamma.5 < 0 & gamma.summary.all$gamma.95 < 0), 1, 0)
-sum(gamma.summary.all$gamma.negative) # 0 treaties: increasing contribution to alliance leads to decreased spending
-
-
-# Ignore uncertainty in estimates: are posterior means positive or negative? 
-gamma.summary.all$positive.lmean <- ifelse(gamma.summary.all$gamma.mean > 0, 1, 0)
-sum(gamma.summary.all$positive.lmean) # 0 treaties
-gamma.summary.all$negative.lmean <- ifelse(gamma.summary.all$gamma.mean < 0, 1, 0)
-sum(gamma.summary.all$negative.lmean) # 285 treaties
-
-# Plot posterior means of alliance coefficients
-ggplot(gamma.summary.all, aes(x = gamma.mean)) +
-  geom_density() + theme_classic() +
-  ggtitle("Posterior Means of Alliance Coefficients")
-
-ggplot(gamma.summary.all, aes(x = gamma.mean)) +
-  geom_histogram(bins = 50) + theme_classic() +
-  labs(x = "Posterior Mean") +
-  ggtitle("Distribution of Alliance Coefficient Posterior Means")
-ggsave("appendix/all-sample-gamma.pdf")
-
-
-# Create a data frame with gamma pars from both samples 
-gamma.comp <- cbind.data.frame(gamma.summary$gamma.mean, gamma.summary.all$gamma.mean)
-colnames(gamma.comp) <- c("full", "allies")
-gamma.comp <- melt(gamma.comp)
-
-# plot 
-ggplot(gamma.comp, aes(x = value, fill = variable)) + 
-  geom_density(alpha=0.25) +
-  scale_fill_manual(name = "Sample", values=c("#999999", "#000000")) +
-  ggtitle("Posterior Means: Full Sample and Alliance Members Only") +
-  theme_classic()
-ggsave("appendix/sample-comp-gamma.pdf")
-
-
-
-# Remove model from workspace- 1.3 Gb
+# Remove fit model from workspace
 saveRDS(ml.model, "data/ml-model.rds")
 rm(ml.model)
-saveRDS(ml.model.all, "data/ml-model-all.rds")
-rm(ml.model.all)

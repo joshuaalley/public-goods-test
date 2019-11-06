@@ -30,6 +30,7 @@ transformed data{
   u = csr_extract_u(Z); 
 }
 
+
 parameters {
   real alpha; // overall intercept
   real<lower = 0> sigma; // variance of outcome

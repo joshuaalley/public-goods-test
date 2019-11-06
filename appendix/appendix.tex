@@ -16,8 +16,6 @@
 \title{
 \textbf{Appendix: Reassessing the Public Goods Theory of Alliances}
 	}
-%\author{Joshua Alley\footnote{Graduate Student,
-%Department of Political Science, Texas A\&M University.}}
 
 \bibliographystyle{apsr}
 
@@ -28,7 +26,8 @@
 \doublespace
 
 This appendix contains supporting materials for the test of Hypothesis 1 in ``Reassessing the Public Goods Theory of Alliances.'' 
-Section 1 provides more detail about the variables in the model and Section 2 shows that results from the hierarchical model are accurate. 
+Section 1 provides more detail about the variables in the model and Section 2 assesses model fit and accuracy. 
+The final section summarizes a test that uses average economic weight in their alliances to predict percentage changes in military spending. 
 
 
 \section{Variables} 
@@ -40,7 +39,7 @@ I use military spending data from the Correlates of War Project \citep{SingerCIN
 All alliance membership data comes from Version 4 of the Alliance Treaty Obligations and Provisions (ATOP) data \citep{Leedsetal2002}.  
 
 
-My dependent variable is percentage changes in military spending. 
+The dependent variable is percentage changes in military spending. 
 Olson and Zeckhauser use defense spending as a share of GDP as their dependent variable, which is the source of previously described identification problems \citep{Kronmal1993, PluemperNeumayer2015}. 
 I use percentage changes instead of the defense burden because this measure gives a sense of burdens from changing defense budgets with a lower risk of spurious inferences. 
 Annual percentage changes in spending is the change in military spending as a share of the previous year's budget:
@@ -158,8 +157,9 @@ The model is a good fit if the credible intervals contain the known parameter va
 This process checks whether the model can recover parameters from a known data-generating process that matches the model. 
 
 
-I simulate a hypothetical dataset with 5000 observations of 50 states observed over 200 years. 
-There are 200 alliances in this data, and 2 state-level control variables. 
+I simulate a hypothetical dataset with 2000 observations of 50 states observed over 200 years.
+I used the observed alliance data from the paper, due to problems simulating an alliance membership matrix with the same characteristics as the alliance data. 
+There are 100 alliances in this data, and 2 state-level control variables. 
 The hypothetical outcome is drawn from a Cauchy distribution with mean 0 and a scale of .25, which is more heavy-tailed than even my observed data. 
 
 
@@ -190,43 +190,86 @@ In these figures, the true parameter value is marked with a thick black line, wh
 
 
 Because graphical presentation of the 200 $\gamma$ parameters is more difficult, I calculated whether the credible interval contained the known parameter. 
-184 of the 200 intervals include the ``true'' $\gamma$ value, which is a 92\% success rate. 
+91 of the 100 intervals include the ``true'' $\gamma$ value. 
 Given the number of parameters and potential simulation variance, such accuracy is tolerable. 
 Simulating data and recovering known parameters shows that the model estimates are reasonable approximations of the data-generating process. 
- 
 
 
-
-\subsection{Alternative Sample} 
-
-
-It is possible that estimating a model on the full sample of states makes misleading comparisons by including states with no alliances.
-This adds many zeros to the membership matrix \textbf{Z}. 
-To check whether inferences are sensitive to including states with no alliance participation, I re-fit the multilevel model on a sample of only states with at least one alliance. 
-This reduced the sample size from 9,961 observations to 5,222, but the results are relatively unchanged. 
+\section{Average Economic Weight and Military Spending}
 
 
-All 285 treaties have a negative mean $\gamma$ estimate, and none have a 90\% credible interval that excludes zero.
-The overall mean $\theta$ is more negative in this sample and the $\gamma$ estimates remain tightly clustered around that mean. 
-Thus as \autoref{fig:sample-comp-gamma} shows, the distribution of the association between treaty contribution and spending across alliances is more negative in the alliance members sample. 
-This figure overlays the distribution of the mean $\gamma$ parameters in each sample. 
+The model I use in the paper estimates alliance-specific associations between economic weight and military spending. 
+But if Hypothesis 1 is correct, states with higher average economic weight across multiple alliances should also have higher percentage changes in military spending. 
+This section summarizes results from four models of the correlation between average economic weight and military spending. 
+Following the recommendations of \citep{RaineyBaissa2018}, I use OLS and robust regression estimators with both transformed and unaltered military spending.  
+I use an inverse hyperbolic sine to transform the outcome because this transformation includes positive, negative and zero values. 
+Robust regression down weights unusual observations, which is important because the residuals of OLS estimators in this data are not normally distributed. 
 
 
-\begin{figure}
-	\centering
-		\includegraphics[width=0.95\textwidth]{sample-comp-gamma.pdf}
-	\caption{Comparison of the distribution of posterior mean $\gamma$ parameters in full sample and a sample of only alliance participants. The darker gray distribution is the mean of the $\gamma$ parameters in the sample of alliance members. The impact of treaty contribution on percentage changes in military spending is more negative in the alliance-members only sample.}
-	\label{fig:sample-comp-gamma}
-\end{figure}
+The key independent variable is a state's average economic weight across all of its alliances. 
+I also include measures of average alliance size and democracy \citep{DigiuseppePoast2016} as controls. 
+Other controls are the same as the multilevel model.  
 
 
-Therefore, inferences about the impact of treaty contribution on percentage changes in military spending are unchanged if the sample is restricted only to alliance members. 
-Increasing a state's share of total allied GDP leads to a more negative effect on treaty spending in expectation. 
-I am still unable to identify any reliably positive $\gamma$ parameters, which contradicts the free-riding hypothesis. 
+\autoref{tab:avg-weight-res} summarizes the results of these four estimation strategies. 
+The robust regression coefficients for average economic weight are of small substantive magnitude and are statistically insignificant. 
+The OLS estimates for average economic weight are larger, but the difference between these estimates and the robust regression suggests that unusual observations are the source of this difference. 
 
 
+\begin{table}[!htbp] \centering 
+  \caption{OLS and robust regression of the association between average economic weight in alliances and percentage changes in military expenditures from 1816 to 2007.} 
+  \label{tab:avg-weight-res} 
+\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\\[-1.8ex]\hline 
+\hline \\[-1.8ex] 
+ & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
+\cline{2-5} 
+\\[-1.8ex] & \multicolumn{2}{c}{\% Change Milex.} & \multicolumn{2}{c}{IHS(\% Change Milex.)} \\ 
+\\[-1.8ex] & \textit{Robust Reg.} & \textit{OLS} & \textit{OLS} & \textit{Robust} \\ 
+\\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
+\hline \\[-1.8ex] 
+ Average Economic Weight & $-$0.016 & 0.525 & 0.063 & $-$0.015 \\ 
+  & (0.020) & (0.644) & (0.042) & (0.020) \\ 
+  & & & & \\ 
+ ln(GDP) & $-$0.119$^{***}$ & $-$6.384$^{***}$ & $-$0.468$^{***}$ & $-$0.118$^{***}$ \\ 
+  & (0.046) & (1.462) & (0.096) & (0.046) \\ 
+  & & & & \\ 
+ Average Alliance Size & $-$0.0002 & $-$0.013 & 0.0002 & $-$0.0002 \\ 
+  & (0.0004) & (0.012) & (0.001) & (0.0004) \\ 
+  & & & & \\ 
+ Average Allied Democracy & 0.001 & $-$0.032 & $-$0.001 & 0.001 \\ 
+  & (0.001) & (0.025) & (0.002) & (0.001) \\ 
+  & & & & \\ 
+ International War & 0.109$^{***}$ & 0.570 & 0.248$^{***}$ & 0.108$^{***}$ \\ 
+  & (0.012) & (0.381) & (0.025) & (0.012) \\ 
+  & & & & \\ 
+ Civil War Participant & $-$0.001 & 0.134 & 0.016 & $-$0.001 \\ 
+  & (0.010) & (0.308) & (0.020) & (0.010) \\ 
+  & & & & \\ 
+ Regime Type & $-$0.001 & 0.039$^{**}$ & 0.001 & $-$0.001 \\ 
+  & (0.001) & (0.019) & (0.001) & (0.001) \\ 
+  & & & & \\ 
+ External Threat & 0.057$^{***}$ & 1.195$^{**}$ & 0.117$^{***}$ & 0.057$^{***}$ \\ 
+  & (0.015) & (0.472) & (0.031) & (0.015) \\ 
+  & & & & \\ 
+ Cold War & 0.047$^{***}$ & 0.387$^{**}$ & 0.039$^{***}$ & 0.046$^{***}$ \\ 
+  & (0.006) & (0.179) & (0.012) & (0.006) \\ 
+  & & & & \\ 
+ Constant & 0.138$^{***}$ & 5.156$^{***}$ & 0.425$^{***}$ & 0.137$^{***}$ \\ 
+  & (0.037) & (1.186) & (0.078) & (0.037) \\ 
+\hline \\[-1.8ex] 
+Observations & 5,409 & 5,409 & 5,409 & 5,409 \\ 
+R$^{2}$ &  & 0.007 & 0.026 &  \\  
+Residual Std. Error (df = 5399) & 0.157 & 6.034 & 0.397 & 0.156 \\ 
+\hline 
+\hline \\[-1.8ex] 
+\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\end{tabular} 
+\end{table} 
 
-
+To asses the substantive impact of increasing a state's average economic weight in its alliances, I simulated the effect of moving average weight from the first quartile (0.05) to the third quartile (.40). 
+Holding all other variables at their medians or modes, this increase in weight implies an expected percentage changes in military spending of -0.005. 
+The 90\% credible interval for this change ranges from -0.017 to 0.007, which implies that a substantively meaningful negative effect is more plausible. 
 
 
 

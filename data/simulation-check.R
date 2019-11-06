@@ -24,18 +24,22 @@ rstan_options(auto_write = TRUE)
 set.seed(12)
 
 # Set-up simulatiom data
-n.sim = 5000 # 2500 simulated observations
+n.sim = 2000 # 2000 simulated observations
+
+
+# Take a chunk of the membership matrix
+state.mem.sim <- state.mem.mat[1001:3000, 151:250]
 
 
 # pull data into a list and add some simulations
-sim.data.noest <- list(N = n.sim, # 2000 obs
+sim.data.noest <- list(N = n.sim, # number of obs
                        y = rcauchy(n.sim, location = 0, scale = .25), # cauchy outcome
                        state = rep(1:50, times = n.sim/50), # 50 states
                        S = 50, 
                        year = rep(1:200, times = n.sim/200), # 200 years
                        T = 200,
-                       A = 200, # 200 alliances
-                       Z = state.mem.mat[1001:6000, 1:200], # real data- hard to simulate 
+                       A = ncol(state.mem.sim), # 100 alliances
+                       Z = state.mem.sim, 
                        X = mvrnorm(n.sim, mu = c(1, -1), Sigma = matrix(c(4,2,2,1),2,2)), # simulate state-level IVs from multivariate normal dist
                        M = 2, # two state-level variables
                        run_estimation = 0
@@ -47,7 +51,8 @@ compiled.ml <- stan_model("data/ml-model-sim.stan")
 
 # Run model to generate draws from posterior and parameter values
 sim.out <- sampling(compiled.ml, data = sim.data.noest,
-                    iter = 1000, warmup = 500, chains = 4)
+                    iter = 1000, warmup = 500, chains = 4,
+                    control = list(adapt_delta = .9))
 
 # Check diagnostics
 check_hmc_diagnostics(sim.out)
@@ -76,7 +81,8 @@ sim.data.est$run_estimation <- 1 # estimate the likelihood
 
 # run the model on this simulated data: attempt to recover parameters
 sim.out.est <- sampling(compiled.ml, data = sim.data.est,
-                        iter = 1000, warmup = 500, chains = 4)
+                        iter = 1000, warmup = 500, chains = 4,
+                        control = list(max_treedepth = 15))
 
 
 # Check diagnostics
@@ -89,7 +95,7 @@ sim.est.sum <- extract(sim.out.est, pars = c("beta", "gamma", "theta", "sigma",
                        permuted = TRUE)
 
 colnames(sim.est.sum$beta) <- c("beta1", "beta2")
-colnames(sim.est.sum$gamma) <- paste0('gamma', 1:200)
+colnames(sim.est.sum$gamma) <- paste0('gamma', 1:100)
 
 
 # Use mcmc_areas to plot credible intervals and overlap
@@ -106,10 +112,8 @@ mcmc_areas(sim.est.sum$beta, pars = c("beta2"), prob = .9) +
 # Gamma parameters
 mcmc_areas(sim.est.sum$gamma, pars = c("gamma1"), prob = .9) +
   vline_at(true.gamma[1], color = "black", size = 2) 
-mcmc_areas(sim.est.sum$gamma, pars = c("gamma100"), prob = .9) +
-  vline_at(true.gamma[100], color = "black", size = 2) 
-mcmc_areas(sim.est.sum$gamma, pars = c("gamma175"), prob = .9) +
-  vline_at(true.gamma[175], color = "black", size = 2) 
+mcmc_areas(sim.est.sum$gamma, pars = c("gamma99"), prob = .9) +
+  vline_at(true.gamma[99], color = "black", size = 2) 
 
 
 
