@@ -158,7 +158,7 @@ This process checks whether the model can recover parameters from a known data-g
 
 
 I simulate a hypothetical dataset with 2000 observations of 50 states observed over 200 years.
-I used the observed alliance data from the paper, due to problems simulating an alliance membership matrix with the same characteristics as the alliance data. 
+I used part of the observed alliance data from the paper, due to problems simulating an alliance membership matrix with the same characteristics as the alliance data. 
 There are 100 alliances in this data, and 2 state-level control variables. 
 The hypothetical outcome is drawn from a Cauchy distribution with mean 0 and a scale of .25, which is more heavy-tailed than even my observed data. 
 
@@ -168,7 +168,7 @@ The next step is selecting one of those draws of the outcome--- which includes t
 I select the 12th draw from the posterior and check whether after estimating the model on these data, the credible intervals include zero. 
 
 
-I focus on inferences about the $\gamma$, $\theta$ and $\sigma_{all}$ parameters, because these are essential to testing the public goods argument. 
+I focus on inferences about the $\gamma$, $\theta$ and $\sigma_{all}$ parameters, because all three affect my test of the public goods argument. 
 As \autoref{fig:theta-sim-res} and \autoref{fig:sall-sim-res} show, the posteriors accurately capture the known values of the hyper-parameters $\theta$ and $\sigma_{all}$. 
 In these figures, the true parameter value is marked with a thick black line, while the light gray shaded area shows the 90\% credible interval. 
 
@@ -203,9 +203,17 @@ This could mask differences within each category that affect inferences about ec
 This section checks whether inferences are sensitive to an alternative coding of $\textbf{Z}$. 
 
 
+To retain the same split of negative values for small states and positive values for large states, I subtracted one from economic weights that fell below the median in bilateral or multilateral alliances. 
+This means that states with a small share of allied GDP have larger negative values than states with close to the median value. 
+For example, a state with a 25\% of total allied GDP  in a bilateral alliance has a weight of -.75 with this variable, but a state with 49\% of allied GDP has a weight of -.51. 
+Positive values remain the same.
 
 
-
+Again, the public goods model would predict many positive $\gamma$ parameters, as these would reflect higher military spending for large states and lower military spending for small states. 
+As \autoref{fig:alliance-coefs-year-w} shows, this is once again not the case. 
+There are two alliances with a clearly positive $\gamma$ parameter. 
+These are the OAS (ATOPID 3150) and an alliance between the United States and Thailand (ATOPID 3260). 
+35 alliances have a positive posterior mean, as well. 
 
 \begin{figure}[htbp]
 	\centering
@@ -214,13 +222,18 @@ This section checks whether inferences are sensitive to an alternative coding of
 	\label{fig:alliance-coefs-year-w}
 \end{figure}
 
+While this approach is somewhat better for the public goods model's predictions, it raises the same issues of generalizability. 
+There are very few alliances with even limited evidence that economic weight leads to higher military spending. 
+
+
+
 \section{Average Economic Weight and Military Spending}
 
 
 The model I use in the paper estimates alliance-specific associations between economic weight and military spending. 
-But if Hypothesis 1 is correct, states with higher average economic weight across multiple alliances should also have higher percentage changes in military spending. 
+I also consider whether higher average economic weight across multiple alliances increases percentage changes in military spending. 
 This section summarizes results from four models of the correlation between average economic weight and military spending. 
-Following the recommendations of \citep{RaineyBaissa2018}, I use OLS and robust regression estimators with both transformed and unaltered military spending.  
+Following the recommendations of \citet{RaineyBaissa2018}, I use OLS and robust regression estimators with both transformed and unaltered military spending growth.  
 I use an inverse hyperbolic sine to transform the outcome because this transformation includes positive, negative and zero values. 
 Robust regression down weights unusual observations, which is important because the residuals of OLS estimators in this data are not normally distributed. 
 
@@ -287,7 +300,7 @@ Residual Std. Error (df = 5399) & 0.157 & 6.034 & 0.397 & 0.156 \\
 \end{table} 
 
 To asses the substantive impact of increasing a state's average economic weight in its alliances, I simulated the effect of moving average weight from the first quartile (0.05) to the third quartile (.40). 
-Holding all other variables at their medians or modes, this increase in weight implies an expected percentage changes in military spending of -0.005. 
+Holding all other variables at their medians or modes, this increase in weight implies an expected percentage change in military spending of -0.005. 
 The 90\% credible interval for this change ranges from -0.017 to 0.007, which implies that a substantively meaningful negative effect is more plausible. 
 
 

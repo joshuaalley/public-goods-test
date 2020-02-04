@@ -73,8 +73,8 @@ atop.cow.year$econ.size.w <- ifelse((atop.cow.year$contrib.gdp < 0.5 &
                                      atop.cow.year$bilat == 1) | # bilateral
                                     (atop.cow.year$contrib.gdp <= 0.125 & 
                                        atop.cow.year$bilat == 0), # multilateral
-                                    (-1*atop.cow.year$contrib.gdp), atop.cow.year$contrib.gdp)
-summary(atop.cow.year$econ.size.w)
+                                    (atop.cow.year$contrib.gdp - 1), atop.cow.year$contrib.gdp)
+ggplot(atop.cow.year, aes(x = econ.size.w)) + geom_histogram()
 summary(subset(atop.cow.year, bilat == 1, select = econ.size.w)) # bilateral
 summary(subset(atop.cow.year, bilat == 0, select = econ.size.w)) # multilateral
 
