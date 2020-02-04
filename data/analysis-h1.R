@@ -12,7 +12,6 @@ library(rstan)
 library(bayesplot)
 library(shinystan)
 library(reshape2)
-library(hexbin)
 
 # Set-up STAN guidelines
 options(mc.cores = parallel::detectCores())
@@ -51,22 +50,34 @@ ggplot(atop.cow.year, aes(x = contrib.gdp)) + geom_histogram()
 summary(subset(atop.cow.year, bilat == 1, select = contrib.gdp)) # bilateral
 summary(subset(atop.cow.year, bilat == 0, select = contrib.gdp)) # multilateral
 ggplot(atop.cow.year, aes(x = as.factor(bilat), y = contrib.gdp)) + 
-  geom_boxplot()
+  geom_boxplot() + theme_bw()
 
 
 # classify states as small or large in their alliances
 # -1 if below 1st quartile, 1 if above in bilateral
 # -1 if above 3rd quartile, 1 if above in multilateral
-atop.cow.year$econ.size <- ifelse((atop.cow.year$contrib.gdp <= 0.4735 & 
+atop.cow.year$econ.size <- ifelse((atop.cow.year$contrib.gdp < 0.5000 & 
                                      atop.cow.year$bilat == 1) | # bilateral
-                                  (atop.cow.year$contrib.gdp <= 0.150 & 
+                                  (atop.cow.year$contrib.gdp <= 0.125 & 
                                      atop.cow.year$bilat == 0), # multilateral
                                   -1, 0)
-atop.cow.year$econ.size[(atop.cow.year$contrib.gdp > 0.4735 & 
+atop.cow.year$econ.size[(atop.cow.year$contrib.gdp >= 0.5000 & 
                              atop.cow.year$bilat == 1) | # bilateral
-                          (atop.cow.year$contrib.gdp > 0.150 & 
+                          (atop.cow.year$contrib.gdp > 0.125 & 
                              atop.cow.year$bilat == 0)] <- 1
 table(atop.cow.year$econ.size)
+
+
+# weighted size: negative for small, positive for large
+atop.cow.year$econ.size.w <- ifelse((atop.cow.year$contrib.gdp < 0.5 & 
+                                     atop.cow.year$bilat == 1) | # bilateral
+                                    (atop.cow.year$contrib.gdp <= 0.125 & 
+                                       atop.cow.year$bilat == 0), # multilateral
+                                    (-1*atop.cow.year$contrib.gdp), atop.cow.year$contrib.gdp)
+summary(atop.cow.year$econ.size.w)
+summary(subset(atop.cow.year, bilat == 1, select = econ.size.w)) # bilateral
+summary(subset(atop.cow.year, bilat == 0, select = econ.size.w)) # multilateral
+
 
 # Create a dataset of state-year alliance membership:
 state.mem <- atop.cow.year %>% select(atopid, ccode, year, econ.size)
@@ -76,9 +87,6 @@ state.mem <- distinct(state.mem, atopid, ccode, year, .keep_all = TRUE)
 # This matrix has each state's contribution to every alliance in a given year
 # If a state is not a member of the alliance, corresponding matrix element = 0
 state.mem <- spread(state.mem, key = atopid, value = econ.size, fill = 0)
-
-# Remove the zero or no alliance category
-state.mem <- subset(state.mem, select = -(3))
 
 
 # Add state membership in alliances to this data
@@ -183,16 +191,16 @@ colnames(gamma.summary) <- c("atopid", "gamma.mean", "gamma.se.mean",
 # tabulate number of positive and negative estimates
 # based on 90% credible intervals
 gamma.summary$gamma.positive <- ifelse((gamma.summary$gamma.5 > 0 & gamma.summary$gamma.95 > 0), 1, 0)
-sum(gamma.summary$gamma.positive) # 2 treaties
+sum(gamma.summary$gamma.positive) # 0 treaties
 gamma.summary$gamma.negative <- ifelse((gamma.summary$gamma.5 < 0 & gamma.summary$gamma.95 < 0), 1, 0)
 sum(gamma.summary$gamma.negative) # 1 treaty
 
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
-sum(gamma.summary$positive.lmean) # 50 treaties
+sum(gamma.summary$positive.lmean) # 28 treaties
 gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
-sum(gamma.summary$negative.lmean) # 234 treaties
+sum(gamma.summary$negative.lmean) # 257 treaties
 
 
 # Plot posterior means of alliance coefficients
@@ -200,15 +208,6 @@ ggplot(gamma.summary, aes(x = gamma.mean)) +
   geom_histogram(bins = 50) + theme_classic() +
   labs(x = "Posterior Mean", y = "Number of Alliances") +
   ggtitle("Distribution of Alliance Coefficient Posterior Means")
-
-
-# Plot points with error bars by ATOPID
-ggplot(gamma.summary, aes(x = atopid, y = gamma.mean)) +
-  geom_errorbar(aes(ymin = gamma.5, 
-                    ymax = gamma.95,
-                    width=.01), position = position_dodge(0.1)) +
-  geom_point(position = position_dodge(0.1)) + geom_hline(yintercept = 0) +
-  theme_classic() + coord_flip()
 
 
 
@@ -268,10 +267,10 @@ sum(gamma.probs$non.zero)
 # positive and negative
 gamma.probs$nz.pos <- ifelse(gamma.probs$pos.post.prob >= .90 & 
                                gamma.probs$non.zero == 1, 1, 0)
-sum(gamma.probs$nz.pos) # 2
+sum(gamma.probs$nz.pos) # 0
 gamma.probs$nz.neg <- ifelse(gamma.probs$pos.post.prob <= .10 & 
                                gamma.probs$non.zero == 1, 1, 0)
-sum(gamma.probs$nz.neg) # 3
+sum(gamma.probs$nz.neg) # 5
 
 
 # Look at distribution of hyperparameters
@@ -286,7 +285,7 @@ summary(ml.model.sum$theta)
  
 ### simulate impact of increasing share of allied GDP, given max positive gamma (OAS)
 # create relevant dataframe of coefficients
-coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 152])
+coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 147])
 
 # Create hypothetical dataset 
 all.data.lshare <- numeric(ncol(reg.state.mat) + 2)
@@ -334,88 +333,6 @@ mcmc_intervals(pred.data, prob = .9) +
   labs(x = "Predicted Percentage Change in Military Spending", y = "Share of Allied GDP") +
   theme_bw()
 ggsave("manuscript/pred-change-share.pdf", height = 6, width = 8)
-
-
-
-
-# Predicted military spending change for all individual alliances
-a <- ncol(state.mem.mat)
-growth.pred <- rep(NA, a)
-growth.pred <- list()
-
-# Loop over matrix columns
-for(i in 1:a){
-  growth.pred[[i]] <- state.mem.mat[, i][state.mem.mat[, i] != 0] # filter out zeros 
-  growth.pred[[i]] <- growth.pred[[i]]%*%t(ml.model.sum$gamma[, i]) # multiply by gamma
-  growth.pred[[i]] <- as.data.frame(growth.pred[[i]])
-}
-
-names(growth.pred) <- c(colnames(state.mem.mat)) # label each matrix with ATOPID
-
-
-# Capture means and add a label variable 
-growth.pred.mean <- lapply(growth.pred, function(x) apply(x, 1, mean))
-for(i in 1:a){
-  growth.pred.mean[[i]] <- as.data.frame(growth.pred.mean[[i]])
-  growth.pred.mean[[i]]$atopid <-  colnames(state.mem)[[i]]
-}
-
-growth.pred.sd <- lapply(growth.pred, function(x) as.data.frame(apply(x, 1, sd)))
-for(i in 1:a){
-  growth.pred.sd[[i]] <- as.data.frame(growth.pred.sd[[i]])
-}
-
-# combine means and sds in a dataframe 
-growth.pred.res <- cbind(do.call(rbind, growth.pred.mean), unlist(growth.pred.sd))
-colnames(growth.pred.res) <- c("mean.pred", "atopid", "sd.pred")
-growth.pred.res$mean.pred <- sinh(growth.pred.res$mean.pred) # reverse IHS transformation
-growth.pred.res$sd.pred <- sinh(growth.pred.res$sd.pred) # reverse IHS transformation
-growth.pred.res$atopid <- as.numeric(growth.pred.res$atopid)
-
-# Add alliance characteristics
-growth.pred.res <- left_join(growth.pred.res, alliance.char)
-
-# Create a dataframe with maximum predicted change, positive or negative 
-growth.pred.res.max <- growth.pred.res %>% 
-  select(atopid, latent.depth.mean, mean.pred) %>% 
-  group_by(atopid) %>%
-  summarise_each(funs(.[which.max(abs(.))]))  
-
-
-
-# plot: hard to read with all the data points
-ggplot(growth.pred.res, aes(x = latent.depth.mean, y = mean.pred)) +
-  geom_hline(yintercept = 0) +
-  geom_point(position = position_jitter(width = 0.1), alpha = .25) + 
-  geom_smooth(method = "lm") + 
-  labs(x = "Latent Depth", y = "Mean Predicted Military Spending Growth from Alliance") +
-  ggtitle("Predicted Military Spending Growth and Treaty Depth") +
-  theme_bw() 
-cor.test(growth.pred.res$latent.depth.mean, growth.pred.res$mean.pred) # expected negative correlation
-
-
-# Another way to attack the clear overplotting problem
-growth.depth.plot <- ggplot(growth.pred.res, aes(x = latent.depth.mean, y = mean.pred)) +
-  geom_hline(yintercept = 0) +
-  stat_bin_hex(colour="white", na.rm=TRUE) +
-  scale_fill_gradientn(colours=c("#999999","#333333"), 
-                       name = "Frequency", 
-                       na.value=NA) +
-  labs(x = "Latent Depth",
-       y = "Mean Predicted Spending Growth from Alliance") +
-  ggtitle("Predicted Military Spending Growth and Treaty Depth") +
-  theme_bw() 
-growth.depth.plot
-
-# take largest absolute value for each alliance
-ggplot(growth.pred.res.max, aes(x = latent.depth.mean, y = mean.pred)) +
-  geom_hline(yintercept = 0) +
-  geom_point() + 
-  geom_smooth(method = "lm") + 
-  labs(x = "Latent Depth", y = "Largest Mean Predicted Military Spending Growth from Alliance") +
-  theme_classic() 
-cor.test(growth.pred.res.max$latent.depth.mean, growth.pred.res.max$mean.pred) # expected negative correlation
-
 
 
 

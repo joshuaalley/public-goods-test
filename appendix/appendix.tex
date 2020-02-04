@@ -72,7 +72,7 @@ I also included measures of regime type, external threat \citep{LeedsSavun2007},
 
 \section{Multilevel Model}
 
-This section describes the priors on the multilevel model, convergence diagnostics for the Hamiltonian Monte Carlo, and results from running the same model on a sample of states with at least one alliance. 
+This section describes the priors on the multilevel model, convergence diagnostics for the Hamiltonian Monte Carlo, and results from running the same model with a weighted economic size in the alliance participation matrix. 
 
 
 \subsection{Priors} 
@@ -194,6 +194,25 @@ Because graphical presentation of the 200 $\gamma$ parameters is more difficult,
 Given the number of parameters and potential simulation variance, such accuracy is tolerable. 
 Simulating data and recovering known parameters shows that the model estimates are reasonable approximations of the data-generating process. 
 
+
+\subsection{Alternative Coding of Economic Size}
+
+
+The values of -1 for small states and 1 for large states in the manuscript create coarse bins. 
+This could mask differences within each category that affect inferences about economic weight and percentage changes in military spending within alliances. 
+This section checks whether inferences are sensitive to an alternative coding of $\textbf{Z}$. 
+
+
+
+
+
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{alliance-coefs-year-w.pdf}
+	\caption{Estimated $\gamma$ parameters from a model with negative and positive economic weights in the alliance membership matrix.}
+	\label{fig:alliance-coefs-year-w}
+\end{figure}
 
 \section{Average Economic Weight and Military Spending}
 
