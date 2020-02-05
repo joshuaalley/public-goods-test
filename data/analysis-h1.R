@@ -46,6 +46,13 @@ atop.cow.year <- select(state.ally.year, atopid, ccode, year, contrib.gdp) %>%
 summary(atop.cow.year$contrib.gdp)
 ggplot(atop.cow.year, aes(x = contrib.gdp)) + geom_histogram()
 
+# check missing by years
+summary(subset(atop.cow.year, year < 1919, select = contrib.gdp)) # bilateral
+summary(subset(atop.cow.year, year >= 1919, select = contrib.gdp)) # multilateral
+
+# filter for post-45 only
+atop.cow.year <- filter(atop.cow.year, year >= 1919)
+
 # comparison bilateral and multilateral
 summary(subset(atop.cow.year, bilat == 1, select = contrib.gdp)) # bilateral
 summary(subset(atop.cow.year, bilat == 0, select = contrib.gdp)) # multilateral
@@ -58,12 +65,12 @@ ggplot(atop.cow.year, aes(x = as.factor(bilat), y = contrib.gdp)) +
 # -1 if above 3rd quartile, 1 if above in multilateral
 atop.cow.year$econ.size <- ifelse((atop.cow.year$contrib.gdp < 0.5000 & 
                                      atop.cow.year$bilat == 1) | # bilateral
-                                  (atop.cow.year$contrib.gdp <= 0.125 & 
+                                  (atop.cow.year$contrib.gdp <= 0.0707 & 
                                      atop.cow.year$bilat == 0), # multilateral
                                   -1, 0)
 atop.cow.year$econ.size[(atop.cow.year$contrib.gdp >= 0.5000 & 
                              atop.cow.year$bilat == 1) | # bilateral
-                          (atop.cow.year$contrib.gdp > 0.125 & 
+                          (atop.cow.year$contrib.gdp > 0.0707 & 
                              atop.cow.year$bilat == 0)] <- 1
 table(atop.cow.year$econ.size)
 
@@ -71,7 +78,7 @@ table(atop.cow.year$econ.size)
 # weighted size: negative for small, positive for large
 atop.cow.year$econ.size.w <- ifelse((atop.cow.year$contrib.gdp < 0.5 & 
                                      atop.cow.year$bilat == 1) | # bilateral
-                                    (atop.cow.year$contrib.gdp <= 0.125 & 
+                                    (atop.cow.year$contrib.gdp <= 0.0707 & 
                                        atop.cow.year$bilat == 0), # multilateral
                                     (atop.cow.year$contrib.gdp - 1), atop.cow.year$contrib.gdp)
 ggplot(atop.cow.year, aes(x = econ.size.w)) + geom_histogram()
@@ -88,12 +95,21 @@ state.mem <- distinct(state.mem, atopid, ccode, year, .keep_all = TRUE)
 # If a state is not a member of the alliance, corresponding matrix element = 0
 state.mem <- spread(state.mem, key = atopid, value = econ.size, fill = 0)
 
+# Flag alliances with some GDP data
+apply(state.mem, 2, function(x) max(x, na.rm = TRUE) == 0 & 
+                                min(x, na.rm = TRUE) == 0)
+
+# remove alliances with no GDP data
+state.mem <- state.mem[, apply(state.mem, 2, function(x) !(max(x, na.rm = TRUE) == 0 & 
+                                 min(x, na.rm = TRUE) == 0))
+                       ]
 
 # Add state membership in alliances to this data
 reg.state.data <- state.vars %>%
   select(ccode, year, growth.milex,
          atwar, civilwar.part, rival.milex, ln.gdp, polity, 
          cold.war, disputes, majpower) %>%
+  filter(year >= 1919) %>%
   left_join(state.mem)
 
 # fill in missing alliance data with zeros
@@ -102,14 +118,8 @@ reg.state.data[, 12:ncol(reg.state.data)][is.na(reg.state.data[, 12:ncol(reg.sta
 # Create a matrix of state membership in alliances (Z in STAN model)
 reg.state.data <- reg.state.data[complete.cases(reg.state.data), ]
 
-# filter only for states with at least one alliance
-# reg.state.data <- reg.state.data %>%
-#  mutate(allied.cap = rowSums(.[12: ncol(reg.state.data)])) %>% 
-#  filter(allied.cap != 0) %>%
-#  select(-(allied.cap))
-
 state.mem.mat <- as.matrix(reg.state.data[, 12: ncol(reg.state.data)])
-
+ncol(state.mem.mat)
 
 # Rescale state regression variables
 reg.state.data[, 5:11] <- lapply(reg.state.data[, 5:11], 
@@ -198,9 +208,9 @@ sum(gamma.summary$gamma.negative) # 1 treaty
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
-sum(gamma.summary$positive.lmean) # 28 treaties
+sum(gamma.summary$positive.lmean) # 13 treaties
 gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
-sum(gamma.summary$negative.lmean) # 257 treaties
+sum(gamma.summary$negative.lmean) # 141 treaties
 
 
 # Plot posterior means of alliance coefficients
@@ -215,7 +225,8 @@ ggplot(gamma.summary, aes(x = gamma.mean)) +
 atop <- read.csv("data/atop-additions.csv")
 
 # Join alliance coefficients with ATOP data
-alliance.coefs <- left_join(atop, gamma.summary)
+alliance.coefs <- left_join(atop, gamma.summary) %>%
+  filter(begyr >= 1899)
 
 
 # Plot by start year of alliance
@@ -270,7 +281,7 @@ gamma.probs$nz.pos <- ifelse(gamma.probs$pos.post.prob >= .90 &
 sum(gamma.probs$nz.pos) # 0
 gamma.probs$nz.neg <- ifelse(gamma.probs$pos.post.prob <= .10 & 
                                gamma.probs$non.zero == 1, 1, 0)
-sum(gamma.probs$nz.neg) # 5
+sum(gamma.probs$nz.neg) # 3
 
 
 # Look at distribution of hyperparameters
@@ -283,9 +294,9 @@ summary(ml.model.sum$theta)
 
 
  
-### simulate impact of increasing share of allied GDP, given max positive gamma (OAS)
+### simulate impact of increasing share of allied GDP, given max positive gamma (ATOPID 3150)
 # create relevant dataframe of coefficients
-coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 147])
+coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 51])
 
 # Create hypothetical dataset 
 all.data.lshare <- numeric(ncol(reg.state.mat) + 2)

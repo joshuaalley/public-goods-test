@@ -18,11 +18,22 @@ state.mem.w <- distinct(state.mem.w, atopid, ccode, year, .keep_all = TRUE)
 state.mem.w <- spread(state.mem.w, key = atopid, value = econ.size.w, fill = 0)
 
 
+# Flag alliances with some GDP data
+apply(state.mem.w, 2, function(x) max(x, na.rm = TRUE) == 0 & 
+        min(x, na.rm = TRUE) == 0)
+
+# remove alliances with no GDP data
+state.mem.w <- state.mem.w[, apply(state.mem.w, 2, function(x) !(max(x, na.rm = TRUE) == 0 & 
+                                                             min(x, na.rm = TRUE) == 0))
+                       ]
+
+
 # Add state membership in alliances to this data
 reg.state.data.w <- state.vars %>%
   select(ccode, year, growth.milex,
          atwar, civilwar.part, rival.milex, ln.gdp, polity, 
          cold.war, disputes, majpower) %>%
+  filter(year >= 1919) %>%
   left_join(state.mem.w)
 
 # fill in missing alliance data with zeros
@@ -124,7 +135,8 @@ ggplot(gamma.summary.w, aes(x = atopid, y = gamma.mean)) +
 atop <- read.csv("data/atop-additions.csv")
 
 # Join alliance coefficients with ATOP data
-alliance.coefs.w <- left_join(atop, gamma.summary.w)
+alliance.coefs.w <- left_join(atop, gamma.summary.w) %>%
+  filter(begyr >= 1898)
 
 
 # Plot by start year of alliance
@@ -194,6 +206,7 @@ summary(model.sum.w$theta)
 
 
 # Predicted military spending change for all individual alliances
+# plot against economic weight
 a <- ncol(state.mem.matw)
 growth.pred <- rep(NA, a)
 growth.pred <- list()
@@ -233,38 +246,38 @@ growth.pred.res <- left_join(growth.pred.res, alliance.char)
 
 # Create a dataframe with maximum predicted change, positive or negative 
 growth.pred.res.max <- growth.pred.res %>% 
-  select(atopid, latent.depth.mean, mean.pred) %>% 
+  select(atopid, nz.weights, mean.pred) %>% 
   group_by(atopid) %>%
   summarise_each(funs(.[which.max(abs(.))]))  
 
 
 
 # plot: hard to read with all the data points
-ggplot(growth.pred.res, aes(x = latent.depth.mean, y = mean.pred)) +
+ggplot(growth.pred.res, aes(x = nz.weights, y = mean.pred)) +
   geom_hline(yintercept = 0) +
   geom_point(position = position_jitter(width = 0.1), alpha = .25) + 
   geom_smooth(method = "lm") + 
-  labs(x = "Latent Depth", y = "Mean Predicted Military Spending Growth from Alliance") +
+  labs(x = "Economic Weight", y = "Mean Predicted Military Spending Growth from Alliance") +
   ggtitle("Predicted Military Spending Growth and Treaty Depth") +
   theme_bw() 
 cor.test(growth.pred.res$latent.depth.mean, growth.pred.res$mean.pred) # expected negative correlation
 
 
 # Another way to attack the clear overplotting problem
-growth.depth.plot <- ggplot(growth.pred.res, aes(x = latent.depth.mean, y = mean.pred)) +
+growth.weight.plot <- ggplot(growth.pred.res, aes(x = nz.weights, y = mean.pred)) +
   geom_hline(yintercept = 0) +
   stat_bin_hex(colour="white", na.rm=TRUE) +
   scale_fill_gradientn(colours=c("#999999","#333333"), 
                        name = "Frequency", 
                        na.value=NA) +
-  labs(x = "Latent Depth",
+  labs(x = "Economic Weight",
        y = "Mean Predicted Spending Growth from Alliance") +
   ggtitle("Predicted Military Spending Growth and Treaty Depth") +
   theme_bw() 
-growth.depth.plot
+growth.weight.plot
 
 # take largest absolute value for each alliance
-ggplot(growth.pred.res.max, aes(x = latent.depth.mean, y = mean.pred)) +
+ggplot(growth.pred.res.max, aes(x = nz.weights, y = mean.pred)) +
   geom_hline(yintercept = 0) +
   geom_point() + 
   geom_smooth(method = "lm") + 
