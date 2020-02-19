@@ -9,6 +9,7 @@
 \usepackage{grffile} 
 \usepackage{hyperref}
 \usepackage{adjustbox}
+\usepackage{amsmath}
 \setcitestyle{aysep{}}
 
 
@@ -26,21 +27,69 @@
 \doublespace
 
 This appendix contains supporting materials for the test of Hypothesis 1 in ``Reassessing the Public Goods Theory of Alliances.'' 
-Section 1 provides more detail about the variables in the model and Section 2 assesses model fit and accuracy. 
+Section 1 provides a proof that analyses of GDP and defense burdens are misspecified. 
+Section 2 then provides more detail about the variables in the model and Section 3 assesses model fit and accuracy. 
 The final section summarizes a test that uses average economic weight in their alliances to predict percentage changes in military spending. 
+
+
+\section{Specification of GDP and Defense Burdens} 
+
+As I note in the introduction, models and correlations between GDP and defense burdens are misspecified. 
+Because defense burdens include GDP in the denominator, changes in GDP affect the expected value of defense burdens. 
+This has important consequences for correlations and linear regression estimates alike. 
+
+
+For a correlation $\rho$ between two variables $X$ and $Y$:
+\begin{equation}
+\rho = \frac{Cov(X,Y)}{Var(X)Var(Y)} 
+\end{equation}
+
+In a linear regression with one independent variable, the coefficient $\beta_1$ is equal to:
+\begin{equation}
+\beta_1 = \frac{Cov(X,y)}{Var(X)} 
+\end{equation} 
+
+Both these estimates depend on the covariance between the two variables. 
+In general, covariance is equal to:
+\begin{equation}
+Cov(X, Y) = E[X,Y] - E[X] E[Y]
+\end{equation}
+
+Now, consider the covariance between $GDP$ and military spending as a share of GDP, $\frac{ME}{GDP}$. 
+\begin{equation}
+Cov\left(GDP, \frac{ME}{GDP} \right) = E\left[GDP, \frac{ME}{GDP} \right] - E[GDP] E\left[\frac{ME}{GDP} \right]
+\end{equation}
+
+Per (CITE Kendall's here), the expected value of the defense burden is equal to:
+\begin{equation}
+E\left[\frac{ME}{GDP} \right] = \frac{E[GDP]}{E\left[\frac{ME}{GDP} \right]} - \frac{Cov(GDP, ME)}{\left(E\left[\frac{ME}{GDP} \right]\right)^2} - \frac{Var(ME) E[GDP]}{\left(E\left[\frac{ME}{GDP} \right]\right)^3}
+\end{equation}
+
+Substituting this into the covariance of GDP and defense burdens:
+\begin{multline}
+Cov\left(GDP, \frac{ME}{GDP} \right) = E\left[GDP, \frac{ME}{GDP} \right] - \\ E[GDP] \left( \frac{E[GDP]}{E\left[\frac{ME}{GDP} \right]} - \frac{Cov(GDP, ME)}{\left(E\left[\frac{ME}{GDP} \right]\right)^2} - \frac{Var(ME) E[GDP]}{\left(E\left[\frac{ME}{GDP} \right]\right)^3} \right)
+\end{multline}
+
+This then simplifies to:
+\begin{multline}
+Cov\left(GDP, \frac{ME}{GDP} \right) = E\left[GDP, \frac{ME}{GDP} \right] - \\ \frac{(E[GDP])^2}{E\left[\frac{ME}{GDP} \right]} - \frac{E[GDP] Cov(GDP, ME)}{\left(E\left[\frac{ME}{GDP} \right]\right)^2} - \frac{Var(ME) (E[GDP])^2}{\left(E\left[\frac{ME}{GDP} \right]\right)^3}
+\end{multline}
+
+Therefore the mean or expected value of GDP, $E[GDP]$, affects the expected value of defense burdens $E\left[\frac{ME}{GDP} \right]$.
+This change in the expected value impacts the covariance between GDP and defense burdens, which then informs regression and correlation estimates.  
+Because defense burdens are a non-linear function of military spending and GDP, the consequences of this specification problem for estimates are hard to predict. 
 
 
 \section{Variables} 
 
 
 Olson and Zeckhauser use GDP to measure state size, so I constructed a measure of GDP using data from the Maddison Project, which provides longer historical coverage \citep{Boltetal2018}. 
-I then take the natural log of GDP to address the variable's skewed distribution. 
 I use military spending data from the Correlates of War Project \citep{SingerCINC1988}.  
 All alliance membership data comes from Version 4 of the Alliance Treaty Obligations and Provisions (ATOP) data \citep{Leedsetal2002}.  
 
 
 The dependent variable is percentage changes in military spending. 
-Olson and Zeckhauser use defense spending as a share of GDP as their dependent variable, which is the source of previously described identification problems \citep{Kronmal1993, PluemperNeumayer2015}. 
+Olson and Zeckhauser use defense spending as a share of GDP as their dependent variable, which is the source of previously described model specification problems \citep{PluemperNeumayer2015}. 
 I use percentage changes instead of the defense burden because this measure gives a sense of burdens from changing defense budgets with a lower risk of spurious inferences. 
 Annual percentage changes in spending is the change in military spending as a share of the previous year's budget:
 

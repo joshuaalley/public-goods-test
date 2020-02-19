@@ -74,7 +74,7 @@ model.1 <- stan_model(file = "data/ml-model-stan.stan")
 # Run model with full Bayes
 system.time(
   ml.model.w <- sampling(model.1, data = stan.data.w, 
-                       iter = 2000, warmup = 1000, chains = 4
+                       iter = 2100, warmup = 1000, chains = 4
   )
 )
 
@@ -225,7 +225,7 @@ names(growth.pred) <- c(colnames(state.mem.matw)) # label each matrix with ATOPI
 growth.pred.mean <- lapply(growth.pred, function(x) apply(x, 1, mean))
 for(i in 1:a){
   growth.pred.mean[[i]] <- as.data.frame(growth.pred.mean[[i]])
-  growth.pred.mean[[i]]$atopid <-  colnames(state.mem.matw)[[i]]
+  growth.pred.mean[[i]]$atopid <-  names(growth.pred)[[i]]
 }
 
 growth.pred.sd <- lapply(growth.pred, function(x) as.data.frame(apply(x, 1, sd)))
@@ -281,7 +281,7 @@ ggplot(growth.pred.res.max, aes(x = nz.weights, y = mean.pred)) +
   geom_hline(yintercept = 0) +
   geom_point() + 
   geom_smooth(method = "lm") + 
-  labs(x = "Latent Depth", y = "Largest Mean Predicted Military Spending Growth from Alliance") +
+  labs(x = "Economic Weight", y = "Largest Mean Predicted Military Spending Growth from Alliance") +
   theme_classic() 
 cor.test(growth.pred.res.max$latent.depth.mean, growth.pred.res.max$mean.pred) # expected negative correlation
 

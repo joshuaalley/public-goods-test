@@ -60,17 +60,21 @@ ggplot(atop.cow.year, aes(x = as.factor(bilat), y = contrib.gdp)) +
   geom_boxplot() + theme_bw()
 
 
+
+
+
+
 # classify states as small or large in their alliances
 # -1 if below 1st quartile, 1 if above in bilateral
 # -1 if above 3rd quartile, 1 if above in multilateral
 atop.cow.year$econ.size <- ifelse((atop.cow.year$contrib.gdp < 0.5000 & 
                                      atop.cow.year$bilat == 1) | # bilateral
-                                  (atop.cow.year$contrib.gdp <= 0.0707 & 
+                                  (atop.cow.year$contrib.gdp <= 0.08 & 
                                      atop.cow.year$bilat == 0), # multilateral
                                   -1, 0)
 atop.cow.year$econ.size[(atop.cow.year$contrib.gdp >= 0.5000 & 
                              atop.cow.year$bilat == 1) | # bilateral
-                          (atop.cow.year$contrib.gdp > 0.0707 & 
+                          (atop.cow.year$contrib.gdp > 0.08 & 
                              atop.cow.year$bilat == 0)] <- 1
 table(atop.cow.year$econ.size)
 
@@ -84,6 +88,12 @@ atop.cow.year$econ.size.w <- ifelse((atop.cow.year$contrib.gdp < 0.5 &
 ggplot(atop.cow.year, aes(x = econ.size.w)) + geom_histogram()
 summary(subset(atop.cow.year, bilat == 1, select = econ.size.w)) # bilateral
 summary(subset(atop.cow.year, bilat == 0, select = econ.size.w)) # multilateral
+
+
+# validity check: NATO coding
+# US, UK and France all clear the 3rd quartile. 
+nato <- filter(atop.cow.year, atopid == 3180) %>%
+              select(contrib.gdp, econ.size, econ.size.w)
 
 
 # Create a dataset of state-year alliance membership:
@@ -158,7 +168,7 @@ rm(ml.model.vb)
 # Run model with full Bayes
 system.time(
   ml.model <- sampling(model.1, data = stan.data, 
-                       iter = 2000, warmup = 1000, chains = 4
+                       iter = 2100, warmup = 1000, chains = 4
   )
 )
 
@@ -201,16 +211,16 @@ colnames(gamma.summary) <- c("atopid", "gamma.mean", "gamma.se.mean",
 # tabulate number of positive and negative estimates
 # based on 90% credible intervals
 gamma.summary$gamma.positive <- ifelse((gamma.summary$gamma.5 > 0 & gamma.summary$gamma.95 > 0), 1, 0)
-sum(gamma.summary$gamma.positive) # 0 treaties
+sum(gamma.summary$gamma.positive) # 0 
 gamma.summary$gamma.negative <- ifelse((gamma.summary$gamma.5 < 0 & gamma.summary$gamma.95 < 0), 1, 0)
-sum(gamma.summary$gamma.negative) # 1 treaty
+sum(gamma.summary$gamma.negative) # 0
 
 
 # Ignore uncertainty in estimates: are posterior means positive or negative? 
 gamma.summary$positive.lmean <- ifelse(gamma.summary$gamma.mean > 0, 1, 0)
 sum(gamma.summary$positive.lmean) # 13 treaties
 gamma.summary$negative.lmean <- ifelse(gamma.summary$gamma.mean < 0, 1, 0)
-sum(gamma.summary$negative.lmean) # 141 treaties
+sum(gamma.summary$negative.lmean) # 191 treaties
 
 
 # Plot posterior means of alliance coefficients
@@ -281,7 +291,7 @@ gamma.probs$nz.pos <- ifelse(gamma.probs$pos.post.prob >= .90 &
 sum(gamma.probs$nz.pos) # 0
 gamma.probs$nz.neg <- ifelse(gamma.probs$pos.post.prob <= .10 & 
                                gamma.probs$non.zero == 1, 1, 0)
-sum(gamma.probs$nz.neg) # 3
+sum(gamma.probs$nz.neg) # 0
 
 
 # Look at distribution of hyperparameters
@@ -294,9 +304,9 @@ summary(ml.model.sum$theta)
 
 
  
-### simulate impact of increasing share of allied GDP, given max positive gamma (ATOPID 3150)
+### simulate impact of increasing share of allied GDP, given max positive gamma
 # create relevant dataframe of coefficients
-coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 51])
+coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 75])
 
 # Create hypothetical dataset 
 all.data.lshare <- numeric(ncol(reg.state.mat) + 2)
@@ -344,7 +354,6 @@ mcmc_intervals(pred.data, prob = .9) +
   labs(x = "Predicted Percentage Change in Military Spending", y = "Share of Allied GDP") +
   theme_bw()
 ggsave("manuscript/pred-change-share.pdf", height = 6, width = 8)
-
 
 
 
