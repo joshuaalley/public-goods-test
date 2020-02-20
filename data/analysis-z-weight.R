@@ -221,28 +221,19 @@ for(i in 1:a){
 names(growth.pred) <- c(colnames(state.mem.matw)) # label each matrix with ATOPID
 
 
-# Capture means and add a label variable 
-growth.pred.mean <- lapply(growth.pred, function(x) apply(x, 1, mean))
-for(i in 1:a){
-  growth.pred.mean[[i]] <- as.data.frame(growth.pred.mean[[i]])
-  growth.pred.mean[[i]]$atopid <-  names(growth.pred)[[i]]
-}
-
+# Capture means and SD in lists of dataframes
+growth.pred.mean <- lapply(growth.pred, function(x) as.data.frame(apply(x, 1, mean)))
 growth.pred.sd <- lapply(growth.pred, function(x) as.data.frame(apply(x, 1, sd)))
-for(i in 1:a){
-  growth.pred.sd[[i]] <- as.data.frame(growth.pred.sd[[i]])
-}
+
 
 # combine means and sds in a dataframe 
 growth.pred.res <- cbind(do.call(rbind, growth.pred.mean), unlist(growth.pred.sd))
-colnames(growth.pred.res) <- c("mean.pred", "atopid", "sd.pred")
+growth.pred.res$atopid <- as.numeric(substr(rownames(growth.pred.res), 1, 4))
+colnames(growth.pred.res) <- c("mean.pred", "sd.pred", "atopid")
 growth.pred.res$mean.pred <- sinh(growth.pred.res$mean.pred) # reverse IHS transformation
 growth.pred.res$sd.pred <- sinh(growth.pred.res$sd.pred) # reverse IHS transformation
-growth.pred.res$atopid <- as.numeric(growth.pred.res$atopid)
 growth.pred.res$nz.weights <- state.mem.matw[state.mem.matw != 0]
 
-# Add alliance characteristics
-growth.pred.res <- left_join(growth.pred.res, alliance.char)
 
 # Create a dataframe with maximum predicted change, positive or negative 
 growth.pred.res.max <- growth.pred.res %>% 
@@ -260,7 +251,6 @@ ggplot(growth.pred.res, aes(x = nz.weights, y = mean.pred)) +
   labs(x = "Economic Weight", y = "Mean Predicted Military Spending Growth from Alliance") +
   ggtitle("Predicted Military Spending Growth and Treaty Depth") +
   theme_bw() 
-cor.test(growth.pred.res$latent.depth.mean, growth.pred.res$mean.pred) # expected negative correlation
 
 
 # Another way to attack the clear overplotting problem
@@ -283,7 +273,6 @@ ggplot(growth.pred.res.max, aes(x = nz.weights, y = mean.pred)) +
   geom_smooth(method = "lm") + 
   labs(x = "Economic Weight", y = "Largest Mean Predicted Military Spending Growth from Alliance") +
   theme_classic() 
-cor.test(growth.pred.res.max$latent.depth.mean, growth.pred.res.max$mean.pred) # expected negative correlation
 
 
 

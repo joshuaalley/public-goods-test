@@ -28,7 +28,7 @@ n.sim = 2000 # 2000 simulated observations
 
 
 # Take a chunk of the membership matrix
-state.mem.sim <- state.mem.mat[1001:3000, 151:250]
+state.mem.sim <- state.mem.mat[1001:3000, 51:150]
 
 
 # pull data into a list and add some simulations
@@ -81,7 +81,7 @@ sim.data.est$run_estimation <- 1 # estimate the likelihood
 
 # run the model on this simulated data: attempt to recover parameters
 sim.out.est <- sampling(compiled.ml, data = sim.data.est,
-                        iter = 1000, warmup = 500, chains = 4,
+                        iter = 2000, warmup = 1000, chains = 4,
                         control = list(max_treedepth = 15))
 
 
@@ -112,8 +112,8 @@ mcmc_areas(sim.est.sum$beta, pars = c("beta2"), prob = .9) +
 # Gamma parameters
 mcmc_areas(sim.est.sum$gamma, pars = c("gamma1"), prob = .9) +
   vline_at(true.gamma[1], color = "black", size = 2) 
-mcmc_areas(sim.est.sum$gamma, pars = c("gamma99"), prob = .9) +
-  vline_at(true.gamma[99], color = "black", size = 2) 
+mcmc_areas(sim.est.sum$gamma, pars = c("gamma39"), prob = .9) +
+  vline_at(true.gamma[39], color = "black", size = 2) 
 
 
 

@@ -208,7 +208,7 @@ This process checks whether the model can recover parameters from a known data-g
 
 I simulate a hypothetical dataset with 2000 observations of 50 states observed over 200 years.
 I used part of the observed alliance data from the paper, due to problems simulating an alliance membership matrix with the same characteristics as the alliance data. 
-There are 100 alliances in this data, and 2 state-level control variables. 
+There are 100 alliances in this data along with 2 state-level control variables. 
 The hypothetical outcome is drawn from a Cauchy distribution with mean 0 and a scale of .25, which is more heavy-tailed than even my observed data. 
 
 
@@ -238,8 +238,8 @@ In these figures, the true parameter value is marked with a thick black line, wh
 \end{figure}
 
 
-Because graphical presentation of the 200 $\gamma$ parameters is more difficult, I calculated whether the credible interval contained the known parameter. 
-91 of the 100 intervals include the ``true'' $\gamma$ value. 
+Because graphical presentation of the 100 $\gamma$ parameters is more difficult, I calculated whether the credible interval contained the known parameter. 
+88 of the 100 intervals include the ``true'' $\gamma$ value. 
 Given the number of parameters and potential simulation variance, such accuracy is tolerable. 
 Simulating data and recovering known parameters shows that the model estimates are reasonable approximations of the data-generating process. 
 
@@ -293,64 +293,60 @@ Other controls are the same as the multilevel model.
 
 
 \autoref{tab:avg-weight-res} summarizes the results of these four estimation strategies. 
-The robust regression coefficients for average economic weight are of small substantive magnitude and are statistically insignificant. 
-The OLS estimates for average economic weight are larger, but the difference between these estimates and the robust regression suggests that unusual observations are the source of this difference. 
+The robust regression coefficients for average economic weight are of small substantive magnitude and the 95\% confidence intervals include a range of positive and negative values. 
+The OLS estimates for average economic weight are larger, but the difference in residual standard error between these estimates and the robust regression suggests that the OLS estimates are driven by unusual observations. 
+
 
 
 \begin{table}[!htbp] \centering 
-  \caption{OLS and robust regression of the association between average economic weight in alliances and percentage changes in military expenditures from 1919 to 2007.} 
-  \label{tab:avg-weight-res} 
-\begin{tabular}{@{\extracolsep{5pt}}lcccc} 
+\begin{tabular}{@{\extracolsep{0pt}}lcccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
  & \multicolumn{4}{c}{\textit{Dependent variable:}} \\ 
 \cline{2-5} 
 \\[-1.8ex] & \multicolumn{2}{c}{\% Change Milex.} & \multicolumn{2}{c}{IHS(\% Change Milex.)} \\ 
-\\[-1.8ex] & \textit{Robust Reg.} & \textit{OLS} & \textit{OLS} & \textit{Robust} \\ 
+\\[-1.8ex] & \textit{robust} & \textit{OLS} & \textit{OLS} & \textit{robust} \\ 
+ & \textit{linear} & \textit{} & \textit{} & \textit{linear} \\ 
 \\[-1.8ex] & (1) & (2) & (3) & (4)\\ 
 \hline \\[-1.8ex] 
- Average Economic Weight & $-$0.016 & 0.525 & 0.063 & $-$0.015 \\ 
-  & (0.020) & (0.644) & (0.042) & (0.020) \\ 
-  & & & & \\ 
- ln(GDP) & $-$0.119$^{***}$ & $-$6.384$^{***}$ & $-$0.468$^{***}$ & $-$0.118$^{***}$ \\ 
-  & (0.046) & (1.462) & (0.096) & (0.046) \\ 
-  & & & & \\ 
- Average Alliance Size & $-$0.0002 & $-$0.013 & 0.0002 & $-$0.0002 \\ 
-  & (0.0004) & (0.012) & (0.001) & (0.0004) \\ 
-  & & & & \\ 
- Average Allied Democracy & 0.001 & $-$0.032 & $-$0.001 & 0.001 \\ 
-  & (0.001) & (0.025) & (0.002) & (0.001) \\ 
-  & & & & \\ 
- International War & 0.109$^{***}$ & 0.570 & 0.248$^{***}$ & 0.108$^{***}$ \\ 
-  & (0.012) & (0.381) & (0.025) & (0.012) \\ 
-  & & & & \\ 
- Civil War Participant & $-$0.001 & 0.134 & 0.016 & $-$0.001 \\ 
-  & (0.010) & (0.308) & (0.020) & (0.010) \\ 
-  & & & & \\ 
- Regime Type & $-$0.001 & 0.039$^{**}$ & 0.001 & $-$0.001 \\ 
-  & (0.001) & (0.019) & (0.001) & (0.001) \\ 
-  & & & & \\ 
- External Threat & 0.057$^{***}$ & 1.195$^{**}$ & 0.117$^{***}$ & 0.057$^{***}$ \\ 
-  & (0.015) & (0.472) & (0.031) & (0.015) \\ 
-  & & & & \\ 
- Cold War & 0.047$^{***}$ & 0.387$^{**}$ & 0.039$^{***}$ & 0.046$^{***}$ \\ 
-  & (0.006) & (0.179) & (0.012) & (0.006) \\ 
-  & & & & \\ 
- Constant & 0.138$^{***}$ & 5.156$^{***}$ & 0.425$^{***}$ & 0.137$^{***}$ \\ 
-  & (0.037) & (1.186) & (0.078) & (0.037) \\ 
-\hline \\[-1.8ex] 
-Observations & 5,409 & 5,409 & 5,409 & 5,409 \\ 
-R$^{2}$ &  & 0.007 & 0.026 &  \\  
-Residual Std. Error (df = 5399) & 0.157 & 6.034 & 0.397 & 0.156 \\ 
+ Avg. Economic Weight & $-$0.008 & 0.382 & 0.030 & $-$0.008 \\ 
+  & ($-$0.051, 0.036) & ($-$1.024, 1.789) & ($-$0.058, 0.118) & ($-$0.051, 0.036) \\ 
+  ln(GDP) & $-$0.035 & $-$6.656$^{}$ & $-$0.363$^{}$ & $-$0.033 \\ 
+  & ($-$0.135, 0.066) & ($-$9.896, $-$3.417) & ($-$0.566, $-$0.160) & ($-$0.133, 0.066) \\ 
+  Avg. Alliance Size & $-$0.0001 & $-$0.014 & 0.00004 & $-$0.0001 \\ 
+  & ($-$0.001, 0.001) & ($-$0.039, 0.011) & ($-$0.002, 0.002) & ($-$0.001, 0.001) \\ 
+  Avg. Allied Democracy & 0.0003 & $-$0.031 & $-$0.001 & 0.0003 \\ 
+  & ($-$0.001, 0.002) & ($-$0.084, 0.022) & ($-$0.005, 0.002) & ($-$0.001, 0.002) \\ 
+  International War & 0.082$^{}$ & 0.149 & 0.140$^{}$ & 0.080$^{}$ \\ 
+  & (0.054, 0.109) & ($-$0.728, 1.026) & (0.085, 0.195) & (0.053, 0.107) \\ 
+  Civil War Participant & $-$0.003 & 0.178 & 0.020 & $-$0.003 \\ 
+  & ($-$0.023, 0.017) & ($-$0.464, 0.821) & ($-$0.020, 0.061) & ($-$0.023, 0.017) \\ 
+  Regime Type & $-$0.001 & 0.039$^{}$ & 0.0002 & $-$0.001 \\ 
+  & ($-$0.002, 0.001) & ($-$0.002, 0.079) & ($-$0.002, 0.003) & ($-$0.002, 0.001) \\ 
+  External Threat & 0.072$^{}$ & 1.109$^{}$ & 0.107$^{}$ & 0.071$^{}$ \\ 
+  & (0.040, 0.104) & (0.071, 2.146) & (0.042, 0.172) & (0.039, 0.103) \\ 
+  Cold War & 0.040$^{}$ & 0.439$^{}$ & 0.040$^{}$ & 0.040$^{}$ \\ 
+  & (0.029, 0.052) & (0.058, 0.820) & (0.016, 0.064) & (0.028, 0.052) \\ 
+  Constant & 0.067 & 5.420$^{}$ & 0.353$^{}$ & 0.065 \\ 
+  & ($-$0.015, 0.148) & (2.791, 8.049) & (0.189, 0.518) & ($-$0.016, 0.146) \\ 
+ \hline \\[-1.8ex] 
+Observations & 5,022 & 5,022 & 5,022 & 5,022 \\ 
+R$^{2}$ &  & 0.007 & 0.015 &  \\ 
+Adjusted R$^{2}$ &  & 0.005 & 0.013 &  \\ 
+Residual Std. Error (df = 5012) & 0.160 & 6.230 & 0.390 & 0.159 \\ 
+F Statistic (df = 9; 5012) &  & 3.657$^{}$  (p = 0.0002) & 8.219$^{}$  (p = 0.000) &  \\ 
 \hline 
 \hline \\[-1.8ex] 
-\textit{Note:}  & \multicolumn{4}{r}{$^{*}$p$<$0.1; $^{**}$p$<$0.05; $^{***}$p$<$0.01} \\ 
+\textit{Note:}  & \multicolumn{4}{r}{95\% Confidence Intervals in Parentheses.} \\ 
 \end{tabular} 
+  \caption{OLS and robust regression of the association between average economic weight in alliances
+and percentage changes in military expenditures from 1919 to 2007.} 
+  \label{tab:avg-weight-res} 
 \end{table} 
 
 To asses the substantive impact of increasing a state's average economic weight in its alliances, I simulated the effect of moving average weight from the first quartile (0.05) to the third quartile (.40). 
 Holding all other variables at their medians or modes, this increase in weight implies an expected percentage change in military spending of -0.005. 
-The 90\% credible interval for this change ranges from -0.017 to 0.007, which implies that a substantively meaningful negative effect is more plausible. 
+The 90\% credible interval for this change ranges from -0.017 to 0.01, so the impact of a massive rise in average economic weight is unclear. 
 
 
 

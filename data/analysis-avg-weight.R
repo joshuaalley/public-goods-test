@@ -15,12 +15,6 @@ library(tidyverse)
 library(stargazer)
 
 
-
-# Set working directory to current folder 
-setwd(here::here())
-getwd()
-
-
 # set seed
 set.seed(12)
 
@@ -81,6 +75,7 @@ state.char.full <- state.char.full %>%
   mutate(
     ln.gdp.norm = ln.gdp / max(ln.gdp, na.rm = TRUE)
   ) %>%
+  filter(year >= 1919) %>%
   group_by()
 
 # Compare the two variables 
@@ -112,8 +107,6 @@ m1.pg.abs <- rlm(growth.milex ~ avg.treaty.weight + ln.gdp.norm +
                 )
 summary(m1.pg.abs)
 plotreg(m1.pg.abs)
-stargazer(m1.pg.abs)
-
 
 # OLS
 m2.pg.abs <- lm(growth.milex ~ avg.treaty.weight + ln.gdp.norm + 
@@ -143,7 +136,7 @@ abline(h = 0)
 plot(m1.abs.ihs$residuals, m1.abs.ihs$w) # transformed DV
 
 
-# OLS estimation 
+# OLS estimation: positive driven by unusual obs
 m2.abs.ihs <- lm(ihs.growth.milex ~ avg.treaty.weight + ln.gdp.norm + 
                     avg.num.mem + avg.dem.prop + 
                     atwar + civilwar.part + polity  +
@@ -154,7 +147,19 @@ summary(m2.abs.ihs)
 
 
 # Take this and ols estiamtes in one appendix table
-stargazer(m1.pg.abs, m2.pg.abs, m2.abs.ihs, m1.abs.ihs)
+stargazer(m1.pg.abs, m2.pg.abs, m2.abs.ihs, m1.abs.ihs,
+          style = "all2",
+          dep.var.labels = c("\\% Change Milex.", "IHS(\\% Change Milex.)"),
+          covariate.labels = c("Avg. Economic Weight",
+                               "ln(GDP)", "Avg. Alliance Size",
+                               "Avg. Allied Democracy", "International War",
+                               "Civil War Participant", "Regime Type",
+                               "External Threat", "Cold War"),
+          ci=TRUE, 
+          star.char = c("", "", ""),
+          notes = "95\\% Confidence Intervals in Parentheses.", 
+          notes.append = FALSE,
+          label = c("tab:avg-weight-res"))
 
 
 ### calculate likely effect of increasing average weight
