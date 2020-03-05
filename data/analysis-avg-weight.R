@@ -4,21 +4,6 @@
 # Examine corelation between economic weight and military spending 
 
 
-# Load packages
-library(here)
-library(arm)
-library(reshape2)
-library(MASS)
-library(plm)
-library(texreg)
-library(tidyverse)
-library(stargazer)
-
-
-# set seed
-set.seed(12)
-
-
 # Load state-ally-year data 
 state.ally.year <- read.csv("data/alliance-state-year.csv")
 state.vars <- read.csv("data/state-vars.csv")

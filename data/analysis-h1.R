@@ -1,26 +1,7 @@
 # Joshua Alley
 # Texas A&M University
 # Empirical test of public goods theory of alliances
-# Examine Hypothesis 2 
-
-
-
-# Load packages
-library(arm)
-library(tidyverse)
-library(rstan)
-library(bayesplot)
-library(shinystan)
-library(reshape2)
-
-# Set-up STAN guidelines
-options(mc.cores = parallel::detectCores())
-rstan_options(auto_write = TRUE)
-
-
-# Set seed 
-set.seed(12)
-
+# Examine Hypothesis 1 and 2
 
 
 ### Multilevel model- heterogenous effects across treaties

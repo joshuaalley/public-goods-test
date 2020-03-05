@@ -3,9 +3,6 @@
 # Analysis with weighted alliance
 
 
-# load key package
-library(hexbin)
-
 # Uses positive and negative GDP share values from the analysis-h1 script
 
 # Create a dataset of state-year alliance membership:

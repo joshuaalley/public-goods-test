@@ -7,21 +7,6 @@
 
 # working directory set through projects
 
-# load packages 
-library(MASS)
-library(tidyverse)
-library(rstan)
-library(shinystan)
-library(bayesplot)
-
-
-# set-up global STAN options
-options(mc.cores = parallel::detectCores())
-rstan_options(auto_write = TRUE)
-
-
-# set seed
-set.seed(12)
 
 # Set-up simulatiom data
 n.sim = 2000 # 2000 simulated observations
