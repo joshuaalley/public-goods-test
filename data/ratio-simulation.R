@@ -132,8 +132,8 @@ tstat.nocor <- ggplot(sum.lm.long, aes(y = tstat, x = as.factor(outcome))) +
                    y = "Test Statistic Estimate",
                    title = "Uncorrelated Variables"
                    ) +
-                scale_x_discrete(labels=c("non.ratio.tstat" = "Non-Ratio Outcome",
-                                   "ratio.tstat" = "Ratio Outcome"))
+                scale_x_discrete(labels=c("non.ratio.tstat" = "Non-Ratio",
+                                   "ratio.tstat" = "Ratio"))
 tstat.nocor
 
 # tabulate results
@@ -162,6 +162,35 @@ state.data19 %>%
 
 # 20 units
 sim.data.cor <- vector(mode = "list", length = 20)
+
+for(i in 1:length(sim.data.cor)){
+  
+  # Simulate correlated predictor and outcome
+  burn.in <- 300
+  n <- 100 
+  rho <- cor(state.data19$ln.milex, state.data19$ln.gdp, 
+             use = "pairwise.complete.obs") 
+  rho1 <- 0.9
+  rho2 <- 0.85
+  q12 <- calcrho(rho, rho1, rho2)
+  eps <- mvrnorm(n+burn.in, mu=c(5, .75), Sigma=cbind(c(1, q12),c(q12, 1)))
+  
+  sim.auto.x <- arima.sim(list(ar=rho1), n, innov = eps[burn.in+1:n, 1], start.innov = eps[1:burn.in,1])
+  sim.auto.dv <- arima.sim(list(ar=rho2), n, innov = eps[burn.in+1:n, 2], start.innov = eps[1:burn.in,2])
+  print(cor(sim.auto.x, sim.auto.dv))
+  
+  
+  # create ratio
+  sim.ratio <- sim.auto.dv / sim.auto.x
+  
+  # create a dataframe:
+  sim.ratio.data <- cbind.data.frame(sim.ratio, sim.auto.dv, sim.auto.x, sim.growth)
+  sim.ratio.data$obs <- as.numeric(rownames(sim.ratio.data))
+  
+  # assign data to each element of list
+  sim.data.cor[[i]] <- sim.ratio.data
+  
+}
 
 
 # pull simulated data into a list
@@ -234,18 +263,99 @@ tstat.cor <- ggplot(sum.lm.cor, aes(y = tstat, x = as.factor(outcome))) +
                  title = "Correlated Variables"
                  ) +
                scale_x_discrete(labels=c(
-                        "non.ratio.tstat" = "Non-Ratio Outcome",
-                        "ratio.tstat" = "Ratio Outcome"))
+                        "non.ratio.tstat" = "Non-Ratio",
+                        "ratio.tstat" = "Ratio"))
 tstat.cor
 
 
 
+### Use growth as the outcome
+# pull simulated data into a list and calculate growth
+sim.df.growth <- bind_rows(sim.data.cor, .id = "unit") %>%
+  group_by(unit) %>%
+  mutate(
+    growth.dv = sim.auto.dv / lag(sim.auto.dv),
+    growth.x = sim.auto.x / lag(sim.auto.x)
+  ) %>%
+  group_by(obs) # switch grouping var for later cross-sections
+
+summary(sim.df.growth$growth.dv)
+summary(sim.df.growth$growth.x)
+
+
+# Calculate regressions on cross-sections of observations
+# Linear regression results
+sim.lm.growth <- sim.df.growth %>%           
+  drop_na() %>%
+  summarize(
+    ratio.est = summary(lm(sim.ratio ~ sim.auto.x))[["coefficients"]][2, 1],
+    growth.est = summary(lm(growth.dv ~ sim.auto.x))[["coefficients"]][2, 1],
+    
+    ratio.tstat = summary(lm(sim.ratio ~ sim.auto.x))[["coefficients"]][2, 3],
+    growth.tstat = summary(lm(growth.dv ~ sim.auto.x))[["coefficients"]][2, 3]
+  )
+
+# Plot t-stats
+sum.lm.growth <- pivot_longer(sim.lm.growth, 
+                           -c(obs, ratio.est, growth.est), 
+                           names_to = "outcome", 
+                           values_to = "tstat") %>%
+  mutate(
+    stat.sig = ifelse(tstat > 2.09 | tstat < -2.09, 1, 0),
+    stat.sig.factor = as.factor(stat.sig)
+  )
+
+# plot densities of t-stats
+ggplot(sum.lm.growth, aes(x = tstat, fill = outcome)) +
+  geom_density(alpha = .6)
+
+# look at stat.sig conclusions
+statsig.growth <- ggplot(sum.lm.growth, aes(x = stat.sig.factor)) +
+  facet_wrap(~outcome,
+             labeller=labeller(outcome = c(growth.tstat = "Percentage Change",
+                                           ratio.tstat = "Ratio"))
+  ) +
+  geom_bar() +
+  labs(
+    x = "Statistical Significance",
+    y = "Count",
+    title = "Percentage Change vs Ratio") +
+  scale_x_discrete(labels=c("0" = "No",
+                            "1" = "Yes"))
+statsig.growth
+
+table(sum.lm.growth$outcome, sum.lm.growth$stat.sig.factor)
+chisq.test(x = sum.lm.growth$outcome, y = sum.lm.growth$stat.sig.factor)
+
+# plot test-statistics with more detail
+tstat.growth <- ggplot(sum.lm.growth, aes(y = tstat, x = as.factor(outcome))) +
+  geom_hline(yintercept = 2.09) +
+  geom_hline(yintercept = -2.09) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter() +
+  theme_bw() +
+  labs(
+    x = "Outcome Measure",
+    y = "Test Statistic Estimate",
+    title = "Percentage Change vs Ratio"
+  ) +
+  scale_x_discrete(labels=c(
+    "growth.tstat" = "Percentage Change",
+    "ratio.tstat" = "Ratio"))
+tstat.growth
+
+
+
+
+
+
+
 # Combine plots and add to the appendix
-grid.arrange(tstat.nocor, tstat.cor, ncol = 2)
-grid.arrange(statsig.nocor, statsig.cor, ncol = 2)
+grid.arrange(tstat.nocor, tstat.cor, tstat.growth, ncol = 3)
+grid.arrange(statsig.nocor, statsig.cor, statsig.growth, ncol = 3)
 
 
 
-sim.inferences <- arrangeGrob(statsig.nocor, statsig.cor,
-                               ncol = 2)
-ggsave("appendix/sim-inferences.pdf", sim.inferences, height = 6, width = 8) #save file
+sim.inferences <- arrangeGrob(statsig.nocor, statsig.cor, statsig.growth,
+                               ncol = 3)
+ggsave("appendix/sim-inferences.png", sim.inferences, height = 6, width = 8.4) #save file

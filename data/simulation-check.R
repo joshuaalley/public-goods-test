@@ -123,7 +123,7 @@ colnames(sim.est.hyper) <- c("theta", "sigma", "sigma_state",
 # then theta- overall mean
 mcmc_areas(sim.est.hyper, pars = c("theta"), prob = .9) +
   vline_at(true.theta[1], color = "black", size = 2) 
-ggsave("appendix/theta-sim-res.pdf", height = 6, width = 8)
+ggsave("appendix/theta-sim-res.png", height = 6, width = 8)
 
 # check whether model recovers variance parameter and hyperparameters
 # use ggplot b/c mcmc_areas doesn't take numeric vector input
@@ -143,4 +143,4 @@ mcmc_areas(sim.est.hyper, pars = c("sigma_year"), prob = .9) +
 # alliance coefficient variance parameter
 mcmc_areas(sim.est.hyper, pars = c("sigma_all"), prob = .9) +
   vline_at(true.sigma.all[1], color = "black", size = 2) 
-ggsave("appendix/sall-sim-res.pdf", height = 6, width = 8)
+ggsave("appendix/sall-sim-res.png", height = 6, width = 8)

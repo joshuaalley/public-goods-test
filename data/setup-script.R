@@ -19,6 +19,7 @@ library(tidyverse)
 library(rstan)
 library(shinystan)
 library(bayesplot)
+library(gridExtra)
 library(hexbin)
 library(conflicted)
 

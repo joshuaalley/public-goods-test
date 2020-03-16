@@ -162,13 +162,13 @@ check_hmc_diagnostics(ml.model)
 post.ml <- nuts_params(ml.model) # extract posterior draws
 color_scheme_set("gray")
 mcmc_nuts_energy(post.ml)
-ggsave("appendix/energy-plot.pdf", height = 6, width = 8) 
+ggsave("appendix/energy-plot.png", height = 6, width = 8) 
 
 
 # plot r-hats
 ml.rhat <- rhat(ml.model)
 mcmc_rhat_hist(ml.rhat)
-ggsave("appendix/rhat-plot.pdf", height = 6, width = 8) 
+ggsave("appendix/rhat-plot.png", height = 6, width = 8) 
 
 
 
@@ -231,7 +231,7 @@ ggplot(alliance.coefs, aes(x = begyr, y = gamma.mean)) +
   geom_hline(yintercept = mean(ml.model.sum$theta), linetype = "dashed") +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
   theme_classic()
-ggsave("manuscript/alliance-coefs-year.pdf", height = 6, width = 8)
+ggsave("manuscript/alliance-coefs-year.png", height = 6, width = 8)
 
 
 
@@ -334,7 +334,7 @@ color_scheme_set("gray")
 mcmc_intervals(pred.data, prob = .9) +
   labs(x = "Predicted Percentage Change in Military Spending", y = "Share of Allied GDP") +
   theme_bw()
-ggsave("manuscript/pred-change-share.pdf", height = 6, width = 8)
+ggsave("manuscript/pred-change-share.png", height = 6, width = 8)
 
 
 

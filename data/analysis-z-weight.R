@@ -147,7 +147,7 @@ ggplot(alliance.coefs.w, aes(x = begyr, y = gamma.mean)) +
   geom_hline(yintercept = mean(ml.model.sum$theta), linetype = "dashed") +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
   theme_classic()
-ggsave("appendix/alliance-coefs-year-w.pdf", height = 6, width = 8)
+ggsave("appendix/alliance-coefs-year-w.png", height = 6, width = 8)
 
 
 

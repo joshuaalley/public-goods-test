@@ -26,8 +26,8 @@
 
 \doublespace
 
-This appendix contains supporting materials for the test of Hypothesis 1 in ``Reassessing the Public Goods Theory of Alliances.'' 
-Section 1 provides a proof that analyses of GDP and defense burdens are misspecified. 
+This appendix contains supporting materials for the test of Hypotheses 1 and 2 in ``Reassessing the Public Goods Theory of Alliances.'' 
+Section 1 provides a demonstration that analyses of GDP and defense burdens are misspecified. 
 Section 2 then provides more detail about the variables in the model and Section 3 assesses model fit and accuracy. 
 The final section summarizes a test that uses average economic weight in their alliances to predict percentage changes in military spending. 
 
@@ -36,22 +36,21 @@ The final section summarizes a test that uses average economic weight in their a
 
 As I note in the introduction, models and correlations between GDP and defense burdens are misspecified. 
 Because defense burdens include GDP in the denominator, changes in GDP affect the expected value of defense burdens. 
-When GDP changes, the defense burden remains constant only if military spending also changes in such a way that defense spending's share of GDP remains the same.
+When GDP shifts, the defense burden remains constant only if military spending also changes in such a way that defense spending's share of GDP remains the same.
 Such changes are highly unlikely.
-This has important consequences for correlations and linear regression estimates alike. 
 
 
+The deterministic component in the relationship between GDP and defense burdens has important consequences for correlation and linear regression estimates. 
 For a correlation $\rho$ between two variables $X$ and $Y$:
 \begin{equation}
 \rho = \frac{Cov(X,Y)}{Var(X)Var(Y)} 
 \end{equation}
-
 In a linear regression with one independent variable, the coefficient $\beta_1$ is equal to:
 \begin{equation}
 \beta_1 = \frac{Cov(X,y)}{Var(X)} 
 \end{equation} 
 
-Both these estimates depend on the covariance between the two variables. 
+Correlations and regression coefficients depend on the covariance between the two variables. 
 In general, covariance is equal to:
 \begin{equation}
 Cov(X, Y) = E[X,Y] - E[X] E[Y]
@@ -62,12 +61,12 @@ Now, consider the covariance between $GDP$ and military spending as a share of G
 Cov\left(GDP, \frac{ME}{GDP} \right) = E\left[GDP, \frac{ME}{GDP} \right] - E[GDP] E\left[\frac{ME}{GDP} \right]
 \end{equation}
 
-Per... the expected value of the defense burden is equal to:
+The approximate expected value of the defense burden\footnote{Based on: \url{http://www.stat.cmu.edu/~hseltman/files/ratio.pdf}.} is equal to:
 \begin{equation}
 E\left[\frac{ME}{GDP} \right] = \frac{E[GDP]}{E\left[\frac{ME}{GDP} \right]} - \frac{Cov(GDP, ME)}{\left(E\left[\frac{ME}{GDP} \right]\right)^2} - \frac{Var(ME) E[GDP]}{\left(E\left[\frac{ME}{GDP} \right]\right)^3}
 \end{equation}
 
-Substituting this into the covariance of GDP and defense burdens:
+Substituting this expectation into the covariance of GDP and defense burdens:
 \begin{multline}
 Cov\left(GDP, \frac{ME}{GDP} \right) = E\left[GDP, \frac{ME}{GDP} \right] - \\ E[GDP] \left( \frac{E[GDP]}{E\left[\frac{ME}{GDP} \right]} - \frac{Cov(GDP, ME)}{\left(E\left[\frac{ME}{GDP} \right]\right)^2} - \frac{Var(ME) E[GDP]}{\left(E\left[\frac{ME}{GDP} \right]\right)^3} \right)
 \end{multline}
@@ -77,43 +76,46 @@ This then simplifies to:
 Cov\left(GDP, \frac{ME}{GDP} \right) = E\left[GDP, \frac{ME}{GDP} \right] - \\ \frac{(E[GDP])^2}{E\left[\frac{ME}{GDP} \right]} - \frac{E[GDP] Cov(GDP, ME)}{\left(E\left[\frac{ME}{GDP} \right]\right)^2} - \frac{Var(ME) (E[GDP])^2}{\left(E\left[\frac{ME}{GDP} \right]\right)^3}
 \end{multline}
 
-Therefore the mean or expected value of GDP, $E[GDP]$, affects the expected value of defense burdens $E\left[\frac{ME}{GDP} \right]$.
-This change in the expected value impacts the covariance between GDP and defense burdens, which then informs regression and correlation estimates.  
-Because defense burdens are a non-linear function of military spending and GDP, the consequences of this specification problem for estimates are hard to predict. 
+Therefore the expected value of GDP, $E[GDP]$, affects the expected value of defense burdens $E\left[\frac{ME}{GDP} \right]$.
+This change in the expected value of defense burdens impacts the covariance between GDP and defense burdens, which then informs regression and correlation estimates.  
+Because defense burdens are a non-linear function of military spending and GDP, the consequences of this specification problem for estimates are hard to predict, especially when GDP and military spending are correlated. 
 
 
-Moreover, the implications of this non-linear relationship for inference depend on autocorrelation in time-series of GDP and defense spending within states. 
-The GDP and defense spending values that Olson and Zeckhauser, as well as other researchers e.g.\citep{Oneal1990, KimSandler2019} employ in cross-sectional correlations depend on past GDP and military spending values. 
-At the very least, simultaneous increases over time can lead to correlations between GDP and military spending within units.  
+The implications of using a ratio variable like defense burdens for inference depend on how GDP and defense spending are correlated. 
+At the very least, the GDP and defense spending values that Olson and Zeckhauser, as well as other researchers e.g.\citep{Oneal1990, KimSandler2019} employ in cross-sectional correlations depend on past GDP and military spending values. 
+Temporal autocorrelation could generate correlations between GDP and military spending within units.  
 If GDP and military spending decisions are correlated for other reasons, this further complicates the ratio calculations. 
 
 
-In what follows, I report the results of two simulation analyses to assess how using defense burdens might affect inferences.  
-This simulation approximates a rough approximation of common tests of burden-sharing within NATO, which estimate annual correlations between GDP and defense burdens among NATO members. 
-In both simulations, I simulate an outcome and independent variable, both of which have strong temporal autocorrelation. 
-I then analyze cross-sectional associations between the independent variable and the outcome with and without taking the outcome as a share of the independent variable. 
-I set the values of the outcome and independent variable to roughly match the distribution of military spending burdens. 
+In what follows, I report the results of three simulation analyses to assess how cross-sectional correlations between GDP and defense burdens might compare to correlations between GDP and military spending. 
+This simulation is a rough approximation of common tests of burden-sharing within NATO, which estimate annual correlations between GDP and defense burdens among NATO members. 
+In all three simulations, I simulate an outcome and independent variable, both of which have strong temporal autocorrelation. 
+I then analyze cross-sectional associations between the independent variable and the outcome with OLS. 
+I compare inferences from measuring the outcome as a share of the independent variable to inferences without the ratio. 
+I set the values of the outcome and independent variable to roughly match the values of military spending burdens. 
 The data-generating process contains 100 temporal observations of 20 units. 
-Therefore, when I run 100 cross-sectional analyses, all the linear regression estimates have 18 degrees of freedom after estimating a regression coefficient and intercept.  
+Therefore, I run 100 cross-sectional analyses and each linear regression estimate has 18 degrees of freedom after estimating a regression coefficient and intercept.  
 
  
-In the first simulation, I assume that the independent variable and outcome are entirely uncorrelated, except for any correlation from time trends. 
-In the second simulation, I assume that the independent variable and outcome are correlated and could have common time trends. 
-I set the assumed correlation equal to the observed correlation between GDP and military spending in my data, which is .48. 
+In the first simulation, I assume that the independent variable and outcome are entirely uncorrelated, except for spurious associations from temporal autocorrelation. 
+In the second simulation, I assume that the independent variable and outcome are correlated and each variable has temporal autocorrelation. 
+I set the assumed correlation in the second simulation equal to the observed correlation between GDP and military spending in my data, which is .48. 
 Because these analyses follow existing research designs by using cross-sectional snapshots, I do not control for temporal autocorrelation within units. 
+The third simulation uses the simulated data from the second simulation, but converts the outcome into percentage changes, which is the outcome I use in the paper. 
 
 
 Inferences about the association between the simulated independent variable and its ratio with a dependent variable depend on whether the two variables are correlated, as \autoref{fig:sim-inferences} shows. 
 This figure plots whether the coefficient in a regression of simulated ratio and non-ratio outcomes on a simulated independent variable is statistically significant at conventional levels. 
-When the independent variable and outcome are independent, creating a ratio of the two generates an overwhelming number of statistically significant findings. 
-When the independent variable and dependent variable are correlated, the ratio variable has a different effect, however. 
+When the independent variable and outcome are independent, creating a ratio generates an overwhelming number of statistically significant findings. 
+When the independent variable and dependent variable are correlated, the ratio variable has a different effect. 
 Creating a ratio of two correlated variables reduces the probability of a statistically significant result, relative to non-ratio estimates. 
-Based on a chi-squared test, there is a statistically significant differences in the inferences under ratio and non-ratio outcomes for both types of simulated variables.
+Last, comparing the percentage change measure to a ratio outcome, the ratio outcome is more likely to produce statistically significant regression coefficients. 
+Based on a chi-squared test, there are statistically significant differences in inferences from ratio and non-ratio outcomes for both types of simulated variables.
 
 
 \begin{figure}
 	\centering
-		\includegraphics[width=0.95\textwidth]{sim-inferences.pdf}
+		\includegraphics[width=0.98\textwidth]{sim-inferences.png}
 	\caption{Estimated statistical significance of a linear regression coefficient in simulated cross-sectional analyses of ratio and non-ratio variables.}
 	\label{fig:sim-inferences}
 \end{figure}
@@ -121,8 +123,9 @@ Based on a chi-squared test, there is a statistically significant differences in
 
 In summary, creating a ratio of the dependent and independent variable is likely to produce spurious results. 
 If the two variables are uncorrelated, then estimates may conclude the two variables are correlated, when any association is driven entirely by changes in the independent variable. 
-But if the two variables are correlated, creating a ratio is more likely to produce findings that do not meet conventional statistical significance thresholds.
-Therefore, research designs that examine the correlation between GDP and military spending as a share of GDP may produce misleading findings, including null results. 
+But if the two variables are correlated, ratio outcomes are more likely to produce findings that do not meet conventional statistical significance thresholds.
+Last, ratio variables are more likely to produce statistically significant estimates than the percentage changes variable this manuscript and \citet{PluemperNeumayer2015} prefer. 
+Therefore, estimates of the correlation between GDP and military spending as a share of GDP may produce misleading findings, including null results when GDP and military spending are correlated. 
 
 
 
@@ -137,7 +140,7 @@ All alliance membership data comes from Version 4 of the Alliance Treaty Obligat
 
 The dependent variable is percentage changes in military spending. 
 Olson and Zeckhauser use defense spending as a share of GDP as their dependent variable, which is the source of previously described model specification problems \citep{PluemperNeumayer2015}. 
-I use percentage changes instead of the defense burden because this measure gives a sense of burdens from changing defense budgets with a lower risk of spurious inferences. 
+I use percentage changes instead of the defense burden because this measure gives a sense of burdens from changing defense budgets, but has a lower risk of spurious inferences. 
 Annual percentage changes in spending is the change in military spending as a share of the previous year's budget:
 
 
@@ -192,7 +195,7 @@ $ p(\gamma) \sim N(\theta, \sigma^{all}) $ \\
 $ p(\theta) \sim N(0, .5) $ \\
 $ p(\sigma^{all}) \sim \mbox{half-}N(0, 1) $ \\
 $ p(\beta) \sim N(0, 1) $ \\
-$ p(\nu) \sim gamma(2, 0.1)$ 
+$ p(\nu) \sim Gamma(2, 0.1)$ 
 \end{tabular} 
 \caption{Summary of Priors in Multilevel Model} 
 \label{tab:priors}
@@ -221,7 +224,7 @@ The substantial overlap in the distributions for all four chains in \autoref{fig
 
 \begin{figure}
 	\centering
-		\includegraphics[width=0.55\textwidth]{energy-plot.pdf}
+		\includegraphics[width=0.55\textwidth]{energy-plot.png}
 	\caption{Energy plot of multilevel model results. Greater overlap in the two histograms indicates adequate exploration of the posterior distribution. }
 	\label{fig:energy-plot}
 \end{figure}
@@ -239,7 +242,7 @@ No parameters generate concern, even at a more conservative threshold of 1.05.
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.55\textwidth]{rhat-plot.pdf}
+		\includegraphics[width=0.55\textwidth]{rhat-plot.png}
 	\caption{Histogram of split $\hat{R}$ statistic for all parameters in the multilevel model.}
 	\label{fig:rhat-plot}
 \end{figure}
@@ -271,7 +274,7 @@ In these figures, the true parameter value is marked with a thick black line, wh
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.65\textwidth]{theta-sim-res.pdf}
+		\includegraphics[width=0.65\textwidth]{theta-sim-res.png}
 	\caption{Posterior estimates and known parameter value for the alliance hyperparameter $\theta$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\theta$ value, which falls within the 90\% interval.}
 	\label{fig:theta-sim-res}
 \end{figure}
@@ -279,7 +282,7 @@ In these figures, the true parameter value is marked with a thick black line, wh
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.65\textwidth]{sall-sim-res.pdf}
+		\includegraphics[width=0.65\textwidth]{sall-sim-res.png}
 	\caption{Posterior estimates and known parameter value for the alliance hyperparameter $\sigma_{all}$. The dark gray bar marks the posterior mean, while the shaded area captures the 90\% credible interval. The black line marks the known, ``true'' $\sigma_{all}$ value, which falls within the 90\% interval.}
 	\label{fig:sall-sim-res}
 \end{figure}
@@ -294,7 +297,7 @@ Simulating data and recovering known parameters shows that the model estimates a
 \subsection{Alternative Coding of Economic Size}
 
 
-The values of -1 for small states and 1 for large states in the manuscript create coarse bins. 
+The values of -1 for small states and 1 for large states in alliance participation matrix $\textbf{Z}$ in the manuscript results create coarse bins. 
 This could mask differences within each category that affect inferences about economic weight and percentage changes in military spending within alliances. 
 This section checks whether inferences are sensitive to an alternative coding of $\textbf{Z}$. 
 
@@ -302,7 +305,7 @@ This section checks whether inferences are sensitive to an alternative coding of
 To retain the same split of negative values for small states and positive values for large states, I subtracted one from economic weights that fell below the median in bilateral or multilateral alliances. 
 This means that states with a small share of allied GDP have larger negative values than states with close to the median value. 
 For example, a state with a 25\% of total allied GDP  in a bilateral alliance has a weight of -.75 with this variable, but a state with 49\% of allied GDP has a weight of -.51. 
-Positive values remain the same.
+Positive values like .51 are unchanged.
 
 
 Again, the public goods model would predict many positive $\gamma$ parameters, as these would reflect higher military spending for large states and lower military spending for small states. 
@@ -313,7 +316,7 @@ These are the OAS (ATOPID 3150) and an alliance between the United States and Th
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.95\textwidth]{alliance-coefs-year-w.pdf}
+		\includegraphics[width=0.95\textwidth]{alliance-coefs-year-w.png}
 	\caption{Estimated $\gamma$ parameters from a model with negative and positive economic weights in the alliance membership matrix.}
 	\label{fig:alliance-coefs-year-w}
 \end{figure}
@@ -393,7 +396,7 @@ and percentage changes in military expenditures from 1919 to 2007.}
 
 To asses the substantive impact of increasing a state's average economic weight in its alliances, I simulated the effect of moving average weight from the first quartile (0.05) to the third quartile (.40). 
 Holding all other variables at their medians or modes, this increase in weight implies an expected percentage change in military spending of -0.005. 
-The 90\% credible interval for this change ranges from -0.017 to 0.01, so the impact of a massive rise in average economic weight is unclear. 
+The 90\% credible interval for this change ranges from -0.017 to 0.01, so the estimated impact of a massive rise in average economic weight includes large positive, large negative and null effects. 
 
 
 
