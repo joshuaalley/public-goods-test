@@ -179,7 +179,10 @@ This section describes the priors on the multilevel model, convergence diagnosti
 All priors are specified to be weakly informative relative to the scale of the data \citep{Gelmanetal2017}. 
 I summarize the prior distributions for each set of parameters in \autoref{tab:priors}. 
 $p(\nu)$ is a well-behaved prior for the degrees of freedom in a t-distribution \citep{JuarezSteele2010}. 
-Given that the median percentage change in military expenditures is 0.06, the priors are quite diffuse. 
+
+
+Given that the median percentage change in military expenditures is 0.06, these normal priors are weakly informative at most.
+I use normal priors because they can cover the full range of likely parameter values and are easier to fit than heavier-tailed distributions.  
 
 
 \begin{table} % Create a table of priors.
@@ -394,9 +397,31 @@ and percentage changes in military expenditures from 1919 to 2007.}
   \label{tab:avg-weight-res} 
 \end{table} 
 
+
 To asses the substantive impact of increasing a state's average economic weight in its alliances, I simulated the effect of moving average weight from the first quartile (0.05) to the third quartile (.40). 
 Holding all other variables at their medians or modes, this increase in weight implies an expected percentage change in military spending of -0.005. 
 The 90\% credible interval for this change ranges from -0.017 to 0.01, so the estimated impact of a massive rise in average economic weight includes large positive, large negative and null effects. 
+
+
+
+\subsection{Substantive Effect Calculations}
+
+To further examine whether increasing a state's share of allied GDP leads to higher defense spending, I simulated the effect of changing economic weight on percentage changes in military spending in the multilevel Bayesian model. 
+In the simulated data, I used the full posteriors of the intercept $\alpha$, all the $\beta$ coefficients, and one $\gamma$ parameter. 
+I selected the economic weight parameter with the most positive posterior mass, so this is the \emph{best case alliance} for the public goods models. 
+I then set the state-level variables at their median or modal value and changed economic weight from -1 to 1. 
+
+
+In \autoref{fig:pred-change-share}, I summarize predicted changes in military spending at the two economic weight values. 
+In this figure, the point marks the mean and the error bars summarize the 90\% credible interval. 
+There is limited evidence that larger alliance participants have higher military spending. 
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{pred-change-share.png}
+	\caption{Predicted percentage changes in military spending for a simulated state with low or high shares of total allied GDP. The public goods model predicts a positive difference between the high and low economic weight scenarios. Points mark the median value, and the error bars summarize the 90\% credible interval. The difference estimate captures the effect of moving from low to high economic weight.}
+	\label{fig:pred-change-share}
+\end{figure}
 
 
 

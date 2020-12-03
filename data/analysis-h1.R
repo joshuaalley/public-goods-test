@@ -230,7 +230,7 @@ ggplot(alliance.coefs, aes(x = begyr, y = gamma.mean)) +
   geom_hline(yintercept = 0) + 
   geom_hline(yintercept = mean(ml.model.sum$theta), linetype = "dashed") +
   labs(x = "Start Year of Alliance", y = "Coefficient for Alliance Contribution") +
-  theme_classic()
+  theme_bw()
 ggsave("manuscript/alliance-coefs-year.png", height = 6, width = 8)
 
 
@@ -335,7 +335,6 @@ mcmc_intervals(pred.data, prob = .9) +
   labs(x = "Predicted Percentage Change in Military Spending", y = "Share of Allied GDP") +
   theme_bw()
 ggsave("manuscript/pred-change-share.png", height = 6, width = 8)
-
 
 
 # Remove fit model from workspace

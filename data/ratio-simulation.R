@@ -112,6 +112,7 @@ statsig.nocor <- ggplot(sum.lm.long, aes(x = stat.sig.factor)) +
                                            ratio.tstat = "Ratio"))
   ) +
   geom_bar() +
+  theme_bw() +
   labs(
     x = "Statistical Significance",
     y = "Count",
@@ -239,6 +240,7 @@ statsig.cor <- ggplot(sum.lm.cor, aes(x = stat.sig.factor)) +
                                            ratio.tstat = "Ratio"))
                   ) +
                  geom_bar() +
+                theme_bw() +
                 labs(
                 x = "Statistical Significance",
                 y = "Count",
@@ -316,12 +318,13 @@ statsig.growth <- ggplot(sum.lm.growth, aes(x = stat.sig.factor)) +
                                            ratio.tstat = "Ratio"))
   ) +
   geom_bar() +
+  theme_bw() +
   labs(
     x = "Statistical Significance",
     y = "Count",
     title = "Percentage Change vs Ratio") +
   scale_x_discrete(labels=c("0" = "No",
-                            "1" = "Yes"))
+                            "1" = "Yes")) 
 statsig.growth
 
 table(sum.lm.growth$outcome, sum.lm.growth$stat.sig.factor)
@@ -353,8 +356,6 @@ tstat.growth
 # Combine plots and add to the appendix
 grid.arrange(tstat.nocor, tstat.cor, tstat.growth, ncol = 3)
 grid.arrange(statsig.nocor, statsig.cor, statsig.growth, ncol = 3)
-
-
 
 sim.inferences <- arrangeGrob(statsig.nocor, statsig.cor, statsig.growth,
                                ncol = 3)
