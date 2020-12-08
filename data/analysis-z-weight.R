@@ -272,9 +272,71 @@ ggplot(growth.pred.res.max, aes(x = nz.weights, y = mean.pred)) +
   theme_classic() 
 
 
+# ID clusters of small states with low spending
+growth.small <- filter(growth.pred.res, nz.weights < 0)
+
+# Pull estimates for OAS (3150) and Warsaw Pact (3285)
+dim(growth.pred$`3150`)
+dim(growth.pred$`3285`)
+
+# OAS
+# calculate 90% credible intervals
+growth.pred.oas <- t(apply(growth.pred$`3150`, 1, 
+                      function(x) quantile(x, probs = c(.05, .95))
+                     ))
+# pull state and year ids
+growth.pred.oas <- cbind.data.frame(growth.pred.oas,
+                    reg.state.data.w %>%
+                    filter(`3150` != 0) %>%
+                     select(ccode, year, `3150`)
+)
+# rename columns 
+colnames(growth.pred.oas) <- c("pred.5", "pred.95",
+                               "ccode", "year", "weight")
+
+# add a large state indicator
+growth.pred.oas <-  mutate(growth.pred.oas,
+    large = ifelse(ccode == 2, 1, 0)
+  )
+
+
+# plot 
+ggplot(growth.pred.oas, aes(x = pred.5, y = year)) +
+  facet_wrap(~ ccode) +
+  geom_linerange(aes(xmin = pred.5, xmax = pred.95),
+                position = position_dodge(1.3))
+
+
+# warsaw pact
+# calculate 90% credible intervals
+growth.pred.ws <- t(apply(growth.pred$`3285`, 1, 
+                           function(x) quantile(x, probs = c(.05, .95))
+))
+# pull state and year ids
+growth.pred.ws <- cbind.data.frame(growth.pred.ws,
+                                    reg.state.data.w %>%
+                                      filter(`3285` != 0) %>%
+                                      select(ccode, year),
+                                   reg.state.data.w$`3285`
+)
+# rename columns 
+colnames(growth.pred.ws) <- c("pred.5", "pred.95",
+                              "ccode", "year", "weight")
+
+# add a large state indicator
+growth.pred.ws <-  mutate(growth.pred.ws,
+                           large = ifelse(ccode == 365, 1, 0)
+)
+
+
+# plot 
+ggplot(growth.pred.ws, aes(x = pred.5, y = year)) +
+  facet_wrap(~ ccode) +
+  geom_linerange(aes(xmin = pred.5, xmax = pred.95),
+                position = position_dodge(1.3))
 
 
 
-# Remove fit model from workspace
+# Remove fitted model object from workspace
 saveRDS(ml.model.w, "data/ml-model-w.rds")
 rm(ml.model.w)
