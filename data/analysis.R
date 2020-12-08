@@ -284,7 +284,82 @@ plot(density(ml.model.sum$theta))
 summary(ml.model.sum$theta)
 
 
+### estimate total effect of alliance participation on small and large members
+total.all <- state.mem.mat %*% t(ml.model.sum$gamma)
+
+total.all <- t(as.data.frame(
+              apply(total.all, 1, function(x) quantile(x, 
+                                    probs = c(.05, .95)))
+))
+
+total.all <- cbind.data.frame(reg.state.data$ccode,
+                              reg.state.data$year,
+                              total.all)
+
+# gamma summary has the rough data needed to give estimates
+glimpse(gamma.summary)
+
+# predicted impact on large members
+pred.imp.lg <- select(gamma.summary, atopid,
+                      gamma.mean, gamma.5, gamma.95) %>%
+                 mutate(mean.pred = sinh(gamma.mean), # undo transformation
+                        pred.5 = sinh(gamma.5),
+                        pred.95 = sinh(gamma.95))
+glimpse(pred.imp.lg)  
+
+# predicted impact on small members
+pred.imp.sm <- select(gamma.summary, atopid,
+                      gamma.mean, gamma.5, gamma.95) %>%
+  mutate(mean.pred = -1 * sinh(gamma.mean), # undo transformation
+         pred.5 = -1 * sinh(gamma.5), # and prediction w/ -1 in state.mem.mat
+         pred.95 = -1 * sinh(gamma.95))
+glimpse(pred.imp.sm)  
+
+# bind rows
+pred.imp.all <- bind_rows("large" = pred.imp.lg,
+                          "small" = pred.imp.sm,
+                          .id = "size")
+
+# pull key alliance
+pred.imp.key <- filter(pred.imp.all,
+                  atopid == 3180 | # NATO
+                  atopid == 3240 | # US-RoK
+                  atopid == 3205 | # Arab League
+                  atopid == 3150 | # OAS
+                  atopid == 3285 # warsaw pact  
+                   ) %>% 
+                select(atopid, size,
+                  mean.pred, pred.5, pred.95
+                )
  
+# plot 
+ggplot(pred.imp.key, aes(y = factor(atopid), x = mean.pred,
+                         group = factor(size),
+                         color = factor(size)
+                         )) +
+  geom_point(position = position_dodge(0.3),
+             size = 1.5) + # mean prediction
+  geom_errorbarh( # error bars 
+   aes(xmax = pred.95, xmin = pred.5),
+   position = position_dodge(0.3),
+   height = .1, size = 1.1
+  ) +
+  scale_color_manual(name="Economic Size", # manual colors
+                       values = c("large" = "gray1",
+                                  "small" = "gray45"),
+                      breaks=c("large", "small"),
+                      labels=c("Large", "Small")) +
+  scale_y_discrete(name = "Alliance", # label alliances
+                   breaks = c(3150, 3180, 3205, 3240, 3285),
+                   labels = c("OAS", "NATO", "Arab League",
+                   "US-Korea", "Warsaw Pact")) +
+  labs(x = "Predicted Spending Growth") +
+  theme_bw()
+ggsave("manuscript/pred-sum.png", height = 6, width = 8)
+
+
+
+
 ### simulate impact of increasing share of allied GDP, given max positive gamma
 # create relevant dataframe of coefficients
 coef.sim <- cbind(ml.model.sum$alpha, ml.model.sum$beta, ml.model.sum$gamma[, 75])
@@ -334,7 +409,7 @@ color_scheme_set("gray")
 mcmc_intervals(pred.data, prob = .9) +
   labs(x = "Predicted Percentage Change in Military Spending", y = "Share of Allied GDP") +
   theme_bw()
-ggsave("manuscript/pred-change-share.png", height = 6, width = 8)
+ggsave("appendix/pred-change-share.png", height = 6, width = 8)
 
 
 # Remove fit model from workspace

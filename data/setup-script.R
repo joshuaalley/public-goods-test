@@ -1,5 +1,4 @@
 # Joshua Alley
-# Texas A&M University
 # Set up R script for project testing the public goods theory of alliances
 
 
