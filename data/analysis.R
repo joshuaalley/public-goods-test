@@ -415,3 +415,82 @@ ggsave("appendix/pred-change-share.png", height = 6, width = 8)
 # Remove fit model from workspace
 saveRDS(ml.model, "data/ml-model.rds")
 rm(ml.model)
+
+
+
+### look at small states joining alliances
+# start with NATO joiners
+# NATO data post 1991
+nato.new <- filter(reg.state.data, (year > 1991)
+                   & (ccode == 316 | # Czech Rep
+                      ccode == 317 | # Slovakia
+                      ccode == 310 | # Hungary
+                      ccode == 290 | # Poland
+                      ccode == 366 | # Estonia
+                      ccode == 367 | # Latvia
+                      ccode == 368  # Lithuania  
+                      )
+                   )%>%
+             select(ccode, year, growth.milex, `3180`) %>%
+             group_by(ccode) %>%
+             mutate(
+               nato.mem = ifelse(`3180` != 0, 1, 0), # dummy NATO member
+               start.nato = ifelse(nato.mem == 1 & lag(nato.mem) == 0,
+                                   1, 0), # ID first year in NATO
+               first.nato.year = ifelse(start.nato == 1, year, 0),
+               first.nato.year = max(first.nato.year, na.rm = TRUE),
+               nato.time = year - first.nato.year # count NATO time
+             ) %>% # cut to 5 years before and after: post-CW budget instability 
+         filter(nato.time >= -5 & nato.time <= 5)
+
+# plot spending
+nato.new.plot <- ggplot(nato.new, aes(x = nato.time, y = growth.milex, 
+                     group = ccode)) +
+                  geom_vline(xintercept = 0) + # mark NATO start
+                  geom_line() +
+                  stat_smooth(aes(group = 1)) +
+                  labs(x = "Years in NATO", y = "Military Spending Growth",
+                  subtitle = "New NATO Members from 1991 to 2007") +
+                  ggtitle("Military Spending and NATO Membership") +
+                  theme_bw()
+nato.new.plot
+
+# Arab league joiners
+arab.new <- filter(reg.state.data, (ccode == 663 | ccode == 645 | 
+                      ccode == 616 | ccode == 696 | 
+                      ccode == 600 | ccode == 690 | 
+                      ccode == 615 | ccode == 620 |
+                      ccode == 625 | ccode == 692 |
+                      ccode == 694 | ccode == 680 |
+                      ccode == 520 | ccode == 698)  
+                   ) %>%
+  select(ccode, year, growth.milex, `3205`) %>%
+  group_by(ccode) %>%
+  mutate(
+    al.mem = ifelse(`3205` == -1, 1, 0), # dummy al member
+    start.al = ifelse(al.mem == 1 & lag(al.mem) == 0,
+                        1, 0), # ID first year in al
+    first.al.year = ifelse(start.al == 1, year, 0),
+    first.al.year = max(first.al.year, na.rm = TRUE),
+    al.time = year - first.al.year # count al time
+  ) %>% # cut to 5 years before and after: post-CW budget instability 
+  filter(al.time >= -5 & al.time <= 5 & (ccode != 694 & ccode !=645)) # remove Oman and Iraq outliers
+     # Iraq was in and out around Gulf War
+# Plot over time
+al.new.plot <- ggplot(arab.new, aes(x = al.time, y = growth.milex, 
+                     group = ccode)) +
+                 geom_vline(xintercept = 0) + # mark al entry
+                 geom_line() +
+                 stat_smooth(aes(group = 1)) +
+                 labs(x = "Years in Arab Leage", y = "Military Spending Growth",
+                   subtitle = "New Arab League Members from 1952 to 1982") +
+                 ggtitle("Military Spending and Arab League Membership") +
+                 theme_bw()
+al.new.plot
+
+
+# combine AL and NATO plots
+grid.arrange(nato.new.plot, al.new.plot, nrow = 1)
+small.join.plot <- arrangeGrob(nato.new.plot, al.new.plot, nrow = 1)
+ggsave("appendix/small-join-plot.png", small.join.plot,
+       height = 6, width = 8)

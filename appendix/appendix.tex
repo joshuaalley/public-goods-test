@@ -181,8 +181,8 @@ I summarize the prior distributions for each set of parameters in \autoref{tab:p
 $p(\nu)$ is a well-behaved prior for the degrees of freedom in a t-distribution \citep{JuarezSteele2010}. 
 
 
-Given that the median percentage change in military expenditures is 0.06, these normal priors are weakly informative at most.
-I use normal priors because they can cover the full range of likely parameter values and are easier to fit than heavier-tailed distributions.  
+Given that the median percentage change in military expenditures is 0.06, these normal priors are weakly informative, which means that they assume both small and extremely large effects are possible.
+I use normal priors because they cover the full range of likely parameter values and are easier to fit than heavier-tailed distributions.  
 
 
 \begin{table} % Create a table of priors.
@@ -297,6 +297,28 @@ Given the number of parameters and potential simulation variance, such accuracy 
 Simulating data and recovering known parameters shows that the model estimates are reasonable approximations of the data-generating process. 
 
 
+\subsection{Substantive Effect Calculations}
+
+To further examine whether increasing a state's share of allied GDP leads to higher defense spending, I simulated the effect of changing economic weight on percentage changes in military spending in the multilevel Bayesian model. 
+In the simulated data, I used the full posteriors of the intercept $\alpha$, all the $\beta$ coefficients, and one $\gamma$ parameter. 
+I selected the economic weight parameter with the most positive posterior mass, so this is the \emph{best case alliance} for the public goods models. 
+I then set the state-level variables at their median or modal value and changed economic weight from -1 to 1. 
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{pred-change-share.png}
+	\caption{Predicted percentage changes in military spending for a simulated state with low or high shares of total allied GDP. The public goods model predicts a positive difference between the high and low economic weight scenarios. Points mark the median value, and the error bars summarize the 90\% credible interval. The difference estimate captures the effect of moving from low to high economic weight.}
+	\label{fig:pred-change-share}
+\end{figure}
+
+
+In \autoref{fig:pred-change-share}, I summarize predicted changes in military spending at the two economic weight values. 
+In this figure, the point marks the mean and the error bars summarize the 90\% credible interval. 
+There is limited evidence that larger alliance participants have higher military spending. 
+
+
+
+
 \subsection{Alternative Coding of Economic Size}
 
 
@@ -335,7 +357,7 @@ There are very few alliances with even limited evidence that economic weight lea
 The model I use in the paper estimates alliance-specific associations between economic weight and military spending. 
 I also consider whether higher average economic weight across multiple alliances increases percentage changes in military spending. 
 This section summarizes results from four models of the correlation between average economic weight and military spending. 
-Following the recommendations of \citet{RaineyBaissa2018}, I use OLS and robust regression estimators with both transformed and unaltered military spending growth.  
+Following the recommendations of \citet{RaineyBaissa2020}, I use OLS and robust regression estimators with both transformed and unaltered military spending growth.  
 I use an inverse hyperbolic sine to transform the outcome because this transformation includes positive, negative and zero values. 
 Robust regression down weights unusual observations, which is important because the residuals of OLS estimators in this data are not normally distributed. 
 
@@ -403,27 +425,30 @@ Holding all other variables at their medians or modes, this increase in weight i
 The 90\% credible interval for this change ranges from -0.017 to 0.01, so the estimated impact of a massive rise in average economic weight includes large positive, large negative and null effects. 
 
 
+\section{Small States Joining Existing Alliances} 
 
-\subsection{Substantive Effect Calculations}
-
-To further examine whether increasing a state's share of allied GDP leads to higher defense spending, I simulated the effect of changing economic weight on percentage changes in military spending in the multilevel Bayesian model. 
-In the simulated data, I used the full posteriors of the intercept $\alpha$, all the $\beta$ coefficients, and one $\gamma$ parameter. 
-I selected the economic weight parameter with the most positive posterior mass, so this is the \emph{best case alliance} for the public goods models. 
-I then set the state-level variables at their median or modal value and changed economic weight from -1 to 1. 
-
-
-In \autoref{fig:pred-change-share}, I summarize predicted changes in military spending at the two economic weight values. 
-In this figure, the point marks the mean and the error bars summarize the 90\% credible interval. 
-There is limited evidence that larger alliance participants have higher military spending. 
+Another way to look at free-riding is to consider the results of small states joining an existing alliance.\footnote{Thanks to an anonymous reviewer for suggesting this analysis.} 
+In these cases, if small states are free-riding, they may be able to lower their defense spending. 
+I consider two cases of small states joining an existing alliance--- NATO expansion and new Arab League members. 
+\autoref{fig:small-join-plot} tracks military spending growth before and after alliance participation for new members of these two alliances. 
 
 \begin{figure}[htbp]
 	\centering
-		\includegraphics[width=0.95\textwidth]{pred-change-share.png}
-	\caption{Predicted percentage changes in military spending for a simulated state with low or high shares of total allied GDP. The public goods model predicts a positive difference between the high and low economic weight scenarios. Points mark the median value, and the error bars summarize the 90\% credible interval. The difference estimate captures the effect of moving from low to high economic weight.}
-	\label{fig:pred-change-share}
+		\includegraphics[width=0.95\textwidth]{small-join-plot.png}
+	\caption{Percentage changes in military spending in the five years before and after joining NATO and the Arab League for states with a small share of allied GDP. Each line shows percentage changes in military spending by a state over time, and lines that stop before five years in the alliance reflect missing data or the end of the sample. The vertical line at year 0 marks when a state joined the alliance. A loess curve summarizes the overall trend across multiple states.}
+	\label{fig:small-join-plot}
 \end{figure}
 
 
+There is little evidence that small states have lower percentage changes in military spending after joining NATO. 
+Before and after NATO membership, most of the European states that joined NATO had positive spending growth. 
+There is not an obvious drop in annual defense allocations, even with substantial budget instability in the aftermath of the Cold War.  
+Several of the Baltic states actually increased defense spending as part of the US-led coalition in Iraq. 
+
+
+The Arab League shows more evidence of falling defense budgets among new small members. 
+Some junior members of the Arab League had either smaller increases or reductions in their defense budgets after joining the alliance. 
+As in the case of new NATO members, small states that joined the Arab League had large swings in defense spending. 
 
 \newpage
 \singlespace
