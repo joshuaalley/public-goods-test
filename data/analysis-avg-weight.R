@@ -1,7 +1,6 @@
 # Joshua Alley
-# Texas A&M University
 # Empirical test of public goods theory of alliances
-# Examine corelation between economic weight and military spending 
+# Examine correlation between economic weight and military spending 
 
 
 # Load state-ally-year data 
@@ -24,7 +23,6 @@ state.ally.sum <- state.ally.year %>%
   )
 
 # Sumarize key variables
-summary(state.ally.sum$avg.treaty.contrib)
 ggplot(state.ally.sum, aes(x = avg.treaty.contrib)) + geom_histogram()
 summary(state.ally.sum$total.ally.expend)
 

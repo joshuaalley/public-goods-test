@@ -26,10 +26,11 @@
 
 \doublespace
 
-This appendix contains supporting materials for the test of Hypotheses 1 and 2 in ``Reassessing the Public Goods Theory of Alliances.'' 
+This appendix contains supporting materials for ``Reassessing the Public Goods Theory of Alliances.'' 
 Section 1 provides a demonstration that analyses of GDP and defense burdens are misspecified. 
-Section 2 then provides more detail about the variables in the model and Section 3 assesses model fit and accuracy. 
-The final section summarizes a test that uses average economic weight in their alliances to predict percentage changes in military spending. 
+Section 2 then details the variables in the model and Section 3 assesses model fit and accuracy. 
+The fourth section summarizes a test that uses average economic weight in their alliances to predict percentage changes in military spending, and the fifth looks at two cases of military spending by small states before and after joining existing alliances.
+In the last section, I consider an alternative model with changes in spending as the dependent variable. 
 
 
 \section{Specification of GDP and Defense Burdens} 
@@ -154,7 +155,7 @@ Positive percentage changes in spending imply an expanding defense budget and hi
 Moreover, using percentage changes in spending mitigates the risk of spurious inferences due to non-stationarity in panel data. 
 The log-level of military spending is not mean-reverting in long panels.
 A differenced military spending variable has increasing variance over time, as budgets expand and generate larger changes. 
-Modeling the DV in levels or changes might lead to spurious inferences \citep{GrangerNewbold1974}. 
+Modeling the DV in levels or changes might lead to spurious inferences \citep{GrangerNewbold1974}, though I consider a model in changes in section 6 of this appendix. 
 
 
 Using percentage changes in military spending as the dependent variable benchmarks changes to budget size. 
@@ -374,6 +375,7 @@ The OLS estimates for average economic weight are larger, but the difference in 
 
 
 \begin{table}[!htbp] \centering 
+\begin{adjustbox}{width= .95\textwidth, center}
 \begin{tabular}{@{\extracolsep{0pt}}lcccc} 
 \\[-1.8ex]\hline 
 \hline \\[-1.8ex] 
@@ -414,6 +416,7 @@ F Statistic (df = 9; 5012) &  & 3.657$^{}$  (p = 0.0002) & 8.219$^{}$  (p = 0.00
 \hline \\[-1.8ex] 
 \textit{Note:}  & \multicolumn{4}{r}{95\% Confidence Intervals in Parentheses.} \\ 
 \end{tabular} 
+\end{adjustbox}
   \caption{OLS and robust regression of the association between average economic weight in alliances
 and percentage changes in military expenditures from 1919 to 2007.} 
   \label{tab:avg-weight-res} 
@@ -449,6 +452,36 @@ Several of the Baltic states actually increased defense spending as part of the 
 The Arab League shows more evidence of falling defense budgets among new small members. 
 Some junior members of the Arab League had either smaller increases or reductions in their defense budgets after joining the alliance. 
 As in the case of new NATO members, small states that joined the Arab League had large swings in defense spending. 
+
+
+
+
+\section{Changes in Military Spending}
+
+
+Although military spending growth has advantages, it is not a perfect measure. 
+Percentage changes in spending help manage the risk of spurious inferences in long panels, and facilitate comparisons across states and over time. 
+At the same time, bench marking spending changes to the prior defense budget may mask disproportionate spending, as small percentage changes leave large states with ample defense spending. 
+
+
+To check whether this was the case, I fit a slight modification of the multilevel model to an alternative dependent variable--- changes in spending. 
+I then included lagged military spending as a control variable to adjust for the size of the defense budget. 
+I report the estimated economic weight parameters from this model in \autoref{fig:alliance-coefs-year-change}. 
+
+
+\begin{figure}[htbp]
+	\centering
+		\includegraphics[width=0.95\textwidth]{alliance-coefs-year-change.png}
+	\caption{Estimated $\gamma$ parameters from a multilevel model of annual changes in defense spending. Positive estimates are more consistent with the predictions of the public goods model of alliances.}
+	\label{fig:alliance-coefs-year-change}
+\end{figure}
+
+
+This approach turns up the most evidence for the public goods model, but evidence of free-riding based on economic weight remains sparse. 
+43 alliances have a positive economic weight parameter, but none have a positive 90\% credible interval. 
+Most alliances show little difference in annual spending changes by large and small states after adjusting for the size of the previous year's defense budget. 
+Overall, estimates from this data are similar to those in the manuscript. 
+
 
 \newpage
 \singlespace

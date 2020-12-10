@@ -52,7 +52,8 @@ conflict_prefer("unpack", "tidyr")
 conflict_prefer("position", "ggplot2")
 conflict_prefer("matches", "dplyr")
 conflict_prefer("is_null", "purrr")
-
+conflict_prefer("combine", "dplyr")
+conflict_prefer("Position", "ggplot2")
 
 # set up functions 
 # Autocorrelation of ratio-simulation
