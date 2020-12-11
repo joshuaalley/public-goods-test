@@ -104,11 +104,11 @@ First, although academic theory has progressed since 1966, the public goods mode
 Second, policy and popular discussions of alliances employ collective action ideas.
 Pundits and American policymakers often refer to allied ``free-riding'' \citep{Lanoszka2015}.   
 For example, Barack Obama complained in 2016 that ``Free riders aggravate me'' and US allies ``have to pay your fair share.'' 
-Donald Trump has implied the United States would not protect allies who spend too little on defense. 
+Donald Trump has implied that the United States would not protect allies who spend too little on defense. 
 
 
 % this is the spot for frame on benefits and burdens of US Alliances 
-Last, increasing great power competition makes assessing Olson and Zeckhauser's argument important for policy debates. 
+Third, increasing great power competition makes assessing Olson and Zeckhauser's argument important for policy debates. 
 Competing visions of US grand strategy hinge in part on the explanatory power of the public goods model. 
 Advocates of retrenchment and ``restraint'' use the public goods logic to claim that US allies free-ride, so the United States should withdraw from many alliances \citep{Preble2009, Posen2014}. 
 Others assert that alliances do not provide a public good and the benefits of alliance participation outweigh the costs \citep{Brooksetal2013, BrandsFeaver2017}. 
@@ -137,7 +137,7 @@ As the aggregate military capability of an alliance provides security for member
 Because an alliance cannot exclude members without undermining its purpose, alliance security is a public good. 
 Olson and Zeckhauser expect that larger members of the alliance will invest more in defense, because these states value security from the alliance more.
 Small alliance members rely on larger partners for security and reduce their defense burdens.
-As a result, smaller states free-ride on larger alliance participants. 
+As a result, small states free-ride on larger alliance participants. 
 %Moreover, small states have greater bargaining leverage, because a large state cannot credibly threaten to reduce their contribution and has ``relatively less to gain than its small ally from driving a hard bargain'' \citep[pg. 274]{OlsonZeckhauser1966}. 
 
 
@@ -155,7 +155,7 @@ Therefore, alliance participation will decrease military spending by small state
 
 
 % Clarify that both predictions approximate the O+Z logic
-I test the public goods prediction of divergent spending by small and large states in a sample of all non-microstates from 1919 to 2007, using percentage changes in spending to facilitate a reliable and general empirical test.\footnote{Limited GDP data makes constructing economic weights for each alliance difficult before 1919. I also omit some alliances after 1919 due to a lack of GDP data.}
+I test the public goods predictions of military spending by small and large alliance members in a sample of all non-microstates from 1919 to 2007, using percentage changes in spending to facilitate a reliable and general empirical test.\footnote{Limited GDP data makes constructing economic weights for each alliance difficult before 1919. I also omit some alliances after 1919 due to a lack of GDP data.}
 State-year observations are the unit of analysis.
 My assessment of the public goods model estimates the extent of free-riding within individual alliances using alliance-specific economic weight parameters.  
  
@@ -166,13 +166,13 @@ My assessment of the public goods model estimates the extent of free-riding with
 I use a Bayesian model to estimate alliance-specific effects of differences in economic weight on military spending.\footnote{I also make similar inferences by regressing percentage changes in military spending on a state's average weight in their alliances and with a model of changes in spending. See the appendix.}
 This approach provides general evidence about the association between economic weight and military spending across 204 alliances.
 I use Bayesian estimation because it regularizes alliance parameter estimates through partial pooling.\footnote{I fit the following model using STAN \citep{Carpenteretal2016}. See the appendix for a full summary of priors, convergence and model fit. I also show that the model recovers known parameters from simulated data.}
-With hundreds of alliance-specific parameters, Bayesian estimation provides a useful way to share information across alliances with less risk of spurious inferences from multiple comparisons. 
+With hundreds of alliance-specific parameters, Bayesian estimation shares information across alliance parameters with less risk of spurious inferences from multiple comparisons. 
 
 
 For each of the 204 ATOP offensive and defensive treaties \citep{Leedsetal2002}, I estimate the association between economic weight and military expenditures. 
 An economic weight parameter for each alliance captures the consequences of alliance participation for military spending. 
-I code economic weight such that a positive economic weight parameter implies more military spending for large members and less spending by small members, as the public goods model predicts. 
-A negative economic weight parameter implies that larger alliance members spend less on the military, and small members spend more. 
+I code economic weight in alliances such that a positive economic weight parameter implies more military spending for large members and less spending by small members, as the public goods model predicts. 
+A negative economic weight parameter indicates that larger alliance members spend less on the military, and small members spend more. 
 
 
 The model starts with state-year percentage changes in military spending $y_{it}$, transformed with an inverse hyperbolic sine.\footnote{The transformation pulls in large positive and negative percentage changes to reduce the impact of outliers on the results.} 
@@ -252,10 +252,10 @@ Only 13 of the 204 alliances have a positive posterior mean.
 Therefore, there is little evidence of free-riding based on economic weight as the public goods model predicts. 
 
 
-To give further evidence, I then used the $\gamma$ parameters to generate the predicted effect of alliance participation for large and small states in specific alliances.
-\autoref{fig:pred-sum} summarizes predictions from the model estimates about several notable alliances. 
-Generally, there is limited evidence of lower defense spending by small states and higher spending by large states in these alliances. 
-Even alliances with the expected pattern of military spending across large and small members have weak evidence of large changes in military spending.  
+To give further evidence, I use the $\gamma$ parameters to predict the effect of participation in specific alliances for large and small states.
+\autoref{fig:pred-sum} summarizes estimates for several notable alliances. 
+Once again, there is limited evidence of lower defense spending by small states and higher spending by large states. 
+Even alliances with the expected pattern of military spending across large and small members have uncertain predictions of military spending growth.  
 
 
 
@@ -270,21 +270,20 @@ Even alliances with the expected pattern of military spending across large and s
 First, the NATO estimates in \autoref{fig:pred-sum} corroborate the size result of \citet{PluemperNeumayer2015}, as there is no evidence that small economic weight encourages lower military spending.
 Expressing the impact of alliance participation through economic weight gives a small estimate of the impact of NATO participation on large and small members.  
 Junior NATO members may still spend less on the military by relying on allied capability \citep{GeorgeSandler2017}, however. 
-Furthermore, the U.S.-South Korea alliance (ATOPID 3240) estimates in \autoref{fig:pred-sum} reverse the free-riding predictions. 
+Furthermore, the U.S.-South Korea alliance (ATOPID 3240) estimates in \autoref{fig:pred-sum} are the reverse of the free-riding predictions. 
 
 
 Among other alliances, the Arab League (ATOPID 3205), OAS (ATOPID 3150) and Warsaw Pact (ATOPID 3285) have the expected results for the public goods model, albeit with substantial uncertainty.
 Although large alliance members increase spending and small members decrease spending in expectation, all these estimates are consistent with substantial positive and negative, as well as null effects. 
 This suggests that highly asymmetric multilateral alliances are the most likely cases of free-riding, but that free-riding based on economic weight is weak even then.
-There is not obvious evidence of differences in military spending based on economic weight, even in some of the best-case alliances for the public goods model's free-riding predictions. 
+There are no clear differences in military spending growth based on economic weight, even in some of the best-case alliances for the public goods model's free-riding predictions. 
 
 
 
 \section{Conclusion}
 
 % Add paragraph summarizing results
-Few alliances have large divergences in military spending by economic weight. 
-Although Olson and Zeckhauser's model is parsimonious, there is little evidence of free-riding based on economic weight. 
+Although Olson and Zeckhauser's model is parsimonious, there is little evidence to match its prediction of free-riding based on economic weight. 
 These results provide general evidence that economic weight is not a determinant of free-riding, which matches the finding of \citet{PluemperNeumayer2015} in NATO. 
 The results do not rule out that alliances provide public goods, or that alliance participation reduces small states' military spending, however. 
 
@@ -295,7 +294,7 @@ If that is the case, inquiry should emphasize sources of leverage in bargaining 
 Alternatively, the extent to which security from an alliance is a public good may vary with factors like technology and strategic doctrine \citep{SandlerHartley2001}. 
 
 
-Beyond scholarship, the results have implications for the inclination of policymakers and pundits use ``free-riding'' rhetoric in alliance politics. 
+Beyond scholarship, the results have implications for policymakers and pundits' inclination to use ``free-riding'' rhetoric in alliance politics. 
 Free-riding is inextricable from a public goods understanding of alliances.
 But without a clear sense of when or whether alliance provide public goods, free-riding is an inaccurate description of reduced defense effort by alliance participants.  
 Low defense effort could reflect cheap-riding on allied capability, or efficiency gains from specialization in pooled military resources. 

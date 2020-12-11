@@ -451,7 +451,7 @@ nato.new.plot <- ggplot(nato.new, aes(x = nato.time, y = growth.milex,
                   stat_smooth(aes(group = 1)) +
                   labs(x = "Years in NATO", y = "Military Spending Growth",
                   subtitle = "New NATO Members from 1991 to 2007") +
-                  ggtitle("Military Spending and NATO Membership") +
+                  ggtitle("Military Spending and NATO") +
                   theme_bw()
 nato.new.plot
 
@@ -484,7 +484,7 @@ al.new.plot <- ggplot(arab.new, aes(x = al.time, y = growth.milex,
                  stat_smooth(aes(group = 1)) +
                  labs(x = "Years in Arab Leage", y = "Military Spending Growth",
                    subtitle = "New Arab League Members from 1952 to 1982") +
-                 ggtitle("Military Spending and Arab League Membership") +
+                 ggtitle("Military Spending and the Arab League") +
                  theme_bw()
 al.new.plot
 

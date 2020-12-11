@@ -35,7 +35,7 @@ In the last section, I consider an alternative model with changes in spending as
 
 \section{Specification of GDP and Defense Burdens} 
 
-As I note in the introduction, models and correlations between GDP and defense burdens are misspecified. 
+Regression models and correlations between GDP and defense burdens are misspecified. 
 Because defense burdens include GDP in the denominator, changes in GDP affect the expected value of defense burdens. 
 When GDP shifts, the defense burden remains constant only if military spending also changes in such a way that defense spending's share of GDP remains the same.
 Such changes are highly unlikely.
@@ -107,11 +107,10 @@ The third simulation uses the simulated data from the second simulation, but con
 
 Inferences about the association between the simulated independent variable and its ratio with a dependent variable depend on whether the two variables are correlated, as \autoref{fig:sim-inferences} shows. 
 This figure plots whether the coefficient in a regression of simulated ratio and non-ratio outcomes on a simulated independent variable is statistically significant at conventional levels. 
-When the independent variable and outcome are independent, creating a ratio generates an overwhelming number of statistically significant findings. 
+When the independent variable and outcome are independent, creating a ratio consistently generates statistically significant findings. 
 When the independent variable and dependent variable are correlated, the ratio variable has a different effect. 
 Creating a ratio of two correlated variables reduces the probability of a statistically significant result, relative to non-ratio estimates. 
 Last, comparing the percentage change measure to a ratio outcome, the ratio outcome is more likely to produce statistically significant regression coefficients. 
-Based on a chi-squared test, there are statistically significant differences in inferences from ratio and non-ratio outcomes for both types of simulated variables.
 
 
 \begin{figure}
@@ -216,7 +215,7 @@ I also employ a sparse matrix representation of the alliance membership matrix $
 
 
 There were no divergent iterations in sampling. 
-However, there are other threats to inference from the posterior samples. 
+However, there are other threats to inference. 
 Given heavy tails in percentage changes of military spending, STAN might have struggled to explore the posterior distribution. 
 
 
@@ -336,9 +335,7 @@ Positive values like .51 are unchanged.
 
 Again, the public goods model would predict many positive $\gamma$ parameters, as these would reflect higher military spending for large states and lower military spending for small states. 
 As \autoref{fig:alliance-coefs-year-w} shows, there are few positive $\gamma$ values.  
-There are two alliances with a clearly positive $\gamma$ parameter. 
-These are the OAS (ATOPID 3150) and an alliance between the United States and Thailand (ATOPID 3260). 
-35 alliances have a positive posterior mean, as well. 
+
 
 \begin{figure}[htbp]
 	\centering
@@ -464,7 +461,7 @@ Percentage changes in spending help manage the risk of spurious inferences in lo
 At the same time, bench marking spending changes to the prior defense budget may mask disproportionate spending, as small percentage changes leave large states with ample defense spending. 
 
 
-To check whether this was the case, I fit a slight modification of the multilevel model to an alternative dependent variable--- changes in spending. 
+To check whether this was the case, I fit a slight modification of the multilevel model to an alternative dependent variable--- changes in logged military spending. 
 I then included lagged military spending as a control variable to adjust for the size of the defense budget. 
 I report the estimated economic weight parameters from this model in \autoref{fig:alliance-coefs-year-change}. 
 
@@ -480,7 +477,7 @@ I report the estimated economic weight parameters from this model in \autoref{fi
 This approach turns up the most evidence for the public goods model, but evidence of free-riding based on economic weight remains sparse. 
 43 alliances have a positive economic weight parameter, but none have a positive 90\% credible interval. 
 Most alliances show little difference in annual spending changes by large and small states after adjusting for the size of the previous year's defense budget. 
-Overall, estimates from this data are similar to those in the manuscript. 
+Overall, estimates with spending changes are similar to those with spending growth. 
 
 
 \newpage
