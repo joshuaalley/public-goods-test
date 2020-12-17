@@ -51,15 +51,18 @@ Free-riding is reflected by disproportionate allocations of resources to defense
 
 
 % So what am I doing here?: revisiting is necessary. 
-The prominence of the public goods model in academic and policy dicussions of alliances belies a major problem.
+\textbf{
+The prominence of the public goods model in academic and policy discussions of alliances belies a major problem.
 Fifty-three years after the publication of ``An Economic Theory of Alliances,'' there is little reliable and general evidence about Olson and Zeckhauser's prediction that small states are prone to free-ride. 
 Here, I attempt to fill that empirical gap in the literature. 
+}
 
-
+\textbf{
 In this paper, I test the free-riding prediction with a statistical model that addresses model specification and generalizability issues in previous research. 
 I use the public goods logic to predict that states with a low share of total GDP in an alliance will decrease percentage changes in military spending, and states with high share of total allied GDP will increase military spending.
 Then I employ a Bayesian model to estimate the association between economic weight and percentage changes in military spending for 204 alliances. 
-I find little evidence of free-riding based on economic weight. 
+I find little evidence of free-riding based on economic weight.
+}
 
 
 My research design addresses two key limitations in existing tests of the public goods logic.
@@ -92,27 +95,28 @@ This leaves a need for a general examination of the public goods logic.
 
 % I'm not the first one to address this theory: first comprehensive empirical evidence
 Using a Bayesian model that estimates the association between economic weight and percentage changes in military spending within many alliances, I find little evidence that small states are more inclined to free-ride than their larger allies.
-This finding expands the economic size results of \citep{PluemperNeumayer2015} from the NATO case.
+\textbf{This finding expands the economic size results of \citet{PluemperNeumayer2015} from the NATO case.}
 Given established theoretical skepticism of the public goods model e.g. \citep{Palmer1990, GatesTerasawa1992, SandlerHartley2001, Norrlof2010, NiouZeigler2019}, what do these findings add? 
 Some existing theoretical skepticism of the public goods model is motivated by inconsistent correlations between GDP and defense burdens. 
 These correlations do not provide reliable evidence, however. 
 Without a reliable and general test, theoretical revisions of a parsimonious public goods model may be premature.
 
-
+\textbf{
 There are three reasons to undertake another test of the public goods model. 
 First, although academic theory has progressed since 1966, the public goods model retains an important place in discourse about alliances e.g.,\citep{Walt1990, Sandler1993, Mearsheimer1994, Goldstein1995, SandlerHartley2001, Garfinkel2004, Walt2009, Norrlof2010, Barrett2010, PluemperNeumayer2015}.
 Second, policy and popular discussions of alliances employ collective action ideas.
 Pundits and American policymakers often refer to allied ``free-riding'' \citep{Lanoszka2015}.   
 For example, Barack Obama complained in 2016 that ``Free riders aggravate me'' and US allies ``have to pay your fair share.'' 
 Donald Trump has implied that the United States would not protect allies who spend too little on defense. 
-
+}
 
 % this is the spot for frame on benefits and burdens of US Alliances 
+\textbf{
 Third, increasing great power competition makes assessing Olson and Zeckhauser's argument important for policy debates. 
 Competing visions of US grand strategy hinge in part on the explanatory power of the public goods model. 
 Advocates of retrenchment and ``restraint'' use the public goods logic to claim that US allies free-ride, so the United States should withdraw from many alliances \citep{Preble2009, Posen2014}. 
 Others assert that alliances do not provide a public good and the benefits of alliance participation outweigh the costs \citep{Brooksetal2013, BrandsFeaver2017}. 
-
+}
 
 The paper proceeds as follows.
 First, I briefly summarize the public goods theory of alliances.
@@ -124,14 +128,16 @@ In the final section, I discuss some implications of the findings for scholarshi
 \section{Free-Riding in Alliances}
 
 % I do not test their exact proposition 
+\textbf{
 To identify observable implications of free-riding, I use the public goods argument to derive predictions about economic size and military spending in alliances.
 This exercise does not critique the public goods model.
 Instead, I take the public goods logic as given, but employ another measure of defense effort. 
 Following \citet{PluemperNeumayer2015} I use percentage changes in military spending to measure defense effort.
 Like Olson and Zeckhauser, I conceptualize state size using economic weight. 
-
+}
 
 % summarize argument
+\textbf{
 Olson and Zeckhauser connect alliances and defense spending through a collective action problem. 
 As the aggregate military capability of an alliance provides security for members, states contribute security by investing in their military.
 Because an alliance cannot exclude members without undermining its purpose, alliance security is a public good. 
@@ -139,6 +145,7 @@ Olson and Zeckhauser expect that larger members of the alliance will invest more
 Small alliance members rely on larger partners for security and reduce their defense burdens.
 As a result, small states free-ride on larger alliance participants. 
 %Moreover, small states have greater bargaining leverage, because a large state cannot credibly threaten to reduce their contribution and has ``relatively less to gain than its small ally from driving a hard bargain'' \citep[pg. 274]{OlsonZeckhauser1966}. 
+}
 
 
 % Economic weight as another way to get at O+Z's key comparion
@@ -163,10 +170,13 @@ My assessment of the public goods model estimates the extent of free-riding with
 \section{Testing the Public Goods Logic}
 
 
+\textbf{
 I use a Bayesian model to estimate alliance-specific effects of differences in economic weight on military spending.\footnote{I also make similar inferences by regressing percentage changes in military spending on a state's average weight in their alliances and with a model of changes in spending. See the appendix.}
 This approach provides general evidence about the association between economic weight and military spending across 204 alliances.
-I use Bayesian estimation because it regularizes alliance parameter estimates through partial pooling.\footnote{I fit the following model using STAN \citep{Carpenteretal2016}. See the appendix for a full summary of priors, convergence and model fit. I also show that the model recovers known parameters from simulated data.}
+I use Bayesian estimation because it regularizes the 204 alliance parameter estimates.
+Partial pooling in this Bayesian model draws on information from all alliances to inform each alliance parameter estimate.\footnote{I fit the following model using STAN \citep{Carpenteretal2016}. See the appendix for a full summary of priors, convergence and model fit. I also show that the model recovers known parameters from simulated data.}
 With hundreds of alliance-specific parameters, Bayesian estimation shares information across alliance parameters with less risk of spurious inferences from multiple comparisons. 
+}
 
 
 For each of the 204 ATOP offensive and defensive treaties \citep{Leedsetal2002}, I estimate the association between economic weight and military expenditures. 
@@ -175,7 +185,7 @@ I code economic weight in alliances such that a positive economic weight paramet
 A negative economic weight parameter indicates that larger alliance members spend less on the military, and small members spend more. 
 
 
-The model starts with state-year percentage changes in military spending $y_{it}$, transformed with an inverse hyperbolic sine.\footnote{The transformation pulls in large positive and negative percentage changes to reduce the impact of outliers on the results.} 
+The model starts with state-year percentage changes in military spending $y_{it}$, transformed with an inverse hyperbolic sine.\footnote{\textbf{This transformation pulls in large positive and negative percentage changes to reduce the impact of outliers on the results.}} 
 I model this variable using a t-distribution with degrees of freedom $\nu$ to account for heavy tails.
 The expected value of military spending $\mu_{it}$ depends on a constant $\alpha$, state and year varying intercepts, and state-year control variables $\mathbf{X_{it}} \beta$.\footnote{See the appendix for a full description of all the variables in the model, as well as an explanation of the priors.} 
 $\sigma$ captures unexplained variation in $y$, like the error term in a frequentist regression. 
@@ -199,12 +209,12 @@ I set the threshold to the third quartile of .08 in multilateral alliances becau
 Increasing the multilateral threshold would classify even the US in NATO as a small state, so .08 is a reasonable value. 
 If a state is not part of the alliance, the corresponding matrix element is zero.
 
- 
+\textbf{ 
 This coding of economic weight facilitates a simple test of the public goods hypothesis across multiple alliances. 
 Multiplying a positive $\gamma$ by negative one for small states reduces military spending growth.
 Multiplying the same positive economic weight parameter by positive one increases military spending growth for large states. 
 Therefore, positive $\gamma$ parameters will change military spending growth in ways that match the public goods model. 
-
+}
 
 $\textbf{Z}$ is a quasi-spatial approach to capturing the impact of participation in multiple alliances.
 In this model, alliance participation affects military spending through economic weight.  
@@ -212,14 +222,14 @@ The $\gamma$ parameters capture whether differences in economic weight between a
 
 
 $\gamma$ is a vector of 204 alliance-specific economic weight parameters.  
-Because \textbf{Z} contains a binary encoding of each state's share of allied GDP, the $\gamma$ coefficients estimate the association between a state's economic weight in an alliance and military spending.\footnote{This assumes symmetric effects across small and large states, which I relax in the appendix with a weighted coding of the economic weights in $\textbf{Z}$.} 
+\textbf{Because \textbf{Z} contains a binary encoding of each state's share of allied GDP, the $\gamma$ coefficients estimate the association between a state's economic weight in an alliance and military spending.}\footnote{This assumes symmetric effects across small and large states, which I relax in the appendix with a weighted coding of the economic weights in $\textbf{Z}$.} 
 When a state is not in an alliance, the corresponding $\gamma$ is multiplied by zero, and has no impact. 
 
 
-Each alliance has a separate impact on military spending, but the economic weight parameters have a common prior distribution where $\gamma \sim N(\theta, \sigma_{all})$.
+Each alliance has unique effects on military spending, but the economic weight parameters have a common prior distribution where $\gamma \sim N(\theta, \sigma_{all})$, which shares information across the alliance estimates. 
 Partial pooling estimates the dispersion of the alliance parameters from the data, so the prior for $\gamma$ has mean $\theta$ and variance $\sigma_{all}$, and relies on a normal distribution, which is standard in most multilevel models.  
 $\theta$ is the mean hyperparameter of the alliance coefficients and each $\gamma$ deviates from the overall mean $\theta$ based on a variance hyperparameter $\sigma_{all}$.
-Every economic weight parameter holds the impact of other alliance constant. 
+Every economic weight parameter holds the impact of other alliances constant. 
     
 
 
@@ -251,12 +261,12 @@ Most credible intervals are consistent with military spending growth between -0.
 Only 13 of the 204 alliances have a positive posterior mean. 
 Therefore, there is little evidence of free-riding based on economic weight as the public goods model predicts. 
 
-
+\textbf{
 To give further evidence, I use the $\gamma$ parameters to predict the effect of participation in specific alliances for large and small states.
 \autoref{fig:pred-sum} summarizes estimates for several notable alliances. 
 Once again, there is limited evidence of lower defense spending by small states and higher spending by large states. 
 Even alliances with the expected pattern of military spending across large and small members have uncertain predictions of military spending growth.  
-
+}
 
 
 \begin{figure}[htbp]
@@ -266,18 +276,19 @@ Even alliances with the expected pattern of military spending across large and s
 	\label{fig:pred-sum}
 \end{figure}
 
-
+\textbf{
 First, the NATO estimates in \autoref{fig:pred-sum} corroborate the size result of \citet{PluemperNeumayer2015}, as there is no evidence that small economic weight encourages lower military spending.
 Expressing the impact of alliance participation through economic weight gives a small estimate of the impact of NATO participation on large and small members.  
 Junior NATO members may still spend less on the military by relying on allied capability \citep{GeorgeSandler2017}, however. 
 Furthermore, the U.S.-South Korea alliance (ATOPID 3240) estimates in \autoref{fig:pred-sum} are the reverse of the free-riding predictions. 
+}
 
-
+\textbf{
 Among other alliances, the Arab League (ATOPID 3205), OAS (ATOPID 3150) and Warsaw Pact (ATOPID 3285) have the expected results for the public goods model, albeit with substantial uncertainty.
 Although large alliance members increase spending and small members decrease spending in expectation, all these estimates are consistent with substantial positive and negative, as well as null effects. 
 This suggests that highly asymmetric multilateral alliances are the most likely cases of free-riding, but that free-riding based on economic weight is weak even then.
 There are no clear differences in military spending growth based on economic weight, even in some of the best-case alliances for the public goods model's free-riding predictions. 
-
+}
 
 
 \section{Conclusion}
