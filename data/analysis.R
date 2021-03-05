@@ -1,5 +1,4 @@
 # Joshua Alley
-# Texas A&M University
 # Empirical test of public goods theory of alliances
 # Examine Hypothesis 1 and 2
 
@@ -16,7 +15,7 @@ atop.cow.year <- read.csv("data/atop-cow-year.csv")
 
 # Merge state contributions to each alliance
 # and keep only alliances that promise military support
-atop.cow.year <- select(state.ally.year, atopid, ccode, year, contrib.gdp) %>%
+atop.cow.year <- select(state.ally.year, atopid, ccode, year, contrib.gdp, num.mem) %>%
   left_join(atop.cow.year) %>%
   group_by(atopid, ccode, year) %>%
   filter(defense == 1 | offense == 1) %>%
@@ -31,7 +30,7 @@ ggplot(atop.cow.year, aes(x = contrib.gdp)) + geom_histogram()
 summary(subset(atop.cow.year, year < 1919, select = contrib.gdp)) # bilateral
 summary(subset(atop.cow.year, year >= 1919, select = contrib.gdp)) # multilateral
 
-# filter for post-45 only
+# filter for post-1919 only
 atop.cow.year <- filter(atop.cow.year, year >= 1919)
 
 # comparison bilateral and multilateral
@@ -140,7 +139,7 @@ model.1 <- stan_model(file = "data/ml-model-stan.stan")
 
 # Variational Bayes- use to check model will run before going full STAN 
 ml.model.vb <- vb(model.1, data = stan.data, seed = 12)
-# Does not converge: diagnostics suggest problems
+# problematic results 
 
 # Clear variational Bayes results from environment
 rm(ml.model.vb)
@@ -149,7 +148,7 @@ rm(ml.model.vb)
 # Run model with full Bayes
 system.time(
   ml.model <- sampling(model.1, data = stan.data, 
-                       iter = 2100, warmup = 1000, chains = 4
+                       iter = 2800, warmup = 1400, chains = 4
   )
 )
 

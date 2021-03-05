@@ -1,5 +1,4 @@
 # Joshua Alley
-# Texas A&M University
 # Simulate fake data from ML model and attempt to recover parameters
 
 # Initial idea from: http://modernstatisticalworkflow.blogspot.com/2017/04/an-easy-way-to-simulate-fake-data-from.html 

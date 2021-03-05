@@ -36,7 +36,7 @@ rm(vb.change)
 # Run model with full Bayes
 system.time(
   ml.model.change <- sampling(model.change, data = stan.data.change, 
-                       iter = 2000, warmup = 1000, chains = 4
+                       iter = 2800, warmup = 1400, chains = 4
   )
 )
 
