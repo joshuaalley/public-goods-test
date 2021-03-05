@@ -71,7 +71,7 @@ model.1 <- stan_model(file = "data/ml-model-stan.stan")
 # Run model with full Bayes
 system.time(
   ml.model.w <- sampling(model.1, data = stan.data.w, 
-                       iter = 2100, warmup = 1000, chains = 4
+                       iter = 2800, warmup = 1400, chains = 4
   )
 )
 
@@ -127,9 +127,6 @@ ggplot(gamma.summary.w, aes(x = atopid, y = gamma.mean)) +
   theme_classic() + coord_flip()
 
 
-
-# Load ATOP data for comparison
-atop <- read.csv("data/atop-additions.csv")
 
 # Join alliance coefficients with ATOP data
 alliance.coefs.w <- left_join(atop, gamma.summary.w) %>%
@@ -306,34 +303,6 @@ ggplot(growth.pred.oas, aes(x = pred.5, y = year)) +
   geom_linerange(aes(xmin = pred.5, xmax = pred.95),
                 position = position_dodge(1.3))
 
-
-# warsaw pact
-# calculate 90% credible intervals
-growth.pred.ws <- t(apply(growth.pred$`3285`, 1, 
-                           function(x) quantile(x, probs = c(.05, .95))
-))
-# pull state and year ids
-growth.pred.ws <- cbind.data.frame(growth.pred.ws,
-                                    reg.state.data.w %>%
-                                      filter(`3285` != 0) %>%
-                                      select(ccode, year),
-                                   reg.state.data.w$`3285`
-)
-# rename columns 
-colnames(growth.pred.ws) <- c("pred.5", "pred.95",
-                              "ccode", "year", "weight")
-
-# add a large state indicator
-growth.pred.ws <-  mutate(growth.pred.ws,
-                           large = ifelse(ccode == 365, 1, 0)
-)
-
-
-# plot 
-ggplot(growth.pred.ws, aes(x = pred.5, y = year)) +
-  facet_wrap(~ ccode) +
-  geom_linerange(aes(xmin = pred.5, xmax = pred.95),
-                position = position_dodge(1.3))
 
 
 
