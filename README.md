@@ -1,6 +1,6 @@
 # public-goods-test
 
-In this paper, I conduct an empirical assesment of Olson and Zeckhauser's 1966 [Economic Theory of Alliances](https://www.jstor.org/stable/1927082). 
+[In this paper](https://journals.sagepub.com/doi/10.1177/20531680211005225), I conduct an empirical assesment of Olson and Zeckhauser's 1966 [Economic Theory of Alliances](https://www.jstor.org/stable/1927082). 
 Olson and Zeckhauser argue that alliances are subject to a collective action problem. 
 Larger alliance members will bear a disproportionate share of the burden of providing security. 
 
